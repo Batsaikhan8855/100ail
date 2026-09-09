@@ -20,10 +20,10 @@ services:
     runtime: docker
     plan: free
     region: frankfurt
-    # Render-д эдгээр зам нь repo-гийн үндэс хавтаснаас тоологдоно
-    # (`rootDir`-ээс биш) — тул хоёуланг нь бүтнээр нь бичнэ.
-    dockerfilePath: ./backend/Dockerfile
-    dockerContext: ./backend
+    # Repo-гийн үндсэн Dockerfile (контекст нь бас үндэс). Render нь
+    # Dockerfile-ын замыг Root Directory-оос үл хамааран үндэснээс
+    # тоолдог тул энэ хувилбар нь ямар ч тохиргоонд ажиллана.
+    dockerfilePath: ./Dockerfile
     # PORT-ыг Render өөрөө оноодог; `main.ts` нь `process.env.PORT`-ыг
     # уншдаг тул энд хатуу заахгүй (заавал заавал зөрчил үүсгэж болзошгүй).
     healthCheckPath: /api/docs

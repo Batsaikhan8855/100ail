@@ -1,0 +1,12 @@
+# Repo-гийн үндсэн Dockerfile-ын контекст. Backend-ийн дүрсэнд хэрэггүй
+# бүхнийг хасна — ялангуяа frontend-ийн node_modules болон 500MB медиа сан.
+.git
+frontend
+**/node_modules
+**/dist
+**/.next
+**/*.log
+**/.env
+backend/media
+backend/prisma/data/barilga/details.jsonl
+backend/prisma/data/barilga/listing.json
