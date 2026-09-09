@@ -22,6 +22,8 @@ services:
     region: frankfurt
     rootDir: backend
     dockerfilePath: ./Dockerfile
+    # PORT-ыг Render өөрөө оноодог; `main.ts` нь `process.env.PORT`-ыг
+    # уншдаг тул энд хатуу заахгүй (заавал заавал зөрчил үүсгэж болзошгүй).
     healthCheckPath: /api/docs
     # Схемийн тохируулга, суурь өгөгдөл, каталогийн импорт нь
     # `backend/docker-entrypoint.sh` дотор хийгддэг — Render-ийн үнэгүй
@@ -35,8 +37,6 @@ services:
         generateValue: true
       - key: JWT_EXPIRES_IN
         value: 7d
-      - key: PORT
-        value: 4000
       - key: PLATFORM_COMMISSION_RATE
         value: "0.02"
       # Vercel-ийн домэйнуудаар солино, жишээ нь:
