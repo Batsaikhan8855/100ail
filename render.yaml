@@ -42,8 +42,9 @@ services:
         value: 4000
       - key: PLATFORM_COMMISSION_RATE
         value: "0.02"
-      # Vercel-ийн домэйнуудаар солино. Preview deploy-д хандах бол
-      # тухайн `*.vercel.app` хаягийг мөн нэмнэ.
+      # Vercel-ийн домэйнуудаар солино, жишээ нь:
+      #   https://100ail.vercel.app,https://*.vercel.app
+      # Орлуулагч дэмжигддэг тул preview deploy бүрд гараар нэмэх шаардлагагүй.
       - key: CORS_ORIGINS
         sync: false
       - key: PUBLIC_API_URL

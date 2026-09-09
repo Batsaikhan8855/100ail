@@ -6,6 +6,36 @@ import * as path from "path";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { AppModule } from "./app.module";
 
+/**
+ * `CORS_ORIGINS` дэх зөвшөөрөгдсөн эх сурвалжууд. Vercel-ийн preview
+ * домэйн deploy бүрд өөрчлөгддөг тул `https://*.vercel.app` хэлбэрийн
+ * орлуулагчийг дэмжинэ (`*` нь цэг агуулаагүй нэг хэсэгтэй тохирно).
+ */
+function corsOrigin(
+  raw: string | undefined,
+): (origin: string | undefined, done: (e: Error | null, ok?: boolean) => void) => void {
+  const patterns = (raw ?? "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean)
+    .map((value) =>
+      value.includes("*")
+        ? new RegExp(
+            `^${value.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, "[^.]+")}$`,
+          )
+        : value,
+    );
+
+  return (origin, done) => {
+    // Хөтчийн бус хүсэлт (curl, server-to-server) Origin илгээдэггүй
+    if (!origin) return done(null, true);
+    const allowed = patterns.some((pattern) =>
+      typeof pattern === "string" ? pattern === origin : pattern.test(origin),
+    );
+    done(null, allowed);
+  };
+}
+
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
@@ -20,10 +50,7 @@ async function bootstrap(): Promise<void> {
   // Excel импорт base64-ээр ирдэг тул үндсэн 100kb хязгаарыг тэлнэ
   app.use(json({ limit: "12mb" }));
   app.use(urlencoded({ extended: true, limit: "12mb" }));
-  app.enableCors({
-    origin: (process.env.CORS_ORIGINS ?? "").split(",").filter(Boolean),
-    credentials: true,
-  });
+  app.enableCors({ origin: corsOrigin(process.env.CORS_ORIGINS), credentials: true });
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
