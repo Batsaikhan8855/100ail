@@ -19,7 +19,7 @@ docker compose up -d db redis meilisearch
 
 # 2. Backend
 cd backend && cp .env.example .env && npm install
-npm run db:push && npm run db:seed
+npm run db:push && npm run db:seed      # ангилал, нийлүүлэгч, хэрэглэгч
 cd .. && npm run dev:backend            # http://localhost:4000/api
 
 # 3. Веб аппууд (тус бүрдээ npm install хийнэ)
@@ -42,6 +42,7 @@ npm run dev:admin        # http://localhost:3300
 
 ## Каталогийн импорт
 
+`db:seed` нь каталог үүсгэдэггүй — бодит бараа энэ импортоос ирнэ.
 barilga.mn-ийн нийтийн каталогийг татаж оруулах урсгалыг
 [`backend/prisma/data/barilga/README.md`](./backend/prisma/data/barilga/README.md)
 дотор бичсэн (scraper → зураг → `npm run db:import:barilga`).
@@ -49,8 +50,8 @@ barilga.mn-ийн нийтийн каталогийг татаж оруулах 
 ## Тест
 
 ```bash
-npm run test:backend   # 59 unit — гуравдагч үйлчилгээгүйгээр ажиллана
-npm run test:e2e       # 25 e2e — PostgreSQL + seed шаардана
+npm run test:backend                  # 59 unit — гуравдагч үйлчилгээгүйгээр
+npm run db:seed:demo && npm run test:e2e   # 25 e2e — демо каталог шаардана
 ```
 
 ## Туршилтын бүртгэл
@@ -62,3 +63,14 @@ npm run test:e2e       # 25 e2e — PostgreSQL + seed шаардана
 | `admin@100ail.mn` | Админ |
 | `buyer@100ail.mn` | Худалдан авагч |
 | `montsement@100ail.mn` | Нийлүүлэгч |
+
+## Байршуулалт
+
+- **Backend → Render**: `render.yaml` blueprint (Docker + PostgreSQL, seed
+  болон каталогийн импортыг deploy бүрд ажиллуулна)
+- **Frontend → Vercel**: гурван тусдаа project, Root Directory нь
+  `frontend/storefront`, `frontend/supplier`, `frontend/admin`;
+  `NEXT_PUBLIC_API_URL`-ыг Render-ийн хаягаар тавина
+- Бүх зүйлийг нэг сервер дээр: `docker compose up -d --build`
+
+Дэлгэрэнгүйг архитектурын баримтын 12.8–12.9 хэсгээс уншина уу.

@@ -1,0 +1,57 @@
+# Render Blueprint — 100 Айл-ын backend ба PostgreSQL.
+#
+# Ашиглах: Render дээр New → Blueprint → энэ repo-г сонгоно.
+# Frontend гурван апп нь Vercel дээр байрлана (доорх CORS_ORIGINS-ыг
+# тэдгээрийн домэйнээр солино).
+#
+# Redis болон Meilisearch энд байхгүй — тохируулаагүй үед код нь
+# доголдолгүй нөөц зам руу шилждэг (ажлууд шууд гүйцэтгэгдэж, хайлт
+# PostgreSQL дээр ажиллана). Ачаалал нэмэгдвэл дараа нь нэмнэ.
+
+databases:
+  - name: ail100-db
+    databaseName: ail100
+    user: ail100
+    plan: free
+
+services:
+  - type: web
+    name: ail100-api
+    runtime: docker
+    plan: free
+    region: frankfurt
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/docs
+    # Схемийг тааруулж, суурь өгөгдөл болон каталогийг оруулна.
+    # Гурвуулаа давтан ажиллуулахад аюулгүй (idempotent).
+    preDeployCommand: >-
+      npx prisma db push --skip-generate &&
+      node dist/prisma/seed.js &&
+      node dist/prisma/import-barilga.js --stock=50
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ail100-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: PORT
+        value: 4000
+      - key: PLATFORM_COMMISSION_RATE
+        value: "0.02"
+      # Vercel-ийн домэйнуудаар солино. Preview deploy-д хандах бол
+      # тухайн `*.vercel.app` хаягийг мөн нэмнэ.
+      - key: CORS_ORIGINS
+        sync: false
+      - key: PUBLIC_API_URL
+        sync: false
+      - key: PUBLIC_WEB_URL
+        sync: false
+      # Зураг: S3/R2 тохируулаагүй тул барааны зураг эх сайтын хаягаар
+      # холбогдоно. Өөрийн санд шилжүүлэх бол S3_* утгуудыг нэмж,
+      # S3_PUBLIC_URL-ыг bucket-ийн нийтийн хаягаар тавина.
+      - key: MEDIA_DIR
+        value: media
