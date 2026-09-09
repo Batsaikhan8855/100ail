@@ -4,6 +4,9 @@
 
 generator client {
   provider = "prisma-client-js"
+  // Docker дүрс Alpine (musl) дээр ажилладаг тул тухайн engine-ийг
+  // хамт бэлтгэнэ — эс бөгөөс дүрсэн доторх client ажиллахгүй.
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
