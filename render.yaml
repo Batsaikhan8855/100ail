@@ -23,12 +23,9 @@ services:
     rootDir: backend
     dockerfilePath: ./Dockerfile
     healthCheckPath: /api/docs
-    # Схемийг тааруулж, суурь өгөгдөл болон каталогийг оруулна.
-    # Гурвуулаа давтан ажиллуулахад аюулгүй (idempotent).
-    preDeployCommand: >-
-      npx prisma db push --skip-generate &&
-      node dist/prisma/seed.js &&
-      node dist/prisma/import-barilga.js --stock=50
+    # Схемийн тохируулга, суурь өгөгдөл, каталогийн импорт нь
+    # `backend/docker-entrypoint.sh` дотор хийгддэг — Render-ийн үнэгүй
+    # тариф `preDeployCommand` дэмждэггүй тул.
     envVars:
       - key: DATABASE_URL
         fromDatabase:
