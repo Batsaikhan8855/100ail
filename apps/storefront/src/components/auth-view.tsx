@@ -1,0 +1,165 @@
+"use client";
+
+import { useState, type FormEvent } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { useSession } from "./session";
+import { SiteHeader } from "./site-header";
+import { Panel, PanelHeader } from "./ui";
+
+export function AuthView() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { login, register, user } = useSession();
+  const [mode, setMode] = useState<"login" | "register">(
+    searchParams.get("mode") === "register" ? "register" : "login",
+  );
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    password: "",
+  });
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const submit = async (event: FormEvent) => {
+    event.preventDefault();
+    setBusy(true);
+    setError(null);
+    try {
+      if (mode === "login") {
+        await login(form.email, form.password);
+      } else {
+        await register({
+          name: form.name,
+          email: form.email,
+          password: form.password,
+          phone: form.phone || undefined,
+        });
+      }
+      router.push("/account/orders");
+    } catch (cause) {
+      setError((cause as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-ink-950">
+      <SiteHeader activeNav="" />
+
+      <main className="mx-auto max-w-[440px] px-4 py-10">
+        <Panel>
+          <PanelHeader
+            title={mode === "login" ? "Нэвтрэх" : "Бүртгүүлэх"}
+            meta={user ? user.email : undefined}
+          />
+
+          <form onSubmit={submit} className="flex flex-col gap-3 px-4 py-4">
+            {mode === "register" ? (
+              <>
+                <Field
+                  label="Нэр"
+                  value={form.name}
+                  onChange={(value) => setForm({ ...form, name: value })}
+                  required
+                />
+                <Field
+                  label="Утас"
+                  value={form.phone}
+                  onChange={(value) => setForm({ ...form, phone: value })}
+                  placeholder="9911-2233"
+                />
+              </>
+            ) : null}
+
+            <Field
+              label="И-мэйл"
+              type="email"
+              value={form.email}
+              onChange={(value) => setForm({ ...form, email: value })}
+              required
+            />
+            <Field
+              label="Нууц үг"
+              type="password"
+              value={form.password}
+              onChange={(value) => setForm({ ...form, password: value })}
+              required
+            />
+
+            {error ? (
+              <p className="rounded-md border border-[#7a3030] bg-[#2c1717] px-3 py-2 text-[12.5px] text-[#f08585]">
+                {error}
+              </p>
+            ) : null}
+
+            <button
+              type="submit"
+              disabled={busy}
+              className="mt-1 rounded-md bg-brand px-4 py-3 text-[13px] font-bold uppercase tracking-wide text-ink-950 transition-colors hover:bg-brand-hi disabled:opacity-60"
+            >
+              {busy
+                ? "Түр хүлээнэ үү…"
+                : mode === "login"
+                  ? "Нэвтрэх"
+                  : "Бүртгүүлэх"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setMode(mode === "login" ? "register" : "login");
+                setError(null);
+              }}
+              className="text-[12.5px] text-mute transition-colors hover:text-white"
+            >
+              {mode === "login"
+                ? "Шинэ хэрэглэгч? Бүртгүүлэх"
+                : "Бүртгэлтэй юу? Нэвтрэх"}
+            </button>
+          </form>
+
+          <p className="border-t border-ink-700 px-4 py-3.5 text-[12px] text-mute-dim">
+            Нэвтрэхгүйгээр ч захиалга хийх боломжтой.{" "}
+            <Link href="/" className="text-brand hover:underline">
+              Каталог руу буцах
+            </Link>
+          </p>
+        </Panel>
+      </main>
+    </div>
+  );
+}
+
+function Field({
+  label,
+  value,
+  onChange,
+  type = "text",
+  placeholder,
+  required,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  type?: string;
+  placeholder?: string;
+  required?: boolean;
+}) {
+  return (
+    <label className="flex flex-col gap-1.5">
+      <span className="text-[12px] text-mute">{label}</span>
+      <input
+        type={type}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
+        required={required}
+        className="h-10 rounded-md border border-ink-700 bg-ink-900 px-3 text-[13.5px] text-white outline-none placeholder:text-mute-dim focus:border-ink-600"
+      />
+    </label>
+  );
+}

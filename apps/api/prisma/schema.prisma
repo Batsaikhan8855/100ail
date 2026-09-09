@@ -1,0 +1,607 @@
+// 100 Айл — өгөгдлийн сангийн загвар.
+// Архитектурын баримтын 6-р хэсгийн table-ууд дээр суурилсан.
+// Мөнгөн дүнг төгрөгөөр, бүхэл тоогоор хадгална (жижиг нэгжгүй).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  BUYER
+  SUPPLIER
+  ADMIN
+}
+
+enum AttributeType {
+  TEXT
+  NUMBER
+  BOOLEAN
+  SELECT
+}
+
+enum OrderStatus {
+  PENDING // төлбөр хүлээгдэж буй
+  PAID
+  PROCESSING
+  COMPLETED
+  CANCELLED
+}
+
+enum SupplierOrderStatus {
+  NEW
+  CONFIRMED
+  PACKING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  QPAY
+  CARD
+  TRANSFER
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum DeliveryMethod {
+  DELIVERY
+  PICKUP
+}
+
+enum DeliveryStatus {
+  PENDING
+  ASSIGNED
+  IN_TRANSIT
+  DELIVERED
+  FAILED
+}
+
+enum CommissionStatus {
+  ACCRUED // хуримтлагдсан
+  INVOICED
+  SETTLED // нийлүүлэгчтэй тооцоо хийгдсэн
+}
+
+enum DisputeStatus {
+  OPEN
+  IN_REVIEW
+  RESOLVED
+  REJECTED
+}
+
+enum NotificationType {
+  ORDER
+  PAYMENT
+  DELIVERY
+  SYSTEM
+  PAYOUT
+}
+
+enum PayoutStatus {
+  REQUESTED // нийлүүлэгч хүсэлт гаргасан
+  APPROVED
+  PAID
+  REJECTED
+}
+
+enum BannerPlacement {
+  HOME_HERO // нүүрний том баннер
+  HOME_STRIP // нүүрний нарийн зурвас
+  CATEGORY_TOP // ангиллын дээд хэсэг
+}
+
+/// Хэрэглэгч: худалдан авагч, нийлүүлэгчийн ажилтан, админ
+model User {
+  id             String        @id @default(cuid())
+  email          String        @unique
+  phone          String?
+  passwordHash   String
+  name           String
+  role           UserRole      @default(BUYER)
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  supplierId     String?
+  supplier       Supplier?     @relation(fields: [supplierId], references: [id])
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  carts         Cart[]
+  orders        Order[]
+  reviews       Review[]
+  notifications Notification[]
+  disputes      Dispute[]
+
+  @@index([supplierId])
+  @@map("users")
+}
+
+/// Байгууллагын худалдан авалт: нэхэмжлэх, гэрээт үнэ
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  regNo     String   @unique
+  phone     String?
+  address   String?
+  createdAt DateTime @default(now())
+
+  users  User[]
+  orders Order[]
+
+  @@map("organizations")
+}
+
+/// Нийлүүлэгч байгууллага
+model Supplier {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  regNo       String?
+  description String?
+  verified    Boolean  @default(false)
+  rating      Float    @default(0)
+  reviewCount Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users          User[]
+  offers         Offer[]
+  warehouses     Warehouse[]
+  supplierOrders SupplierOrder[]
+  commissions    CommissionLedger[]
+  reviews        Review[]
+  payouts        Payout[]
+  bankAccount    SupplierBankAccount?
+
+  @@map("suppliers")
+}
+
+/// Ангилал, дэд ангилал
+model Category {
+  id       String  @id @default(cuid())
+  slug     String  @unique
+  name     String
+  icon     String?
+  position Int     @default(0)
+  parentId String?
+
+  parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryTree")
+
+  products   Product[]
+  attributes Attribute[]
+
+  @@map("categories")
+}
+
+/// Ангилал тус бүрийн техникийн үзүүлэлтийн тодорхойлолт (dynamic attributes)
+model Attribute {
+  id         String        @id @default(cuid())
+  categoryId String
+  category   Category      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  key        String
+  label      String
+  unit       String?
+  type       AttributeType @default(TEXT)
+  filterable Boolean       @default(true)
+  position   Int           @default(0)
+
+  values AttributeValue[]
+
+  @@unique([categoryId, key])
+  @@map("attributes")
+}
+
+/// Бүтээгдэхүүн бүрийн үзүүлэлтийн утга
+model AttributeValue {
+  id          String    @id @default(cuid())
+  productId   String
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  attributeId String
+  attribute   Attribute @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+  value       String
+
+  @@unique([productId, attributeId])
+  @@map("attribute_values")
+}
+
+/// Бүтээгдэхүүний үндсэн тодорхойлолт (нийлүүлэгчээс хамаарахгүй)
+model Product {
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  name         String
+  variantLabel String?
+  categoryId   String
+  category     Category @relation(fields: [categoryId], references: [id])
+  manufacturer String?
+  art          String   @default("cement")
+  summary      String?
+  standard     String?
+  usage        String[] @default([])
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  variants   ProductVariant[]
+  offers     Offer[]
+  attributes AttributeValue[]
+  reviews    Review[]
+  images     ProductImage[]
+
+  @@index([categoryId])
+  @@map("products")
+}
+
+/// Хэмжээ, өнгө, зузаан, марк зэрэг хувилбар
+model ProductVariant {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name      String
+  sku       String? @unique
+
+  offers Offer[]
+
+  @@map("product_variants")
+}
+
+/// Барааны зураг (S3 түлхүүр)
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  key       String
+  position  Int     @default(0)
+
+  @@map("product_images")
+}
+
+/// Нийлүүлэгч бүрийн үнэ, нөхцөл
+model Offer {
+  id            String          @id @default(cuid())
+  productId     String
+  product       Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variantId     String?
+  variant       ProductVariant? @relation(fields: [variantId], references: [id])
+  supplierId    String
+  supplier      Supplier        @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  price         Int
+  bulkPrice     Int?
+  bulkMinQty    Int?
+  unit          String          @default("ш")
+  deliveryPrice Int             @default(0)
+  deliveryDays  Int?
+  deliversTo    String[]        @default([])
+  active        Boolean         @default(true)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  inventory  Inventory[]
+  cartItems  CartItem[]
+  orderItems OrderItem[]
+
+  @@index([productId])
+  @@index([supplierId])
+  @@map("offers")
+}
+
+/// Агуулах, дэлгүүрийн байршил
+model Warehouse {
+  id         String   @id @default(cuid())
+  supplierId String
+  supplier   Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  name       String
+  city       String
+  address    String?
+  lat        Float?
+  lng        Float?
+
+  inventory Inventory[]
+
+  @@map("warehouses")
+}
+
+/// Салбар тус бүрийн үлдэгдэл
+model Inventory {
+  id          String    @id @default(cuid())
+  offerId     String
+  offer       Offer     @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  warehouseId String
+  warehouse   Warehouse @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+  quantity    Int       @default(0)
+  reserved    Int       @default(0)
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([offerId, warehouseId])
+  @@map("inventory")
+}
+
+/// Худалдан авалтын сагс
+model Cart {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessionId String?  @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items CartItem[]
+
+  @@map("carts")
+}
+
+model CartItem {
+  id      String @id @default(cuid())
+  cartId  String
+  cart    Cart   @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  offerId String
+  offer   Offer  @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  qty     Int    @default(1)
+
+  @@unique([cartId, offerId])
+  @@map("cart_items")
+}
+
+/// Захиалгын үндсэн мэдээлэл. Нийлүүлэгч тус бүрээр дэд захиалгад хуваагдана.
+model Order {
+  id             String         @id @default(cuid())
+  code           String         @unique
+  userId         String?
+  user           User?          @relation(fields: [userId], references: [id])
+  organizationId String?
+  organization   Organization?  @relation(fields: [organizationId], references: [id])
+  status         OrderStatus    @default(PENDING)
+  buyerName      String
+  phone          String
+  city           String
+  district       String?
+  address        String
+  note           String?
+  deliveryMethod DeliveryMethod @default(DELIVERY)
+  paymentMethod  PaymentMethod  @default(QPAY)
+  goodsTotal     Int
+  deliveryTotal  Int
+  total          Int
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  supplierOrders SupplierOrder[]
+  payments       Payment[]
+  disputes       Dispute[]
+
+  @@index([userId])
+  @@map("orders")
+}
+
+/// Нийлүүлэгч тус бүрийн дэд захиалга: хүргэлт, шимтгэл тус тусдаа
+model SupplierOrder {
+  id            String              @id @default(cuid())
+  code          String              @unique
+  orderId       String
+  order         Order               @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  supplierId    String
+  supplier      Supplier            @relation(fields: [supplierId], references: [id])
+  status        SupplierOrderStatus @default(NEW)
+  goodsTotal    Int
+  deliveryPrice Int                 @default(0)
+  total         Int
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+
+  items      OrderItem[]
+  delivery   Delivery?
+  commission CommissionLedger?
+  disputes   Dispute[]
+
+  @@index([supplierId])
+  @@map("supplier_orders")
+}
+
+/// Захиалсан бараанууд
+model OrderItem {
+  id              String        @id @default(cuid())
+  supplierOrderId String
+  supplierOrder   SupplierOrder @relation(fields: [supplierOrderId], references: [id], onDelete: Cascade)
+  offerId         String
+  offer           Offer         @relation(fields: [offerId], references: [id])
+  productName     String
+  supplierName    String
+  unitPrice       Int
+  qty             Int
+  unit            String
+  lineTotal       Int
+
+  @@map("order_items")
+}
+
+/// Төлбөрийн гүйлгээ
+model Payment {
+  id            String        @id @default(cuid())
+  orderId       String
+  order         Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  method        PaymentMethod
+  status        PaymentStatus @default(PENDING)
+  amount        Int
+  transactionId String?
+  invoiceId     String?
+  paidAt        DateTime?
+  createdAt     DateTime      @default(now())
+
+  @@map("payments")
+}
+
+/// Платформын шимтгэлийн бүртгэл (2%)
+model CommissionLedger {
+  id              String           @id @default(cuid())
+  supplierOrderId String           @unique
+  supplierOrder   SupplierOrder    @relation(fields: [supplierOrderId], references: [id], onDelete: Cascade)
+  supplierId      String
+  supplier        Supplier         @relation(fields: [supplierId], references: [id])
+  rate            Float
+  base            Int
+  amount          Int
+  status          CommissionStatus @default(ACCRUED)
+  settledAt       DateTime?
+  createdAt       DateTime         @default(now())
+
+  @@index([supplierId])
+  @@map("commission_ledger")
+}
+
+/// Хүргэлт, жолооч, төлөв
+model Delivery {
+  id              String         @id @default(cuid())
+  supplierOrderId String         @unique
+  supplierOrder   SupplierOrder  @relation(fields: [supplierOrderId], references: [id], onDelete: Cascade)
+  status          DeliveryStatus @default(PENDING)
+  driverName      String?
+  driverPhone     String?
+  trackingCode    String         @unique
+  address         String
+  city            String
+  dispatchedAt    DateTime?
+  deliveredAt     DateTime?
+  updatedAt       DateTime       @updatedAt
+
+  @@map("deliveries")
+}
+
+/// Бараа ба нийлүүлэгчийн үнэлгээ
+model Review {
+  id         String    @id @default(cuid())
+  productId  String
+  product    Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  supplierId String?
+  supplier   Supplier? @relation(fields: [supplierId], references: [id])
+  userId     String?
+  user       User?     @relation(fields: [userId], references: [id])
+  authorName String
+  rating     Int
+  text       String
+  /// Тухайн барааг үнэхээр худалдаж авсан хэрэглэгчийн сэтгэгдэл эсэх
+  verifiedPurchase Boolean @default(false)
+  createdAt  DateTime  @default(now())
+
+  @@unique([productId, userId])
+  @@index([productId])
+  @@map("reviews")
+}
+
+/// Мэдэгдэл (queue-ээр илгээгдэнэ)
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType @default(SYSTEM)
+  title     String
+  body      String
+  link      String?
+  read      Boolean          @default(false)
+  /// Имэйл/SMS сувгаар илгээгдсэн хугацаа (тохиргоогүй үед хоосон)
+  sentAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  @@index([userId, read])
+  @@map("notifications")
+}
+
+/// Сурталчилгаа, хөнгөлөлт
+model Promotion {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  title       String
+  description String?
+  percentOff  Int?
+  amountOff   Int?
+  startsAt    DateTime
+  endsAt      DateTime
+  active      Boolean  @default(true)
+
+  @@map("promotions")
+}
+
+/// Нийлүүлэгчийн дансны мэдээлэл (татан авалтад ашиглана)
+model SupplierBankAccount {
+  id          String   @id @default(cuid())
+  supplierId  String   @unique
+  supplier    Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  bankName    String
+  accountNo   String
+  accountName String
+  updatedAt   DateTime @updatedAt
+
+  @@map("supplier_bank_accounts")
+}
+
+/// Нийлүүлэгчийн мөнгө татан авах хүсэлт (баримтын 4.2)
+model Payout {
+  id          String       @id @default(cuid())
+  supplierId  String
+  supplier    Supplier     @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  amount      Int
+  status      PayoutStatus @default(REQUESTED)
+  bankName    String
+  accountNo   String
+  accountName String
+  note        String?
+  /// Банкны гүйлгээний утга, админ бөглөнө
+  reference   String?
+  requestedBy String?
+  processedAt DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([supplierId, status])
+  @@map("payouts")
+}
+
+/// Нүүр хуудасны сурталчилгааны баннер (баримтын 4.3)
+model Banner {
+  id          String          @id @default(cuid())
+  title       String
+  subtitle    String?
+  /// S3 түлхүүр эсвэл бүрэн зургийн хаяг
+  imageKey    String?
+  linkUrl     String?
+  placement   BannerPlacement @default(HOME_HERO)
+  position    Int             @default(0)
+  startsAt    DateTime
+  endsAt      DateTime
+  active      Boolean         @default(true)
+  impressions Int             @default(0)
+  clicks      Int             @default(0)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@index([placement, active])
+  @@map("banners")
+}
+
+/// Буцаалт, маргаан
+model Dispute {
+  id              String         @id @default(cuid())
+  orderId         String
+  order           Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  supplierOrderId String?
+  supplierOrder   SupplierOrder? @relation(fields: [supplierOrderId], references: [id])
+  userId          String?
+  user            User?          @relation(fields: [userId], references: [id])
+  reason          String
+  detail          String?
+  status          DisputeStatus  @default(OPEN)
+  resolution      String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@map("disputes")
+}

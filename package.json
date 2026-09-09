@@ -1,0 +1,19 @@
+{
+  "name": "100ail",
+  "version": "0.1.0",
+  "private": true,
+  "description": "100 Айл — барилгын материалын e-commerce платформ (modular monolith)",
+  "scripts": {
+    "dev:api": "npm --prefix apps/api run start:dev",
+    "dev:storefront": "npm --prefix apps/storefront run dev",
+    "dev:supplier": "npm --prefix apps/supplier run dev",
+    "dev:admin": "npm --prefix apps/admin run dev",
+    "build:api": "npm --prefix apps/api run build",
+    "build:storefront": "npm --prefix apps/storefront run build",
+    "build:supplier": "npm --prefix apps/supplier run build",
+    "build:admin": "npm --prefix apps/admin run build",
+    "db:push": "npm --prefix apps/api run db:push",
+    "db:seed": "npm --prefix apps/api run db:seed",
+    "db:studio": "npm --prefix apps/api run db:studio"
+  }
+}

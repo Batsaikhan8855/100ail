@@ -1,0 +1,124 @@
+# 100 Айл — бүрэн орчин: өгөгдлийн сан, cache, хайлт, API, гурван веб.
+# Хөгжүүлэлтэд: docker compose up -d db redis meilisearch
+# Бүтнээр:      docker compose up -d --build
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ail100
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ail100}
+      POSTGRES_DB: ail100
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ail100"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.11
+    environment:
+      MEILI_MASTER_KEY: ${MEILISEARCH_API_KEY:-masterKey}
+      MEILI_ENV: production
+    ports:
+      - "7700:7700"
+    volumes:
+      - meili-data:/meili_data
+
+  api:
+    build:
+      context: ./apps/api
+    environment:
+      DATABASE_URL: postgresql://ail100:${POSTGRES_PASSWORD:-ail100}@db:5432/ail100?schema=public
+      JWT_SECRET: ${JWT_SECRET:-change-me}
+      JWT_EXPIRES_IN: 7d
+      PORT: 4000
+      PUBLIC_API_URL: ${PUBLIC_API_URL:-http://localhost:4000/api}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3100,http://localhost:3200,http://localhost:3300}
+      PLATFORM_COMMISSION_RATE: ${PLATFORM_COMMISSION_RATE:-0.02}
+      REDIS_URL: redis://redis:6379
+      MEILISEARCH_HOST: http://meilisearch:7700
+      MEILISEARCH_API_KEY: ${MEILISEARCH_API_KEY:-masterKey}
+      S3_BUCKET: ${S3_BUCKET:-}
+      S3_REGION: ${S3_REGION:-auto}
+      S3_ENDPOINT: ${S3_ENDPOINT:-}
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-}
+      S3_PUBLIC_URL: ${S3_PUBLIC_URL:-}
+      QPAY_BASE_URL: ${QPAY_BASE_URL:-https://merchant.qpay.mn/v2}
+      QPAY_USERNAME: ${QPAY_USERNAME:-}
+      QPAY_PASSWORD: ${QPAY_PASSWORD:-}
+      QPAY_INVOICE_CODE: ${QPAY_INVOICE_CODE:-}
+      MAPBOX_TOKEN: ${MAPBOX_TOKEN:-}
+      NOMINATIM_URL: ${NOMINATIM_URL:-https://nominatim.openstreetmap.org}
+      MAIL_WEBHOOK_URL: ${MAIL_WEBHOOK_URL:-}
+      MAIL_WEBHOOK_TOKEN: ${MAIL_WEBHOOK_TOKEN:-}
+      MAIL_FROM: ${MAIL_FROM:-100 Айл <no-reply@100ail.mn>}
+      SMS_GATEWAY_URL: ${SMS_GATEWAY_URL:-}
+      SMS_GATEWAY_TOKEN: ${SMS_GATEWAY_TOKEN:-}
+      PUBLIC_WEB_URL: ${PUBLIC_WEB_URL:-http://localhost:3100}
+    ports:
+      - "4000:4000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  storefront:
+    build:
+      context: ./apps/storefront
+      args:
+        NEXT_PUBLIC_API_URL: ${PUBLIC_API_URL:-http://localhost:4000/api}
+        NEXT_PUBLIC_MAPBOX_TOKEN: ${NEXT_PUBLIC_MAPBOX_TOKEN:-}
+        NEXT_PUBLIC_GOOGLE_MAPS_KEY: ${NEXT_PUBLIC_GOOGLE_MAPS_KEY:-}
+    ports:
+      - "3100:3100"
+    depends_on:
+      - api
+
+  supplier:
+    build:
+      context: ./apps/supplier
+      args:
+        NEXT_PUBLIC_API_URL: ${PUBLIC_API_URL:-http://localhost:4000/api}
+        NEXT_PUBLIC_MAPBOX_TOKEN: ${NEXT_PUBLIC_MAPBOX_TOKEN:-}
+        NEXT_PUBLIC_GOOGLE_MAPS_KEY: ${NEXT_PUBLIC_GOOGLE_MAPS_KEY:-}
+    ports:
+      - "3200:3200"
+    depends_on:
+      - api
+
+  admin:
+    build:
+      context: ./apps/admin
+      args:
+        NEXT_PUBLIC_API_URL: ${PUBLIC_API_URL:-http://localhost:4000/api}
+        NEXT_PUBLIC_MAPBOX_TOKEN: ${NEXT_PUBLIC_MAPBOX_TOKEN:-}
+        NEXT_PUBLIC_GOOGLE_MAPS_KEY: ${NEXT_PUBLIC_GOOGLE_MAPS_KEY:-}
+    ports:
+      - "3300:3300"
+    depends_on:
+      - api
+
+volumes:
+  db-data:
+  redis-data:
+  meili-data:

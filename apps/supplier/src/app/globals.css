@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink-950: #0b0c0f;
+  --color-ink-900: #101216;
+  --color-ink-850: #15171c;
+  --color-ink-800: #191c22;
+  --color-ink-700: #22252d;
+  --color-ink-600: #2c3038;
+  --color-mute: #8b929e;
+  --color-mute-dim: #6b7280;
+  --color-brand: #f5911e;
+  --color-brand-hi: #ffa733;
+  --color-brand-lo: #d97a0c;
+  --color-ok: #37b96a;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+html,
+body {
+  background: var(--color-ink-950);
+  color: #e8eaee;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Хөндлөн гүйлгэлт үүсгэхгүй */
+body {
+  overflow-x: hidden;
+}
+
+/* Тоон input дээрх сумыг нуух */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* Үнийн хүрээний slider */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  pointer-events: none;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 4px;
+  background: transparent;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  pointer-events: auto;
+  height: 16px;
+  width: 16px;
+  margin-top: -6px;
+  border-radius: 9999px;
+  background: var(--color-brand);
+  border: 2px solid var(--color-ink-900);
+  cursor: pointer;
+}
+input[type="range"]::-moz-range-thumb {
+  pointer-events: auto;
+  height: 16px;
+  width: 16px;
+  border-radius: 9999px;
+  background: var(--color-brand);
+  border: 2px solid var(--color-ink-900);
+  cursor: pointer;
+}
+
+/* Нарийн scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-ink-600) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--color-ink-600);
+  border-radius: 9999px;
+}

@@ -1,0 +1,31 @@
+import type { Metadata, Viewport } from "next";
+import { CartProvider } from "@/components/cart-context";
+import { SessionProvider } from "@/components/session";
+import "./globals.css";
+
+export const metadata: Metadata = {
+  title: "100 Айл — Барилгын материалын маркетплейс",
+  description:
+    "Олон нийлүүлэгчийн барилгын материалыг үнэ, үлдэгдэл, байршил, хүргэлтийн нөхцөлөөр харьцуулан худалдан авах платформ.",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0b0c0f",
+  colorScheme: "dark",
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="mn">
+      <body>
+        <SessionProvider>
+          <CartProvider>{children}</CartProvider>
+        </SessionProvider>
+      </body>
+    </html>
+  );
+}
