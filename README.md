@@ -5,10 +5,10 @@
 файлаас уншина уу.
 
 ```text
-apps/api          NestJS + Prisma API (modular monolith)   :4000
-apps/storefront   Худалдан авагчийн веб                     :3100
-apps/supplier     Нийлүүлэгчийн систем                      :3200
-apps/admin        Admin panel                               :3300
+backend/              NestJS + Prisma API (modular monolith)   :4000
+frontend/storefront   Худалдан авагчийн веб                     :3100
+frontend/supplier     Нийлүүлэгчийн систем                      :3200
+frontend/admin        Admin panel                               :3300
 ```
 
 ## Хурдан эхлэл
@@ -17,9 +17,10 @@ apps/admin        Admin panel                               :3300
 # 1. Дэд бүтэц (PostgreSQL, Redis, Meilisearch)
 docker compose up -d db redis meilisearch
 
-# 2. API
-cd apps/api && cp .env.example .env && npm install
-npm run db:push && npm run db:seed && npm run start:dev
+# 2. Backend
+cd backend && cp .env.example .env && npm install
+npm run db:push && npm run db:seed
+cd .. && npm run dev:backend            # http://localhost:4000/api
 
 # 3. Веб аппууд (тус бүрдээ npm install хийнэ)
 npm run dev:storefront   # http://localhost:3100
@@ -39,12 +40,17 @@ npm run dev:admin        # http://localhost:3300
 - Мэдэгдэл: апп дотор + сонголтоор имэйл/SMS суваг
 - Нүүр хуудасны сурталчилгааны баннер (админаас удирдана, CTR бүртгэнэ)
 
+## Каталогийн импорт
+
+barilga.mn-ийн нийтийн каталогийг татаж оруулах урсгалыг
+[`backend/prisma/data/barilga/README.md`](./backend/prisma/data/barilga/README.md)
+дотор бичсэн (scraper → зураг → `npm run db:import:barilga`).
+
 ## Тест
 
 ```bash
-cd apps/api
-npm test        # 59 unit — гуравдагч үйлчилгээгүйгээр ажиллана
-npm run test:e2e  # 25 e2e — PostgreSQL + seed шаардана
+npm run test:backend   # 59 unit — гуравдагч үйлчилгээгүйгээр ажиллана
+npm run test:e2e       # 25 e2e — PostgreSQL + seed шаардана
 ```
 
 ## Туршилтын бүртгэл

@@ -40,7 +40,7 @@ flowchart TD
 ### 4.1 Худалдан авагчийн веб
 
 ```text
-apps/storefront
+frontend/storefront
 ├── нүүр
 ├── ангилал
 ├── хайлт
@@ -68,7 +68,7 @@ apps/storefront
 ### 4.2 Нийлүүлэгчийн dashboard
 
 ```text
-apps/supplier
+frontend/supplier
 ├── бараа нэмэх
 ├── Excel-ээр бөөнөөр оруулах
 ├── үнэ шинэчлэх
@@ -84,7 +84,7 @@ apps/supplier
 ### 4.3 Admin panel
 
 ```text
-apps/admin
+frontend/admin
 ├── хэрэглэгч
 ├── нийлүүлэгч
 ├── бүтээгдэхүүн баталгаажуулах
@@ -101,7 +101,7 @@ apps/admin
 ## 5. Backend модулиуд
 
 ```text
-apps/api/src/modules
+backend/src/modules
 ├── auth
 ├── users
 ├── suppliers
@@ -238,15 +238,37 @@ PostgreSQL + Redis + Meilisearch + S3
 
 | Апп | Хавтас | Порт | Агуулга |
 |---|---|---|---|
-| Backend API | `apps/api` | 4000 | NestJS + Prisma, 26 модуль, Swagger `/api/docs` |
-| Худалдан авагчийн веб | `apps/storefront` | 3100 | Каталог, харьцуулалт, сагс, төлбөр, хүргэлт хянах, сэтгэгдэл |
-| Нийлүүлэгчийн систем | `apps/supplier` | 3200 | Бараа, Excel импорт, үлдэгдэл, агуулах, захиалга, хүргэлт, шимтгэл, татан авалт |
-| Admin panel | `apps/admin` | 3300 | Нийлүүлэгч, каталог, ангилал, хэрэглэгч, шимтгэл, татан авалт, маргаан, урамшуулал, сурталчилгаа |
+| Backend API | `backend` | 4000 | NestJS + Prisma, 26 модуль, Swagger `/api/docs` |
+| Худалдан авагчийн веб | `frontend/storefront` | 3100 | Каталог, харьцуулалт, сагс, төлбөр, хүргэлт хянах, сэтгэгдэл |
+| Нийлүүлэгчийн систем | `frontend/supplier` | 3200 | Бараа, Excel импорт, үлдэгдэл, агуулах, захиалга, хүргэлт, шимтгэл, татан авалт |
+| Admin panel | `frontend/admin` | 3300 | Нийлүүлэгч, каталог, ангилал, хэрэглэгч, шимтгэл, татан авалт, маргаан, урамшуулал, сурталчилгаа |
+
+Repo нь backend болон frontend гэсэн хоёр тодорхой хэсэгтэй:
+
+```text
+100ail/
+├── backend/                 NestJS + Prisma (:4000)
+│   ├── src/common/          cache, queue, notify, guards, xlsx
+│   ├── src/modules/         22 домэйн модуль + search, storage, geo, reports
+│   ├── prisma/              schema.prisma, seed.ts, import-barilga.ts
+│   │   └── data/barilga/    barilga.mn каталогийн scraper ба өгөгдөл
+│   └── media/               татаж авсан барааны зураг (git-д ордоггүй)
+├── frontend/
+│   ├── storefront/          Худалдан авагчийн веб (:3100)
+│   ├── supplier/            Нийлүүлэгчийн систем (:3200)
+│   └── admin/               Admin panel (:3300)
+├── docker-compose.yml       db, redis, meilisearch, api, 3 веб
+└── package.json             root скриптүүд (dev:*, build:*, db:*, test:*)
+```
+
+Апп бүр өөрийн `package.json`, `package-lock.json`, `node_modules`-тэй бие
+даасан — npm workspaces ашиглаагүй тул CI дээр апп тус бүр тусад нь cache
+хийгдэж, Docker build context нь тухайн хавтас л байна.
 
 ### 12.1 Худалдан авагчийн веб (API-тай холбогдсон)
 
 ```text
-apps/storefront
+frontend/storefront
 ├── /                    → каталог: сурталчилгааны баннер, facet шүүлтүүр, хайлт, эрэмбэлэлт, хуудаслалт
 ├── /product/[slug]      → бүтээгдэхүүн + бүх нийлүүлэгчийн саналын харьцуулалт (SSR),
 │                          агуулахын байршил газрын зураг дээр, сэтгэгдэл бичих
@@ -272,7 +294,7 @@ UI-ийн `Product` / `Offer` хэлбэр рүү хөрвүүлдэг тул х
 ### 12.2 Нийлүүлэгчийн систем
 
 ```text
-apps/supplier
+frontend/supplier
 ├── /              → борлуулалт, шинэ захиалга, шимтгэл, дуусч буй үлдэгдэл
 ├── /products      → үнэ, бөөний нөхцөл, Excel/CSV файлаар бөөнөөр оруулах, хуулж наах
 ├── /inventory     → агуулах тус бүрийн үлдэгдэл, нөөцөлсөн тоо
@@ -298,7 +320,7 @@ apps/supplier
 ### 12.3 Admin panel
 
 ```text
-apps/admin
+frontend/admin
 ├── /              → GMV, шимтгэл, нээлттэй маргаан, тэргүүлэх нийлүүлэгч
 ├── /orders        → захиалга, дэд захиалга, төлбөр, буцаалт
 ├── /suppliers     → нийлүүлэгч баталгаажуулах, мэдээлэл засах
@@ -345,9 +367,9 @@ apps/admin
 ### 12.5 Ажиллуулах
 
 ```bash
-# API (PostgreSQL шаардлагатай)
+# Backend (PostgreSQL шаардлагатай)
 npm run db:push && npm run db:seed
-npm run dev:api
+npm run dev:backend      # http://localhost:4000/api
 
 # Frontend-ууд
 npm run dev:storefront   # http://localhost:3100
@@ -355,7 +377,7 @@ npm run dev:supplier     # http://localhost:3200
 npm run dev:admin        # http://localhost:3300
 ```
 
-Орчны хувьсагчийн жагсаалт `apps/api/.env.example` дотор. Frontend бүр
+Орчны хувьсагчийн жагсаалт `backend/.env.example` дотор. Frontend бүр
 `NEXT_PUBLIC_API_URL` (анхдагч `http://localhost:4000/api`)-аар API-тай
 холбогдоно; газрын зургийн `NEXT_PUBLIC_MAPBOX_TOKEN` эсвэл
 `NEXT_PUBLIC_GOOGLE_MAPS_KEY` заавал биш. Эрхийн шалгалт API талд
@@ -372,10 +394,38 @@ Seed нь агуулах бүрд координат, нийлүүлэгч бү�
 3 баннер үүсгэдэг тул газрын зураг, татан авалт, сурталчилгааг шууд туршиж
 болно.
 
-### 12.6 Тест ба CI
+### 12.6 Каталогийн импорт (barilga.mn)
+
+Seed нь хөгжүүлэлтийн жижиг каталог (10 ангилал, 43 бүтээгдэхүүн) үүсгэдэг.
+Бодит хэмжээний каталог шаардвал `barilga.mn`-ийн нийтийн жагсаалтыг татаж
+оруулах гурван алхамт урсгал бэлэн:
 
 ```bash
-cd apps/api
+cd backend/prisma/data/barilga
+python3 scrape.py     # ангиллын мод + жагсаалтын бүх хуудас  -> listing.json
+python3 details.py    # бүтээгдэхүүн бүрийн дэлгэрэнгүй        -> products.json.gz
+python3 images.py     # зургийг backend/media/barilga/ дор татна
+
+cd ../../..           # backend/
+npm run db:import:barilga -- --stock=50
+```
+
+- `details.py` нь `details.jsonl` руу мөр мөрөөр бичдэг тул **тасарвал
+  үргэлжлүүлж болно** — дахин ажиллуулахад зөвхөн дутуу ID-г татна.
+- Импорт нь **idempotent**: бүтээгдэхүүнийг `barilga-<id>` slug-аар таньдаг
+  тул seed өгөгдөл, захиалгад орсон саналуудад хүрэхгүй.
+- Эх сайт нийлүүлэгч, үлдэгдлийг харуулдаггүй тул бүх санал `barilga-mn`
+  гэсэн нэг эх сурвалжийн нийлүүлэгч дээр, үлдэгдэл `--stock`-оор орно.
+- Зураг татагдсан бол локал `media/barilga/<файл>`, эс бөгөөс эх сайтын
+  хаягаар холбогдоно. Түр файлууд (`listing.json`, `details.jsonl`) git-д
+  ордоггүй — зөвхөн `products.json.gz` хадгалагдана.
+
+Дэлгэрэнгүйг `backend/prisma/data/barilga/README.md` дотор бичсэн.
+
+### 12.7 Тест ба CI
+
+```bash
+cd backend
 npm test          # 59 unit тест — гуравдагч үйлчилгээгүйгээр ажиллана
 npm run test:e2e  # 25 e2e тест — PostgreSQL + seed шаардана
 ```
@@ -397,7 +447,7 @@ npm run test:e2e  # 25 e2e тест — PostgreSQL + seed шаардана
   API-ийн typecheck + unit + e2e; storefront/supplier/admin гурвыг matrix-ээр
   typecheck + build.
 
-### 12.7 Docker байршуулалт
+### 12.8 Docker байршуулалт
 
 ```bash
 docker compose up -d --build
@@ -416,7 +466,7 @@ storefront, `supplier.` болон `admin.` дэд домэйнүүдийг чи
 Cloudflare эсвэл reverse proxy дээр төгсгөнө. `PUBLIC_API_URL` болон
 `CORS_ORIGINS`-ыг тухайн домэйнүүдээр солино.
 
-### 12.8 Үлдсэн ажил
+### 12.9 Үлдсэн ажил
 
 Кодын хувьд баримтын бүх шаардлага хэрэгжсэн. Үлдсэн зүйлс нь зөвхөн
 байгууллагын шийдвэр, гэрээ шаардсан гадаад тохиргоо:
@@ -426,3 +476,8 @@ Cloudflare эсвэл reverse proxy дээр төгсгөнө. `PUBLIC_API_URL` 
 - Домэйн, DNS, SSL тохиргоо (Cloudflare)
 - Mobile app-д зориулсан push мэдэгдэл (одоогоор мэдэгдэл апп дотор,
   имэйл/SMS сувгаар дамжина)
+
+Каталогийн талаас: `products.json.gz` дотор одоогоор **200 бүтээгдэхүүн**
+байна. Эх сайт дээр ~67 хуудас (~6,400 бүтээгдэхүүн) байгаа тул бүтэн
+каталог болгох бол 12.6-гийн `scrape.py` → `details.py` → `images.py`
+гурвыг дуустал ажиллуулна (дэлгэрэнгүй татац удаан, тасарвал үргэлжилнэ).

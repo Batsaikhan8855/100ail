@@ -1,7 +1,7 @@
 # 100 Айл — Storefront
 
 Барилгын материалын marketplace-ийн худалдан авагчийн веб (архитектурын
-баримтын `apps/storefront`). Next.js App Router + TypeScript + Tailwind CSS v4.
+баримтын `frontend/storefront`). Next.js App Router + TypeScript + Tailwind CSS v4.
 
 ## Ажиллуулах
 

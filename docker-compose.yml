@@ -45,7 +45,7 @@ services:
 
   api:
     build:
-      context: ./apps/api
+      context: ./backend
     environment:
       DATABASE_URL: postgresql://ail100:${POSTGRES_PASSWORD:-ail100}@db:5432/ail100?schema=public
       JWT_SECRET: ${JWT_SECRET:-change-me}
@@ -85,7 +85,7 @@ services:
 
   storefront:
     build:
-      context: ./apps/storefront
+      context: ./frontend/storefront
       args:
         NEXT_PUBLIC_API_URL: ${PUBLIC_API_URL:-http://localhost:4000/api}
         NEXT_PUBLIC_MAPBOX_TOKEN: ${NEXT_PUBLIC_MAPBOX_TOKEN:-}
@@ -97,7 +97,7 @@ services:
 
   supplier:
     build:
-      context: ./apps/supplier
+      context: ./frontend/supplier
       args:
         NEXT_PUBLIC_API_URL: ${PUBLIC_API_URL:-http://localhost:4000/api}
         NEXT_PUBLIC_MAPBOX_TOKEN: ${NEXT_PUBLIC_MAPBOX_TOKEN:-}
@@ -109,7 +109,7 @@ services:
 
   admin:
     build:
-      context: ./apps/admin
+      context: ./frontend/admin
       args:
         NEXT_PUBLIC_API_URL: ${PUBLIC_API_URL:-http://localhost:4000/api}
         NEXT_PUBLIC_MAPBOX_TOKEN: ${NEXT_PUBLIC_MAPBOX_TOKEN:-}
