@@ -28,7 +28,13 @@ interface Category {
   name: string;
   icon: string | null;
   productCount: number;
-  children: { id: string; slug: string; name: string; icon: string | null }[];
+  children: {
+    id: string;
+    slug: string;
+    name: string;
+    icon: string | null;
+    productCount: number;
+  }[];
 }
 
 interface Attribute {
@@ -146,7 +152,6 @@ export default function CategoriesPage() {
                       onClick={() =>
                         setSelected({
                           ...child,
-                          productCount: 0,
                           children: [],
                         })
                       }

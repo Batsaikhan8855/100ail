@@ -485,6 +485,14 @@ const vary = (base: number, index: number): number => {
   return Math.round((base * factor) / 100) * 100;
 };
 
+/**
+ * Демо каталог (33 зохиомол бараа, тэдгээрийн санал, үлдэгдэл, үнэлгээ) нь
+ * зөвхөн `--demo` тугтай үед үүснэ. Бодит каталогийг `db:import:barilga`
+ * оруулдаг тул анхдагчаар seed нь зөвхөн ангилал, нийлүүлэгч, хэрэглэгч,
+ * урамшуулал, баннерыг л бэлтгэнэ.
+ */
+const withDemoCatalog = process.argv.includes("--demo");
+
 async function main() {
   console.log("Хуучин өгөгдлийг цэвэрлэж байна...");
   await prisma.$transaction([
@@ -583,9 +591,14 @@ async function main() {
     });
   }
 
-  console.log("Бүтээгдэхүүн, санал, үлдэгдэл...");
+  console.log(
+    withDemoCatalog
+      ? "Демо бүтээгдэхүүн, санал, үлдэгдэл..."
+      : "Демо каталог алгаслаа (--demo тугаар үүсгэнэ).",
+  );
   let offerCount = 0;
-  for (const [productIndex, product] of PRODUCTS.entries()) {
+  const demoProducts: ProductSeed[] = withDemoCatalog ? PRODUCTS : [];
+  for (const [productIndex, product] of demoProducts.entries()) {
     const categoryId = categoryIds.get(product.category);
     if (!categoryId) throw new Error(`Ангилал олдсонгүй: ${product.category}`);
 

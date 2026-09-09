@@ -11,7 +11,10 @@ export class CategoriesService {
       where: { parentId: null },
       orderBy: { position: "asc" },
       include: {
-        children: { orderBy: { position: "asc" } },
+        children: {
+          orderBy: { position: "asc" },
+          include: { _count: { select: { products: true } } },
+        },
         _count: { select: { products: true } },
       },
     });
@@ -21,12 +24,17 @@ export class CategoriesService {
       slug: category.slug,
       name: category.name,
       icon: category.icon,
-      productCount: category._count.products,
+      // Дэд ангилалд байгаа бараа мөн үндсэн ангиллын тоонд орно
+      productCount: category.children.reduce(
+        (sum, child) => sum + child._count.products,
+        category._count.products,
+      ),
       children: category.children.map((child) => ({
         id: child.id,
         slug: child.slug,
         name: child.name,
         icon: child.icon,
+        productCount: child._count.products,
       })),
     }));
   }

@@ -101,7 +101,13 @@ export interface ApiCategory {
   name: string;
   icon: string | null;
   productCount: number;
-  children: { id: string; slug: string; name: string; icon: string | null }[];
+  children: {
+    id: string;
+    slug: string;
+    name: string;
+    icon: string | null;
+    productCount: number;
+  }[];
 }
 
 export interface ApiReview {

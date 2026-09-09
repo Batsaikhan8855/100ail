@@ -14,12 +14,28 @@ import * as zlib from "zlib";
 
 const prisma = new PrismaClient();
 
-const DATA_DIR = path.join(__dirname, "data/barilga");
-/** Шахсан хувилбарыг эхэлж хайна (репод багтахаар gzip-лэсэн) */
-const DATA_FILES = [
-  path.join(DATA_DIR, "products.json.gz"),
-  path.join(DATA_DIR, "products.json"),
+/**
+ * Эх өгөгдлийн сан. `ts-node`-оор ажиллахад `__dirname` нь `prisma/`,
+ * бүтээсэн дүрсэнд `dist/prisma/` болдог (tsc нь `.gz` файл хуулдаггүй)
+ * тул ажлын хавтснаас ч хайна.
+ */
+const DATA_DIRS = [
+  path.join(__dirname, "data/barilga"),
+  path.resolve(process.cwd(), "prisma/data/barilga"),
 ];
+/** Шахсан хувилбарыг эхэлж хайна (репод багтахаар gzip-лэсэн) */
+const DATA_FILES = DATA_DIRS.flatMap((dir) => [
+  path.join(dir, "products.json.gz"),
+  path.join(dir, "products.json"),
+]);
+/**
+ * `Offer.price` нь PostgreSQL-ийн `integer` (INT4) тул 2,147,483,647-оос
+ * хэтэрч болохгүй. Эх сайт дээр материал биш зарууд (газар, объект)
+ * тэрбумаар зарлагдсан байдаг тул тэднийг үнэгүйтэй адил үзэж нуухаас
+ * өөр аргагүй.
+ */
+const MAX_PRICE = 2_000_000_000;
+
 /** Импортын эх сурвалжийг төлөөлөх нийлүүлэгч */
 const SOURCE_SUPPLIER_SLUG = "barilga-mn";
 const SOURCE_CITY = "Улаанбаатар";
@@ -109,22 +125,29 @@ const toSummary = (product: ScrapedProduct): string | null => {
 /**
  * Зургийн түлхүүр.
  *
- * Эх сайтын CDN нь `?d=0`-гүй хүсэлтийг 403-аар хаадаг бөгөөд гаднаас
- * холбох нь найдваргүй тул `images.py`-аар татаж авсан локал файлыг
- * эхэнд нь тавина. Татагдаагүй бол эх хаягаар нь (шаардлагатай query-тэй)
- * буцаана.
+ * `images.py`-аар татаж авсан локал файл байвал түүнийг (`barilga/<файл>`),
+ * үгүй бол эх хаягаар нь буцаана — CDN нь `?d=0`-гүй хүсэлтийг 403-аар
+ * хаадаг тул query-г нөхнө.
+ *
+ * Онцгой тохиолдол: галерейн зураг эх сайтын CDN (`img.barilga.mn`) дээр
+ * байдаг бол тайлбар доторх нэмэлт зураг нь ихэвчлэн тусгаарлагч, дүрс
+ * зэрэг 1-2KB файл байдаг. `images.py` нь тэднийг хэмжээгээр нь шүүж
+ * хадгалдаггүй тул **тайлбарын зургийг зөвхөн локалд буусан үед** авна.
  */
-const imageKeys = (item: ScrapedProduct): string[] =>
-  (item.images ?? [])
-    .filter(Boolean)
-    .slice(0, 8)
-    .map((url) => {
-      const file = url.split("/files/").pop()?.split("?")[0];
-      if (file && fs.existsSync(path.join(MEDIA_DIR, IMAGE_PREFIX, file))) {
-        return `${IMAGE_PREFIX}/${file}`;
-      }
-      return url.includes("?") ? url : `${url}?d=0`;
-    });
+const isGalleryImage = (url: string): boolean => url.includes("img.barilga.mn");
+
+const imageKeys = (item: ScrapedProduct): string[] => {
+  const keys: string[] = [];
+  for (const url of (item.images ?? []).filter(Boolean).slice(0, 8)) {
+    const file = url.split("/files/").pop()?.split("?")[0];
+    if (file && fs.existsSync(path.join(MEDIA_DIR, IMAGE_PREFIX, file))) {
+      keys.push(`${IMAGE_PREFIX}/${file}`);
+    } else if (isGalleryImage(url)) {
+      keys.push(url.includes("?") ? url : `${url}?d=0`);
+    }
+  }
+  return keys;
+};
 
 const arg = (name: string): string | undefined =>
   process.argv.find((a) => a.startsWith(`--${name}=`))?.split("=")[1];
@@ -152,12 +175,21 @@ async function main() {
   for (const p of items) {
     if (p.categoryId && p.categoryName) catNames.set(p.categoryId, p.categoryName);
   }
-  const existingSlugs = new Set(
-    (await prisma.category.findMany({ select: { slug: true } })).map((c) => c.slug),
-  );
   const categoryIdBySourceId = new Map<number, string>();
   const iconBySourceId = new Map<number, string>();
   let position = 100; // seed-ийн ангиллуудын ард байрлуулна
+
+  /**
+   * `iconFor` нь эх сайтын ангиллын нэрийг seed-ийн 10 үндсэн ангиллын
+   * slug (cement, brick, rebar…) руу буулгадаг. Тэр ангилал байвал эх
+   * сайтын ангиллыг түүний **дэд ангилал** болгоно — ингэснээр нүүр дээр
+   * үндсэн 10 ангилал л харагдаж, эх сайтын нарийвчлал хадгалагдана.
+   */
+  const parentIdByIcon = new Map<string, string>();
+  for (const icon of new Set([...catNames.values()].map(iconFor))) {
+    const parent = await prisma.category.findUnique({ where: { slug: icon } });
+    if (parent) parentIdByIcon.set(icon, parent.id);
+  }
 
   for (const [sourceId, name] of [...catNames].sort((a, b) => a[0] - b[0])) {
     let slug = slugify(name);
@@ -165,22 +197,31 @@ async function main() {
     const existing = await prisma.category.findUnique({ where: { slug } });
     // Ижил slug өөр ангилалд оногдвол cid-ээр ялгана
     if (existing && existing.name !== name) slug = `${slug}-${sourceId}`;
+    const parentId = parentIdByIcon.get(icon) ?? null;
     const category = await prisma.category.upsert({
       where: { slug },
-      update: { name, icon },
-      create: { slug, name, icon, position: position++ },
+      update: { name, icon, parentId },
+      create: { slug, name, icon, parentId, position: position++ },
     });
-    existingSlugs.add(slug);
     categoryIdBySourceId.set(sourceId, category.id);
     iconBySourceId.set(sourceId, icon);
   }
-  console.log(`Ангилал: ${categoryIdBySourceId.size}`);
+  console.log(
+    `Ангилал: ${categoryIdBySourceId.size} (${parentIdByIcon.size} үндсэн ангилал доор)`,
+  );
 
   // Ангилалгүй бүтээгдэхүүнд зориулсан нөөц ангилал
+  const fallbackParentId = parentIdByIcon.get("tools") ?? null;
   const fallbackCategory = await prisma.category.upsert({
     where: { slug: "busad" },
-    update: {},
-    create: { slug: "busad", name: "Бусад", icon: "tools", position: position++ },
+    update: { parentId: fallbackParentId },
+    create: {
+      slug: "busad",
+      name: "Бусад",
+      icon: "tools",
+      parentId: fallbackParentId,
+      position: position++,
+    },
   });
 
   // ---------- 2. Эх сурвалжийн нийлүүлэгч ----------
@@ -216,6 +257,7 @@ async function main() {
   let created = 0;
   let updated = 0;
   let withoutPrice = 0;
+  let outOfRange = 0;
 
   for (const batch of chunk(items, 25)) {
     await Promise.all(
@@ -225,8 +267,10 @@ async function main() {
         const categoryId =
           categoryIdBySourceId.get(sourceCategoryId) ?? fallbackCategory.id;
         const icon = iconBySourceId.get(sourceCategoryId) ?? "tools";
-        const price = item.price && item.price > 0 ? Math.round(item.price) : null;
+        const raw = item.price && item.price > 0 ? Math.round(item.price) : null;
+        const price = raw !== null && raw <= MAX_PRICE ? raw : null;
         if (price === null) withoutPrice += 1;
+        if (raw !== null && price === null) outOfRange += 1;
 
         const data = {
           name: (item.name ?? "").trim(),
@@ -315,7 +359,8 @@ async function main() {
   }
 
   console.log(
-    `Дуусав: шинэ ${created}, шинэчилсэн ${updated}, үнэгүй (нуусан) ${withoutPrice}`,
+    `Дуусав: шинэ ${created}, шинэчилсэн ${updated}, үнэгүй (нуусан) ${withoutPrice}` +
+      (outOfRange ? `, үүнээс хэт өндөр үнэтэй ${outOfRange}` : ""),
   );
   console.log(`Үлдэгдэл: ${stock} (--stock=N-ээр өөрчилнө)`);
 }

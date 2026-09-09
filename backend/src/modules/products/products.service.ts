@@ -135,7 +135,17 @@ export class ProductsService {
     // Facet-ийн тоог үндсэн шүүлт (хайлт + ангилал + үнэ)-ээр тооцно
     const baseWhere: Prisma.ProductWhereInput = {
       active: true,
-      ...(query.category ? { category: { slug: query.category } } : {}),
+      // Үндсэн ангиллаар шүүхэд дэд ангиллын бараа мөн орно
+      ...(query.category
+        ? {
+            category: {
+              OR: [
+                { slug: query.category },
+                { parent: { slug: query.category } },
+              ],
+            },
+          }
+        : {}),
       ...(query.q
         ? {
             OR: [

@@ -10,6 +10,7 @@
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
     "db:seed": "ts-node prisma/seed.ts",
+    "db:seed:demo": "ts-node prisma/seed.ts --demo",
     "db:import:barilga": "ts-node prisma/import-barilga.ts",
     "db:studio": "prisma studio",
     "test": "jest --testPathIgnorePatterns e2e",
@@ -31,6 +32,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
     "ioredis": "^6.0.0",
+    "prisma": "^6.16.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2"
   },
@@ -43,7 +45,6 @@
     "@types/node": "^24.5.0",
     "@types/supertest": "^7.2.1",
     "jest": "^30.5.1",
-    "prisma": "^6.16.1",
     "supertest": "^7.2.2",
     "ts-jest": "^29.4.12",
     "ts-node": "^10.9.2",
