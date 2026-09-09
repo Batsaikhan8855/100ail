@@ -32,8 +32,10 @@ function expectedProducts(): number {
     if (!fs.existsSync(file)) continue;
     const rows = JSON.parse(
       zlib.gunzipSync(fs.readFileSync(file)).toString("utf-8"),
-    ) as unknown[];
-    return rows.length;
+    ) as { id?: number; name?: string }[];
+    // Импорт нь ID болон нэргүй мөрийг алгасдаг тул тэднийг тооцохгүй —
+    // эс бөгөөс тоо хэзээ ч таарахгүй, cold start бүрд дахин импортлоно.
+    return rows.filter((row) => row.id && (row.name ?? "").trim()).length;
   }
   return 0;
 }
@@ -49,8 +51,13 @@ async function main(): Promise<void> {
 
   const expected = expectedProducts();
 
+  // Импортын дүрэм өөрчлөгдсөн үед (жишээ нь үнийн хязгаар) каталогийг
+  // дахин боловсруулах хэрэгтэй болдог. Render дээр shell байхгүй тул
+  // `FORCE_IMPORT=1` хувьсагчаар нэг удаа албадаж болно.
+  const forced = process.env.FORCE_IMPORT === "1";
+
   // Бүрэн орсон бол дахин ажиллуулах шаардлагагүй
-  if (expected > 0 && products >= expected) {
+  if (!forced && expected > 0 && products >= expected) {
     console.log(`[bootstrap] ${products} бараа бүрэн байна — алгаслаа`);
     return;
   }
@@ -59,6 +66,9 @@ async function main(): Promise<void> {
   // үргэлжлүүлнэ (seed нь өгөгдлийг арчих тул дахин ажиллуулж болохгүй).
   // Үнэгүй тарифын instance унтахад импорт таслагдаж дутуу үлдэж болзошгүй
   // тул энэ шалгалт нь дараагийн эхлэлд ажлыг дуусгана.
+  if (forced && products > 0) {
+    console.log("[bootstrap] FORCE_IMPORT=1 — каталогийг дахин боловсруулна");
+  }
   if (products === 0) {
     console.log("[bootstrap] Мэдээллийн сан хоосон — суурь өгөгдөл бэлтгэж байна");
     run([path.join(__dirname, "seed.js")]);

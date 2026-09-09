@@ -36,6 +36,15 @@ const DATA_FILES = DATA_DIRS.flatMap((dir) => [
  */
 const MAX_PRICE = 2_000_000_000;
 
+/**
+ * Эх сайт дээр «утсаар лавлана» гэсэн зарыг 1₮ (эсвэл 0.01₮) гэж
+ * тавьдаг бөгөөд нэрэндээ утасны дугаараа бичсэн байдаг. Барилгын
+ * материалын бодит үнэ 100₮-аас доош байхгүй тул тэднийг үнэгүйтэй
+ * адил үзэж каталогоос нууна — эс бөгөөс үнээр эрэмбэлэхэд нүүрэнд
+ * гарч ирнэ.
+ */
+const MIN_PRICE = 100;
+
 /** Импортын эх сурвалжийг төлөөлөх нийлүүлэгч */
 const SOURCE_SUPPLIER_SLUG = "barilga-mn";
 const SOURCE_CITY = "Улаанбаатар";
@@ -268,7 +277,8 @@ async function main() {
           categoryIdBySourceId.get(sourceCategoryId) ?? fallbackCategory.id;
         const icon = iconBySourceId.get(sourceCategoryId) ?? "tools";
         const raw = item.price && item.price > 0 ? Math.round(item.price) : null;
-        const price = raw !== null && raw <= MAX_PRICE ? raw : null;
+        const price =
+          raw !== null && raw >= MIN_PRICE && raw <= MAX_PRICE ? raw : null;
         if (price === null) withoutPrice += 1;
         if (raw !== null && price === null) outOfRange += 1;
 
@@ -360,7 +370,7 @@ async function main() {
 
   console.log(
     `Дуусав: шинэ ${created}, шинэчилсэн ${updated}, үнэгүй (нуусан) ${withoutPrice}` +
-      (outOfRange ? `, үүнээс хэт өндөр үнэтэй ${outOfRange}` : ""),
+      (outOfRange ? `, үүнээс үнэ нь хүрээнээс гадуур ${outOfRange}` : ""),
   );
   console.log(`Үлдэгдэл: ${stock} (--stock=N-ээр өөрчилнө)`);
 }
