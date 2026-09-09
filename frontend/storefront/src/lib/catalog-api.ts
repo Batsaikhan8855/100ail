@@ -151,6 +151,7 @@ export const toProduct = (product: ApiProduct): Product => ({
   variant: product.variantLabel ?? undefined,
   categoryId: product.category.slug,
   art: toArt(product.art),
+  image: product.images[0]?.url,
 });
 
 const deliveryNote = (offer: ApiOffer): string => {

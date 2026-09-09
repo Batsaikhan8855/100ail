@@ -10,6 +10,7 @@
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
     "db:seed": "ts-node prisma/seed.ts",
+    "db:import:barilga": "ts-node prisma/import-barilga.ts",
     "db:studio": "prisma studio",
     "test": "jest --testPathIgnorePatterns e2e",
     "test:e2e": "jest --runInBand test/app.e2e-spec.ts"

@@ -8,3 +8,12 @@ dist/
 .env.*.local
 coverage/
 *.tsbuildinfo
+
+# Татаж авсан барааны зураг (repo-д оруулахгүй)
+backend/media/
+
+# Scraper-ийн түр файлууд — эцсийн products.json.gz л repo-д ордог
+backend/prisma/data/barilga/categories.json
+backend/prisma/data/barilga/listing.json
+backend/prisma/data/barilga/details.jsonl
+backend/prisma/data/barilga/products.json

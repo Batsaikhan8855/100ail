@@ -4,7 +4,7 @@ import Link from "next/link";
 import type { Offer, Product } from "@/data/catalog";
 import { formatNumber, formatPrice } from "@/lib/format";
 import { BoxIcon, HeartIcon, PinIcon } from "./icons";
-import { ProductArt } from "./product-art";
+import { ProductThumb } from "./product-art";
 
 function StockBadges({ offer }: { offer: Offer }) {
   return (
@@ -66,7 +66,7 @@ export function ProductCard({
       <Link href={href} className="block">
         <article className="flex gap-4 rounded-md border border-ink-700 bg-ink-800 p-3 transition-colors hover:border-ink-600">
           <div className="relative h-[104px] w-[140px] shrink-0 overflow-hidden rounded bg-gradient-to-b from-ink-700/60 to-ink-900">
-            <ProductArt art={product.art} />
+            <ProductThumb image={product.image} art={product.art} name={product.name} />
           </div>
           <div className="min-w-0 flex-1">
             <h3 className="truncate text-sm font-semibold text-white">
@@ -105,7 +105,7 @@ export function ProductCard({
     <Link href={href} className="block">
       <article className="group overflow-hidden rounded-md border border-ink-700 bg-ink-800 transition-colors hover:border-ink-600">
         <div className="relative h-[168px] bg-gradient-to-b from-ink-700/50 to-ink-900 p-3">
-          <ProductArt art={product.art} />
+          <ProductThumb image={product.image} art={product.art} name={product.name} />
           {favButton}
         </div>
         <div className="border-t border-ink-700 p-3">

@@ -49,6 +49,8 @@ export interface Product {
   /** Ангиллын slug */
   categoryId: string;
   art: ArtKey;
+  /** Бодит гэрэл зураг байвал вектор дүрслэлийн оронд харагдана */
+  image?: string;
 }
 
 export interface Offer {

@@ -289,8 +289,33 @@ const ART: Record<ArtKey, () => React.JSX.Element> = {
 };
 
 export function ProductArt({ art }: { art: ArtKey }) {
-  const Component = ART[art];
+  const Component = ART[art] ?? ART.cement;
   return <Component />;
+}
+
+/**
+ * Бодит гэрэл зураг байвал түүнийг, эс бөгөөс вектор дүрслэлийг харуулна.
+ * (Импортлосон каталогийн бараанууд эх сайтын зурагтай ирдэг.)
+ */
+export function ProductThumb({
+  image,
+  art,
+  name,
+}: {
+  image?: string;
+  art: ArtKey;
+  name: string;
+}) {
+  if (!image) return <ProductArt art={art} />;
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={image}
+      alt={name}
+      loading="lazy"
+      className="h-full w-full object-contain"
+    />
+  );
 }
 
 const BRAND_ART: Record<BrandKey, React.JSX.Element> = {

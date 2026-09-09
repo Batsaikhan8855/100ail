@@ -4,7 +4,7 @@ import Link from "next/link";
 import type { Offer, Product } from "@/data/catalog";
 import { formatNumber, formatPrice } from "@/lib/format";
 import { BoxIcon, CheckIcon, PinIcon, TruckIcon } from "./icons";
-import { ProductArt } from "./product-art";
+import { ProductThumb } from "./product-art";
 import { Panel, PanelHeader } from "./ui";
 
 /**
@@ -60,7 +60,7 @@ export function ComparisonPanel({
                 }`}
               >
                 <div className="relative h-[132px] bg-gradient-to-b from-ink-700/50 to-ink-900 p-2">
-                  <ProductArt art={product.art} />
+                  <ProductThumb image={product.image} art={product.art} name={product.name} />
                   <label className="absolute left-2.5 top-2.5 flex cursor-pointer items-center">
                     <input
                       type="checkbox"
