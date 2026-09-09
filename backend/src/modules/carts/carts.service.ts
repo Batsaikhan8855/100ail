@@ -51,16 +51,35 @@ export class CartsService {
       throw new BadRequestException("sessionId эсвэл нэвтрэлт шаардлагатай");
     }
 
+    const sessionId = owner.sessionId;
     const existing = await this.prisma.cart.findUnique({
-      where: { sessionId: owner.sessionId },
+      where: { sessionId },
       include: cartInclude,
     });
     if (existing) return existing;
 
-    return this.prisma.cart.create({
-      data: { sessionId: owner.sessionId },
-      include: cartInclude,
-    });
+    // Нүүр хуудас сагсаа зэрэг хэд хэдэн хүсэлтээр татдаг тул хоёр хүсэлт
+    // нэгэн зэрэг үүсгэх гэж оролдож `sessionId`-ийн unique дээр мөргөлддөг.
+    // (Prisma-гийн `upsert` нь `include`-тэй үед атомик биш тул үүнийг
+    // шийддэггүй.) Хожсон хүсэлтийн үүсгэсэн сагсыг буцаана.
+    try {
+      return await this.prisma.cart.create({
+        data: { sessionId },
+        include: cartInclude,
+      });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2002"
+      ) {
+        const raced = await this.prisma.cart.findUnique({
+          where: { sessionId },
+          include: cartInclude,
+        });
+        if (raced) return raced;
+      }
+      throw error;
+    }
   }
 
   /** Сагсыг нийлүүлэгчээр бүлэглэж, дүнг тооцсон хэлбэрээр буцаана */
