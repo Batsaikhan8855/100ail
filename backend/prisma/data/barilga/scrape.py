@@ -122,8 +122,37 @@ def scrape_detail(pid):
         pick = next((sizes[s] for s in SIZE_RANK if s in sizes), None)
         # `?d=0`-гүй бол CDN 403 буцаадаг тул хаягийг бүтнээр нь хадгална
         if pick: imgs.append(f"{pick}?d=0")
-    d["images"] = imgs
+    # Галерейд ихэвчлэн ганц зураг байдаг ч тайлбар дотор нэмэлт гэрэл зураг
+    # ордог тул тэдгээрийг ард нь залгана (дэлгэрэнгүй хуудасны галерей).
+    d["images"] = imgs + description_images(d.get("descriptionHtml"), imgs)
     return d
+
+
+# Тайлбар дотор лого, дүрс, тусгаарлагч зэрэг жижиг файл ч оршдог тул
+# зөвхөн barilga.mn-ий байршуулсан файлыг, хязгаартайгаар авна.
+DESC_IMAGE_LIMIT = 4
+
+
+def description_images(html_body, already):
+    """`descriptionHtml` доторх барааны нэмэлт зургууд."""
+    if not html_body:
+        return []
+    seen = {u.split("/files/")[-1].split("?")[0] for u in already}
+    out = []
+    for url in re.findall(
+        r'https?://(?:www\.)?(?:img\.)?barilga\.mn/[^\s"\'<>)]+?\.(?:jpe?g|png|webp)',
+        html_body, re.I,
+    ):
+        if "/files/" not in url:
+            continue
+        name = url.split("/files/")[-1].split("?")[0]
+        if name in seen:
+            continue
+        seen.add(name)
+        out.append(url)
+        if len(out) >= DESC_IMAGE_LIMIT:
+            break
+    return out
 
 def main():
     cats = scrape_categories()

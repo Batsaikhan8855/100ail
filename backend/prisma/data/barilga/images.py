@@ -16,7 +16,10 @@ MEDIA = os.path.join(API_ROOT, os.environ.get("MEDIA_DIR", "media"), "barilga")
 UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 MAX_EDGE = int(os.environ.get("IMAGE_MAX_EDGE", "500"))
 # Бүтээгдэхүүн тус бүрээс хэдэн зураг татах вэ (сангийн хэмжээг барина)
-MAX_PER_PRODUCT = int(os.environ.get("IMAGE_MAX_PER_PRODUCT", "3"))
+MAX_PER_PRODUCT = int(os.environ.get("IMAGE_MAX_PER_PRODUCT", "5"))
+# Тайлбар доторх зургийн 85% нь тусгаарлагч, дүрс зэрэг 1-2KB файл байдаг.
+# Эндээс жижиг файлыг барааны зураг гэж үзэхгүй — татсан ч хадгалахгүй.
+MIN_BYTES = int(os.environ.get("IMAGE_MIN_BYTES", "6000"))
 SIPS = shutil.which("sips")  # macOS-ийн хэмжээ өөрчлөгч (байхгүй бол алгасна)
 
 
@@ -47,7 +50,7 @@ def source_urls():
 
 
 lock = threading.Lock()
-stats = {"ok": 0, "skip": 0, "fail": 0, "bytes": 0}
+stats = {"ok": 0, "skip": 0, "fail": 0, "tiny": 0, "bytes": 0}
 
 
 def fetch(job):
@@ -56,12 +59,19 @@ def fetch(job):
     if os.path.exists(dest) and os.path.getsize(dest) > 0:
         with lock: stats["skip"] += 1
         return
-    # `?d=0` заавал шаардлагатай — эс бөгөөс 403
-    req = urllib.request.Request(f"{url}?d=0", headers={"User-Agent": UA})
+    # CDN (img.barilga.mn) нь `?d=0`-гүй хүсэлтийг 403-аар хаадаг. Хаяг нь
+    # аль хэдийн query-тэй ирвэл давхардуулахгүй.
+    src = url if "?" in url else f"{url}?d=0"
+    req = urllib.request.Request(src, headers={"User-Agent": UA})
     for attempt in range(3):
         try:
             with urllib.request.urlopen(req, timeout=30) as response:
                 body = response.read()
+            if len(body) < MIN_BYTES:
+                # Чимэглэлийн жижиг файл — хадгалахгүй (импорт локал файл
+                # байхгүй тайлбарын зургийг алгасдаг)
+                with lock: stats["tiny"] += 1
+                return
             tmp = f"{dest}.part"
             with open(tmp, "wb") as fh:
                 fh.write(body)
@@ -73,10 +83,11 @@ def fetch(job):
             with lock:
                 stats["ok"] += 1
                 stats["bytes"] += os.path.getsize(dest)
-                done = stats["ok"] + stats["skip"] + stats["fail"]
+                done = stats["ok"] + stats["skip"] + stats["fail"] + stats["tiny"]
                 if done % 200 == 0:
                     print(f"  {done} ({stats['ok']} шинэ, {stats['skip']} байсан, "
-                          f"{stats['fail']} алдаа, {stats['bytes'] // 1048576}MB)", flush=True)
+                          f"{stats['tiny']} жижиг, {stats['fail']} алдаа, "
+                          f"{stats['bytes'] // 1048576}MB)", flush=True)
             return
         except Exception as error:
             if attempt == 2:
@@ -93,7 +104,8 @@ def main():
     with ThreadPoolExecutor(max_workers=8) as ex:
         list(ex.map(fetch, jobs))
     print(f"Дуусав: {stats['ok']} татсан, {stats['skip']} өмнө нь байсан, "
-          f"{stats['fail']} алдаа, нийт {stats['bytes'] // 1048576}MB")
+          f"{stats['tiny']} жижиг тул алгассан, {stats['fail']} алдаа, "
+          f"нийт {stats['bytes'] // 1048576}MB")
 
 
 if __name__ == "__main__":

@@ -3,7 +3,7 @@
 import json, os, sys, threading
 from concurrent.futures import ThreadPoolExecutor
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from scrape import scrape_detail
+from scrape import scrape_detail, description_images
 
 OUT = os.path.dirname(os.path.abspath(__file__))
 JSONL = f"{OUT}/details.jsonl"
@@ -46,7 +46,11 @@ def finish():
             row = json.loads(line)
         except Exception:
             continue
-        # descriptionHtml, thumb нь давхардсан тул хасна (файлын хэмжээ)
+        # Тайлбар доторх нэмэлт зургийг галерейд оруулаад (аль хэдийн
+        # татсан мөрүүдэд ч хүчинтэй болгохын тулд энд дахин хийнэ),
+        # descriptionHtml, thumb-ыг хасна (файлын хэмжээ)
+        images = row.get("images") or []
+        row["images"] = images + description_images(row.get("descriptionHtml"), images)
         row.pop("descriptionHtml", None)
         row.pop("thumb", None)
         rows[row["id"]] = row

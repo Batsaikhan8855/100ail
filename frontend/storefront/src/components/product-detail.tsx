@@ -57,6 +57,8 @@ export function ProductDetail({
   const [tab, setTab] = useState<TabId>("spec");
   const [favorite, setFavorite] = useState(false);
   const [added, setAdded] = useState(false);
+  /** Галерейд сонгогдсон зураг (олон зурагтай бараанд) */
+  const [imageIndex, setImageIndex] = useState(0);
   const { addLine } = useCart();
 
   const offer = offers.find((o) => o.id === offerId) ?? offers[0];
@@ -135,31 +137,63 @@ export function ProductDetail({
           <div className="flex flex-col gap-4">
             <Panel className="p-4">
               <div className="grid gap-5 md:grid-cols-[minmax(0,320px)_minmax(0,1fr)]">
-                <div className="relative h-[260px] overflow-hidden rounded-md bg-gradient-to-b from-ink-700/50 to-ink-900 p-4">
-                  {images.length > 0 ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={images[0].url}
-                      alt={product.name}
-                      className="h-full w-full rounded object-contain"
-                    />
-                  ) : (
-                    <ProductArt art={product.art} />
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => setFavorite((v) => !v)}
-                    aria-label={favorite ? "Хадгалснаас хасах" : "Хадгалах"}
-                    aria-pressed={favorite}
-                    className={`absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-ink-950/60 backdrop-blur transition-colors ${
-                      favorite ? "text-brand" : "text-[#c2c7cf] hover:text-white"
-                    }`}
-                  >
-                    <HeartIcon
-                      className="h-5 w-5"
-                      fill={favorite ? "currentColor" : "none"}
-                    />
-                  </button>
+                <div className="flex flex-col gap-2">
+                  <div className="relative h-[260px] overflow-hidden rounded-md bg-gradient-to-b from-ink-700/50 to-ink-900 p-4">
+                    {images.length > 0 ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={(images[imageIndex] ?? images[0]).url}
+                        alt={product.name}
+                        className="h-full w-full rounded object-contain"
+                      />
+                    ) : (
+                      <ProductArt art={product.art} />
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setFavorite((v) => !v)}
+                      aria-label={favorite ? "Хадгалснаас хасах" : "Хадгалах"}
+                      aria-pressed={favorite}
+                      className={`absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-ink-950/60 backdrop-blur transition-colors ${
+                        favorite
+                          ? "text-brand"
+                          : "text-[#c2c7cf] hover:text-white"
+                      }`}
+                    >
+                      <HeartIcon
+                        className="h-5 w-5"
+                        fill={favorite ? "currentColor" : "none"}
+                      />
+                    </button>
+                  </div>
+
+                  {/* Хоёроос дээш зурагтай бараанд сонгох зурвас */}
+                  {images.length > 1 ? (
+                    <div className="flex gap-2 overflow-x-auto pb-1">
+                      {images.map((image, index) => (
+                        <button
+                          key={image.id}
+                          type="button"
+                          onClick={() => setImageIndex(index)}
+                          aria-label={`${index + 1}-р зураг`}
+                          aria-current={index === imageIndex}
+                          className={`h-14 w-14 shrink-0 overflow-hidden rounded border bg-ink-900 p-1 transition-colors ${
+                            index === imageIndex
+                              ? "border-brand"
+                              : "border-ink-700 hover:border-ink-600"
+                          }`}
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={image.url}
+                            alt=""
+                            loading="lazy"
+                            className="h-full w-full object-contain"
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
                 </div>
 
                 <div className="min-w-0">
@@ -239,7 +273,9 @@ export function ProductDetail({
                       onClick={() => setTab(item.id)}
                       aria-current={active ? "true" : undefined}
                       className={`relative shrink-0 px-3.5 py-3.5 text-[13px] font-semibold whitespace-nowrap transition-colors ${
-                        active ? "text-brand" : "text-[#c2c7cf] hover:text-white"
+                        active
+                          ? "text-brand"
+                          : "text-[#c2c7cf] hover:text-white"
                       }`}
                     >
                       {item.label}
@@ -289,48 +325,48 @@ export function ProductDetail({
 
                 {tab === "reviews" ? (
                   <>
-                  {reviews.length === 0 ? (
-                    <p className="py-8 text-center text-sm text-mute">
-                      Одоогоор сэтгэгдэл алга байна.
-                    </p>
-                  ) : (
-                    <ul className="divide-y divide-ink-700">
-                      {reviews.map((review) => (
-                        <li key={review.id} className="py-3.5 first:pt-0">
-                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                            <span className="text-[13px] font-semibold text-white">
-                              {review.author}
-                            </span>
-                            <span className="flex items-center gap-0.5">
-                              {Array.from({ length: 5 }, (_, i) => (
-                                <StarIcon
-                                  key={i}
-                                  className={`h-3.5 w-3.5 ${
-                                    i < review.rating
-                                      ? "text-brand"
-                                      : "text-ink-600"
-                                  }`}
-                                  fill="currentColor"
-                                />
-                              ))}
-                            </span>
-                            <span className="text-[11.5px] text-mute-dim">
-                              {review.supplierName} · {review.date}
-                            </span>
-                            {review.verified ? (
-                              <span className="rounded-full border border-[#2b6b45] bg-[#14291d] px-2 py-[2px] text-[10.5px] text-ok">
-                                Худалдан авалт баталгаажсан
+                    {reviews.length === 0 ? (
+                      <p className="py-8 text-center text-sm text-mute">
+                        Одоогоор сэтгэгдэл алга байна.
+                      </p>
+                    ) : (
+                      <ul className="divide-y divide-ink-700">
+                        {reviews.map((review) => (
+                          <li key={review.id} className="py-3.5 first:pt-0">
+                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                              <span className="text-[13px] font-semibold text-white">
+                                {review.author}
                               </span>
-                            ) : null}
-                          </div>
-                          <p className="mt-1.5 text-[13px] leading-relaxed text-[#c2c7cf]">
-                            {review.text}
-                          </p>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                  <ReviewForm slug={product.slug} />
+                              <span className="flex items-center gap-0.5">
+                                {Array.from({ length: 5 }, (_, i) => (
+                                  <StarIcon
+                                    key={i}
+                                    className={`h-3.5 w-3.5 ${
+                                      i < review.rating
+                                        ? "text-brand"
+                                        : "text-ink-600"
+                                    }`}
+                                    fill="currentColor"
+                                  />
+                                ))}
+                              </span>
+                              <span className="text-[11.5px] text-mute-dim">
+                                {review.supplierName} · {review.date}
+                              </span>
+                              {review.verified ? (
+                                <span className="rounded-full border border-[#2b6b45] bg-[#14291d] px-2 py-[2px] text-[10.5px] text-ok">
+                                  Худалдан авалт баталгаажсан
+                                </span>
+                              ) : null}
+                            </div>
+                            <p className="mt-1.5 text-[13px] leading-relaxed text-[#c2c7cf]">
+                              {review.text}
+                            </p>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    <ReviewForm slug={product.slug} />
                   </>
                 ) : null}
               </div>
@@ -411,7 +447,9 @@ export function ProductDetail({
                   <Row
                     label="Хүргэлт"
                     value={
-                      deliveryPrice === 0 ? "Үнэгүй" : formatPrice(deliveryPrice)
+                      deliveryPrice === 0
+                        ? "Үнэгүй"
+                        : formatPrice(deliveryPrice)
                     }
                   />
                   <div className="mt-1 flex items-baseline justify-between border-t border-ink-700 pt-3">
@@ -519,7 +557,10 @@ function WarehouseMapPanel({ offer }: { offer: Offer }) {
 
   return (
     <Panel>
-      <PanelHeader title="Агуулахын байршил" meta={`${located.length} салбар`} />
+      <PanelHeader
+        title="Агуулахын байршил"
+        meta={`${located.length} салбар`}
+      />
       <div className="p-4">
         <MapView
           points={located.map((warehouse) => ({
