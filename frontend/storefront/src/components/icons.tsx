@@ -311,3 +311,54 @@ export const WeightIcon = (p: IconProps) => (
     <circle cx="12" cy="5.5" r="2.5" />
   </svg>
 );
+
+/* ── Хэмжээсийн дүрсүүд — техникийн үзүүлэлтийн мөрүүдэд ── */
+
+/** Нийт урт — хоёр талдаа таглаатай хэвтээ сум */
+export const LengthIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M3 6v12M21 6v12M5.5 12h13" />
+    <path d="m8 9-2.5 3L8 15M16 9l2.5 3L16 15" />
+  </svg>
+);
+
+/** Өргөн — хоёр тийш заасан сум */
+export const WidthIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M3 8v8M21 8v8M5.5 12h13" />
+    <path d="m9 9.5-2 2.5 2 2.5M15 9.5l2 2.5-2 2.5" />
+  </svg>
+);
+
+/** Өндөр — босоо сум */
+export const HeightIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M7 3h10M7 21h10M12 5.5v13" />
+    <path d="m9.5 8 2.5-2.5L14.5 8M9.5 16l2.5 2.5L14.5 16" />
+  </svg>
+);
+
+/** Гүүр хоорондын зай — хоёр тэнхлэг ба хоорондын зай */
+export const AxleIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <circle cx="6" cy="12" r="2.5" />
+    <circle cx="18" cy="12" r="2.5" />
+    <path d="M8.5 12h7" />
+  </svg>
+);
+
+/** Эзэлхүүн — гурван хэмжээст шоо */
+export const CubeIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M12 3 4 7v10l8 4 8-4V7z" />
+    <path d="m4 7 8 4 8-4M12 11v10" />
+  </svg>
+);
+
+/** Паллет — стандарт тавцан */
+export const PalletIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <rect x="3" y="5" width="18" height="9" rx="1" />
+    <path d="M12 5v9M3 9.5h18M4.5 14v5M12 14v5M19.5 14v5M3 19h18" />
+  </svg>
+);

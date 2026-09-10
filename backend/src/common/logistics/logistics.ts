@@ -70,6 +70,8 @@ export interface Vehicle {
   volumeM3: number;
   /** Гадна габарит — хэмжээсийн зураг үүгээр зурагдана */
   spec: VehicleSpec;
+  /** Тэвшний шалан дээр багтах стандарт паллетын тоо */
+  pallets: number;
   /**
    * Улаанбаатар хот доторх нэг ачилтын үнэ (₮).
    *
@@ -78,6 +80,39 @@ export interface Vehicle {
    * хэрэгтэй зэрэг нэмэлт нөхцөлийг одоогоор тооцоогүй.
    */
   price: number;
+}
+
+/** Евро паллетын хэмжээ, метр */
+const PALLET_L = 1.2;
+const PALLET_W = 0.8;
+
+/**
+ * Тэвшний шалан дээр багтах стандарт паллетын тоо (нэг давхраар).
+ *
+ * Паллетыг хоёр байдлаар тавьж болно: урт талаар нь эсвэл хөндлөн. Ихэнх
+ * тэвшинд хоёрыг хольж тавибал илүү багтдаг — 5.5 × 2.2 м тэвшинд цэвэр
+ * нэг чиглэлээр 8 багтахад, холимгоор 10 багтана. Тиймээс өргөний дагуу
+ * хуваалтуудыг туршиж хамгийн ихийг сонгоно.
+ *
+ * Өндрөөр нь давхарлахыг тооцохгүй — барилгын материал бүрийг давхарлаж
+ * болдоггүй тул шалны багтаамж нь найдвартай доод хязгаар.
+ */
+export function palletsOnFloor(bed: VehicleBed): number {
+  const { lengthM: L, widthM: W } = bed;
+  if (L <= 0 || W <= 0) return 0;
+
+  let best = 0;
+  // `strips` ширхэг паллетыг өргөний дагуу богино талаар нь, үлдсэн
+  // өргөнд урт талаар нь тавина
+  const maxStrips = Math.floor(W / PALLET_W);
+  for (let strips = 0; strips <= maxStrips; strips++) {
+    const rest = W - strips * PALLET_W;
+    const count =
+      strips * Math.floor(L / PALLET_L) +
+      Math.floor(rest / PALLET_L) * Math.floor(L / PALLET_W);
+    if (count > best) best = count;
+  }
+  return best;
 }
 
 /** Эзэлхүүнийг тэвшний хэмжээнээс бодож, нэг аравтын нарийвчлалд */
@@ -101,6 +136,7 @@ const vehicle = (
   bed,
   spec,
   volumeM3: bedVolume(bed),
+  pallets: palletsOnFloor(bed),
 });
 
 export const VEHICLES: Vehicle[] = [

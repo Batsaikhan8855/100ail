@@ -36,7 +36,7 @@
 | Файл | Машин | Төлөв |
 |---|---|---|
 | `porter-dimensions.png` | Портер | Байгаа |
-| `truck-3-dimensions.png` | 3 тонны ачааны машин | Байхгүй |
+| `truck-3-dimensions.jpg` | 3 тонны ачааны машин | Байгаа |
 | `truck-5-dimensions.jpg` | 5 тонны ачааны машин | Байгаа |
 | `truck-10-dimensions.png` | 10 тонны ачааны машин | Байхгүй |
 | `truck-20-dimensions.png` | 20 тонны чиргүүл | Байхгүй |

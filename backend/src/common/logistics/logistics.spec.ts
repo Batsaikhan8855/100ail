@@ -4,6 +4,7 @@ import {
   formatBed,
   formatVolume,
   formatWeight,
+  palletsOnFloor,
   planShipment,
   shipmentPrice,
   unitVolume,
@@ -11,6 +12,30 @@ import {
   vehicleById,
   VEHICLES,
 } from "./logistics";
+
+describe("palletsOnFloor", () => {
+  it("нэг чиглэлээр биш, холимгоор тавьж хамгийн ихийг олно", () => {
+    // 5.5 × 2.2: цэвэр урт талаар 4×2 = 8, харин нэг эгнээ хөндлөн
+    // тавибал 4 + 6 = 10
+    expect(palletsOnFloor({ lengthM: 5.5, widthM: 2.2, heightM: 2.2 })).toBe(10);
+    // 4.3 × 2.0: 3×2 = 6, холимгоор 3 + 5 = 8
+    expect(palletsOnFloor({ lengthM: 4.3, widthM: 2.0, heightM: 2.0 })).toBe(8);
+  });
+
+  it("паллет багтахгүй жижиг тэвшинд 0", () => {
+    expect(palletsOnFloor({ lengthM: 0.5, widthM: 0.5, heightM: 1 })).toBe(0);
+    expect(palletsOnFloor({ lengthM: 0, widthM: 0, heightM: 0 })).toBe(0);
+  });
+
+  it("машин бүрд тооцоологдсон байна", () => {
+    for (const v of VEHICLES) {
+      expect(`${v.name}: ${v.pallets}`).toBe(
+        `${v.name}: ${palletsOnFloor(v.bed)}`,
+      );
+      expect(v.pallets).toBeGreaterThan(0);
+    }
+  });
+});
 
 describe("VEHICLES габарит", () => {
   it("урд гарц + гүүр хоорондын зай + хойд гарц нь гадна урттай тэнцэнэ", () => {

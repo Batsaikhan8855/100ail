@@ -125,6 +125,8 @@ export interface Vehicle {
   spec: VehicleSpec;
   /** Хэмжээсийн зургийн их биений хэлбэр */
   shape: VehicleShape;
+  /** Тэвшний шалан дээр багтах стандарт паллетын тоо */
+  pallets: number;
 }
 
 /** Их биений хэлбэр — задгай тэвш, битүү тэвш, чиргүүл */
@@ -149,11 +151,12 @@ export interface VehicleBed {
 
 /** Овор, габаритын талбарууд нь хуучин серверээс ирэхгүй байж болно */
 interface ApiVehicle
-  extends Omit<Vehicle, "bed" | "volumeM3" | "spec" | "shape"> {
+  extends Omit<Vehicle, "bed" | "volumeM3" | "spec" | "shape" | "pallets"> {
   bed?: VehicleBed | null;
   volumeM3?: number | null;
   spec?: VehicleSpec | null;
   shape?: VehicleShape | null;
+  pallets?: number | null;
 }
 
 const ZERO_BED: VehicleBed = { lengthM: 0, widthM: 0, heightM: 0 };
@@ -178,6 +181,7 @@ const toVehicle = (vehicle: ApiVehicle): Vehicle => {
     bed,
     spec: vehicle.spec ?? ZERO_SPEC,
     shape: vehicle.shape ?? "box",
+    pallets: vehicle.pallets ?? 0,
     volumeM3:
       vehicle.volumeM3 ??
       Math.round(bed.lengthM * bed.widthM * bed.heightM * 10) / 10,

@@ -16,17 +16,24 @@ import {
 } from "./cart-context";
 import {
   ArrowRightIcon,
+  AxleIcon,
   BoxIcon,
   CartIcon,
+  CubeIcon,
+  HeightIcon,
+  LengthIcon,
   ChevronRightIcon,
   ClockIcon,
   CloseIcon,
   MinusIcon,
+  PalletIcon,
   PinIcon,
   PlusIcon,
+  WidthIcon,
   TruckIcon,
   WeightIcon,
 } from "./icons";
+import { CargoBox } from "./cargo-box";
 import { ProductThumb } from "./product-art";
 import { SiteHeader } from "./site-header";
 import { VehicleArt } from "./vehicle-art";
@@ -527,57 +534,114 @@ function VehiclePicker({ group }: { group: SupplierGroup }) {
                   </div>
                 </section>
 
-                <section className="rounded-md border border-ink-700 bg-ink-950/40">
-                  <h4 className="flex items-center gap-2 border-b border-ink-700 px-3 py-2 text-[12.5px] font-semibold text-white">
-                    <BoxIcon className="h-4 w-4 shrink-0 text-brand" />
-                    Техникийн үзүүлэлт
-                  </h4>
-                  <dl className="px-3">
-                    <SpecRow label="Даац" value={formatWeight(shown.capacityKg)} />
-                    <SpecRow
-                      label="Тэвш (урт × өргөн × өндөр)"
-                      value={`${shown.bed.lengthM} × ${shown.bed.widthM} × ${shown.bed.heightM} м`}
-                    />
-                    <SpecRow
-                      label="Тэвшний багтаамж"
-                      value={formatVolume(shown.volumeM3)}
-                    />
-                    <SpecRow label="Нийт урт" value={`${shown.spec.lengthM} м`} />
-                    <SpecRow label="Өргөн" value={`${shown.spec.widthM} м`} />
-                    <SpecRow label="Өндөр" value={`${shown.spec.heightM} м`} />
-                    <SpecRow
-                      label="Гүүр хоорондын зай"
-                      value={`${shown.spec.wheelbaseM} м`}
-                    />
-                  </dl>
+                <div className="flex flex-col gap-3">
+                  <section className="rounded-md border border-ink-700 bg-ink-950/40">
+                    <h4 className="flex items-center gap-2 border-b border-ink-700 px-3 py-2 text-[12.5px] font-semibold text-white">
+                      <BoxIcon className="h-4 w-4 shrink-0 text-brand" />
+                      Техникийн үзүүлэлт
+                    </h4>
+                    <dl className="px-3">
+                      <SpecRow
+                        icon={<WeightIcon className="h-4 w-4" />}
+                        label="Даац"
+                        value={formatWeight(shown.capacityKg)}
+                      />
+                      <SpecRow
+                        icon={<BoxIcon className="h-4 w-4" />}
+                        label="Тэвш (урт × өргөн × өндөр)"
+                        value={`${shown.bed.lengthM} × ${shown.bed.widthM} × ${shown.bed.heightM} м`}
+                      />
+                      <SpecRow
+                        icon={<CubeIcon className="h-4 w-4" />}
+                        label="Тэвшний багтаамж"
+                        value={formatVolume(shown.volumeM3)}
+                      />
+                      <SpecRow
+                        icon={<LengthIcon className="h-4 w-4" />}
+                        label="Нийт урт"
+                        value={`${shown.spec.lengthM} м`}
+                      />
+                      <SpecRow
+                        icon={<WidthIcon className="h-4 w-4" />}
+                        label="Өргөн"
+                        value={`${shown.spec.widthM} м`}
+                      />
+                      <SpecRow
+                        icon={<HeightIcon className="h-4 w-4" />}
+                        label="Өндөр"
+                        value={`${shown.spec.heightM} м`}
+                      />
+                      <SpecRow
+                        icon={<AxleIcon className="h-4 w-4" />}
+                        label="Гүүр хоорондын зай"
+                        value={`${shown.spec.wheelbaseM} м`}
+                      />
+                    </dl>
+                  </section>
 
-                  <div className="flex flex-col gap-2.5 border-t border-ink-700 px-3 py-3">
-                    <FillBar
-                      label="Даац"
-                      value={group.weightKg}
-                      max={shown.capacityKg}
-                      text={`${group.weightEstimated ? "~" : ""}${formatWeight(
-                        group.weightKg,
-                      )} / ${formatWeight(shown.capacityKg)}`}
-                    />
-                    <FillBar
-                      label="Тэвш"
-                      value={group.volumeM3}
-                      max={shown.volumeM3}
-                      text={`${group.weightEstimated ? "~" : ""}${formatVolume(
-                        group.volumeM3,
-                      )} / ${formatVolume(shown.volumeM3)}`}
-                    />
-                  </div>
+                  <section className="rounded-md border border-ink-700 bg-ink-950/40">
+                    <h4 className="flex items-baseline gap-2 border-b border-ink-700 px-3 py-2">
+                      <CubeIcon className="h-4 w-4 shrink-0 self-center text-brand" />
+                      <span className="text-[12.5px] font-semibold text-white">
+                        Ачааны хэмжээс
+                      </span>
+                      <span className="text-[11px] text-mute-dim">
+                        (тэвшний дотор)
+                      </span>
+                    </h4>
 
-                  <DimensionsLink vehicleId={shown.id} name={shown.name} />
+                    <div className="grid gap-3 px-3 py-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,150px)] sm:items-center">
+                      <CargoBox bed={shown.bed} />
+                      <div className="flex flex-col gap-2.5">
+                        <CargoStat
+                          icon={<CubeIcon className="h-4 w-4" />}
+                          value={formatVolume(shown.volumeM3)}
+                          label="Тэвшний багтаамж"
+                        />
+                        <CargoStat
+                          icon={<WeightIcon className="h-4 w-4" />}
+                          value={formatWeight(shown.capacityKg)}
+                          label="Даац"
+                        />
+                        {shown.pallets > 0 ? (
+                          <CargoStat
+                            icon={<PalletIcon className="h-4 w-4" />}
+                            value={`${shown.pallets} паллет`}
+                            label="стандарт 1.2 × 0.8 м"
+                          />
+                        ) : null}
+                      </div>
+                    </div>
 
-                  <p className="border-t border-ink-700 px-3 py-2.5 text-[10.5px] leading-relaxed text-mute-dim">
-                    Гадна хэмжээ нь тухайн ангилалд түгээмэл машины ойролцоо
-                    утга. Тэвшний хэмжээ, даац нь хүргэлтийн тооцоонд
-                    ашиглагдана.
-                  </p>
-                </section>
+                    <div className="flex flex-col gap-2.5 border-t border-ink-700 px-3 py-3">
+                      <FillBar
+                        label="Даац"
+                        value={group.weightKg}
+                        max={shown.capacityKg}
+                        text={`${group.weightEstimated ? "~" : ""}${formatWeight(
+                          group.weightKg,
+                        )} / ${formatWeight(shown.capacityKg)}`}
+                      />
+                      <FillBar
+                        label="Тэвш"
+                        value={group.volumeM3}
+                        max={shown.volumeM3}
+                        text={`${group.weightEstimated ? "~" : ""}${formatVolume(
+                          group.volumeM3,
+                        )} / ${formatVolume(shown.volumeM3)}`}
+                      />
+                    </div>
+
+                    <DimensionsLink vehicleId={shown.id} name={shown.name} />
+
+                    <p className="border-t border-ink-700 px-3 py-2.5 text-[10.5px] leading-relaxed text-mute-dim">
+                      Гадна хэмжээ нь тухайн ангилалд түгээмэл машины ойролцоо
+                      утга. Тэвшний хэмжээ, даац нь хүргэлтийн тооцоонд
+                      ашиглагдана. Паллетын тоо нь нэг давхраар байрлуулсан
+                      тооцоо.
+                    </p>
+                  </section>
+                </div>
               </div>
             </div>
           ) : null}
@@ -700,13 +764,45 @@ function QtyStepper({
 }
 
 /** Техникийн үзүүлэлтийн нэг мөр */
-function SpecRow({ label, value }: { label: string; value: string }) {
+function SpecRow({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) {
   return (
-    <div className="flex items-baseline justify-between gap-3 border-b border-ink-800 py-2 last:border-0">
-      <dt className="text-[11.5px] text-mute">{label}</dt>
+    <div className="flex items-center justify-between gap-3 border-b border-ink-800 py-2 last:border-0">
+      <dt className="flex items-center gap-2.5 text-[11.5px] text-mute">
+        <span className="shrink-0 text-mute-dim">{icon}</span>
+        {label}
+      </dt>
       <dd className="text-right text-[12.5px] font-semibold text-white">
         {value}
       </dd>
+    </div>
+  );
+}
+
+/** Ачааны хэсгийн нэг үзүүлэлт — дүрс, тоо, тайлбар */
+function CargoStat({
+  icon,
+  value,
+  label,
+}: {
+  icon: React.ReactNode;
+  value: string;
+  label: string;
+}) {
+  return (
+    <div className="flex items-center gap-2.5">
+      <span className="shrink-0 text-mute-dim">{icon}</span>
+      <span className="leading-tight">
+        <span className="block text-[13px] font-bold text-white">{value}</span>
+        <span className="block text-[10.5px] text-mute-dim">{label}</span>
+      </span>
     </div>
   );
 }
