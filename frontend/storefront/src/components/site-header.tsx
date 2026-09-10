@@ -1,13 +1,21 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { NAV_LINKS } from "@/data/catalog";
 import { toCategory, type ApiCategory } from "@/lib/catalog-api";
+import { formatNumber } from "@/lib/format";
 import { useResource } from "@/lib/use-resource";
 import { useCart } from "./cart-context";
 import { NotificationBell } from "./notification-menu";
 import { useSession } from "./session";
-import { CATEGORY_ICONS, CartIcon, LogoMark, UserIcon } from "./icons";
+import {
+  CATEGORY_ICONS,
+  CartIcon,
+  ChevronDownIcon,
+  LogoMark,
+  UserIcon,
+} from "./icons";
 
 export function SiteHeader({
   activeNav,
@@ -22,6 +30,14 @@ export function SiteHeader({
   const { count: cartCount } = useCart();
   const { user, logout } = useSession();
   const categories = useResource<ApiCategory[]>("/categories");
+  /** Дэд ангиллын мөр нээлттэй байгаа үндсэн ангилал */
+  const [openCategory, setOpenCategory] = useState("");
+
+  const rows = categories.data ?? [];
+  // Дэд ангилал нь зөвхөн каталогийн хуудсанд утгатай (шүүлтүүр солино)
+  const openRow = onCategoryChange
+    ? rows.find((row) => row.slug === openCategory && row.children.length > 0)
+    : undefined;
 
   return (
     <header className="sticky top-0 z-30 border-b border-ink-700 bg-ink-900/95 backdrop-blur">
@@ -119,14 +135,27 @@ export function SiteHeader({
 
       <div className="border-t border-ink-700 bg-ink-900">
         <div className="mx-auto flex max-w-[1660px] items-stretch gap-1 overflow-x-auto px-4 xl:px-6">
-          {(categories.data ?? []).map((row) => {
+          {rows.map((row) => {
             const category = toCategory(row);
             const Icon = CATEGORY_ICONS[category.icon];
-            const active = category.id === activeCategory;
+            // Дэд ангилал сонгосон үед эцэг ангилал нь идэвхтэй харагдана
+            const active =
+              category.id === activeCategory ||
+              row.children.some((child) => child.slug === activeCategory);
+            const expandable =
+              Boolean(onCategoryChange) && row.children.length > 0;
+            const expanded = openCategory === row.slug;
             const content = (
               <>
                 <Icon className="h-[22px] w-[22px]" />
                 {category.name}
+                {expandable ? (
+                  <ChevronDownIcon
+                    className={`h-3.5 w-3.5 transition-transform ${
+                      expanded ? "rotate-180" : ""
+                    }`}
+                  />
+                ) : null}
                 {active ? (
                   <span
                     aria-hidden
@@ -144,8 +173,14 @@ export function SiteHeader({
               <button
                 key={category.id}
                 type="button"
-                onClick={() => onCategoryChange(active ? "" : category.id)}
+                onClick={() => {
+                  // Дарахад тухайн ангиллаар шүүж, дэд ангиллын мөр нээгдэнэ
+                  const closing = active && expanded;
+                  setOpenCategory(expandable && !closing ? row.slug : "");
+                  onCategoryChange(closing ? "" : category.id);
+                }}
                 aria-pressed={active}
+                aria-expanded={expandable ? expanded : undefined}
                 className={className}
               >
                 {content}
@@ -162,6 +197,51 @@ export function SiteHeader({
           })}
         </div>
       </div>
+
+      {/* Задарсан дэд ангиллын мөр. Ангилалд 40 хүртэл дэд ангилал байдаг
+          тул хэвтээ гүйлгэнэ. */}
+      {openRow && onCategoryChange ? (
+        <div className="border-t border-ink-700 bg-ink-850">
+          <div className="mx-auto flex max-w-[1660px] items-center gap-2 overflow-x-auto px-4 py-2.5 xl:px-6">
+            <button
+              type="button"
+              onClick={() => onCategoryChange(openRow.slug)}
+              aria-pressed={activeCategory === openRow.slug}
+              className={`shrink-0 rounded-md border px-3 py-1.5 text-[12px] font-semibold whitespace-nowrap transition-colors ${
+                activeCategory === openRow.slug
+                  ? "border-brand bg-brand/12 text-brand"
+                  : "border-ink-700 text-[#aeb4bd] hover:border-ink-600 hover:text-white"
+              }`}
+            >
+              Бүгдийг харах
+            </button>
+
+            {openRow.children.map((child) => {
+              const chosen = activeCategory === child.slug;
+              return (
+                <button
+                  key={child.id}
+                  type="button"
+                  onClick={() =>
+                    onCategoryChange(chosen ? openRow.slug : child.slug)
+                  }
+                  aria-pressed={chosen}
+                  className={`flex shrink-0 items-center gap-2 rounded-md border px-3 py-1.5 text-[12px] whitespace-nowrap transition-colors ${
+                    chosen
+                      ? "border-brand bg-brand/12 text-brand"
+                      : "border-ink-700 text-[#aeb4bd] hover:border-ink-600 hover:text-white"
+                  }`}
+                >
+                  {child.name}
+                  <span className={chosen ? "text-brand/70" : "text-mute-dim"}>
+                    {formatNumber(child.productCount)}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
     </header>
   );
 }
