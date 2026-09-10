@@ -16,6 +16,7 @@ import {
 } from "./cart-context";
 import {
   ArrowRightIcon,
+  BoxIcon,
   CartIcon,
   ChevronRightIcon,
   ClockIcon,
@@ -28,8 +29,8 @@ import {
 } from "./icons";
 import { ProductThumb } from "./product-art";
 import { SiteHeader } from "./site-header";
-import { VehicleArt } from "./vehicle-art";
-import { VehicleBlueprint } from "./vehicle-blueprint";
+import { useImageExists, VehicleArt } from "./vehicle-art";
+import { VehicleDrawing, dimensionsSrc } from "./vehicle-blueprint";
 import { Panel, PanelHeader } from "./ui";
 
 export function CartView() {
@@ -508,36 +509,75 @@ function VehiclePicker({ group }: { group: SupplierGroup }) {
                 ))}
               </div>
 
-              <div className="mt-3 grid gap-4 lg:grid-cols-[minmax(0,440px)_minmax(0,1fr)] lg:items-center">
-                <VehicleBlueprint
-                  spec={shown.spec}
-                  bed={shown.bed}
-                  loadM3={group.volumeM3}
-                  volumeM3={shown.volumeM3}
-                />
-                <div className="flex flex-col gap-2.5">
-                  <FillBar
-                    label="Даац"
-                    value={group.weightKg}
-                    max={shown.capacityKg}
-                    text={`${group.weightEstimated ? "~" : ""}${formatWeight(
-                      group.weightKg,
-                    )} / ${formatWeight(shown.capacityKg)}`}
-                  />
-                  <FillBar
-                    label="Тэвш"
-                    value={group.volumeM3}
-                    max={shown.volumeM3}
-                    text={`${group.weightEstimated ? "~" : ""}${formatVolume(
-                      group.volumeM3,
-                    )} / ${formatVolume(shown.volumeM3)}`}
-                  />
-                  <p className="text-[10.5px] leading-relaxed text-mute-dim">
+              <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,330px)] lg:items-start">
+                <section className="rounded-md border border-ink-700 bg-ink-950/40">
+                  <h4 className="flex items-center gap-2 border-b border-ink-700 px-3 py-2">
+                    <TruckIcon className="h-4 w-4 shrink-0 text-brand" />
+                    <span className="leading-tight">
+                      <span className="block text-[12.5px] font-semibold text-white">
+                        Машины хэмжээ
+                      </span>
+                      <span className="block text-[11px] text-mute-dim">
+                        {shown.name}
+                      </span>
+                    </span>
+                  </h4>
+                  <div className="p-3">
+                    <VehicleDrawing vehicle={shown} loadM3={group.volumeM3} />
+                  </div>
+                </section>
+
+                <section className="rounded-md border border-ink-700 bg-ink-950/40">
+                  <h4 className="flex items-center gap-2 border-b border-ink-700 px-3 py-2 text-[12.5px] font-semibold text-white">
+                    <BoxIcon className="h-4 w-4 shrink-0 text-brand" />
+                    Техникийн үзүүлэлт
+                  </h4>
+                  <dl className="px-3">
+                    <SpecRow label="Даац" value={formatWeight(shown.capacityKg)} />
+                    <SpecRow
+                      label="Тэвш (урт × өргөн × өндөр)"
+                      value={`${shown.bed.lengthM} × ${shown.bed.widthM} × ${shown.bed.heightM} м`}
+                    />
+                    <SpecRow
+                      label="Тэвшний багтаамж"
+                      value={formatVolume(shown.volumeM3)}
+                    />
+                    <SpecRow label="Нийт урт" value={`${shown.spec.lengthM} м`} />
+                    <SpecRow label="Өргөн" value={`${shown.spec.widthM} м`} />
+                    <SpecRow label="Өндөр" value={`${shown.spec.heightM} м`} />
+                    <SpecRow
+                      label="Гүүр хоорондын зай"
+                      value={`${shown.spec.wheelbaseM} м`}
+                    />
+                  </dl>
+
+                  <div className="flex flex-col gap-2.5 border-t border-ink-700 px-3 py-3">
+                    <FillBar
+                      label="Даац"
+                      value={group.weightKg}
+                      max={shown.capacityKg}
+                      text={`${group.weightEstimated ? "~" : ""}${formatWeight(
+                        group.weightKg,
+                      )} / ${formatWeight(shown.capacityKg)}`}
+                    />
+                    <FillBar
+                      label="Тэвш"
+                      value={group.volumeM3}
+                      max={shown.volumeM3}
+                      text={`${group.weightEstimated ? "~" : ""}${formatVolume(
+                        group.volumeM3,
+                      )} / ${formatVolume(shown.volumeM3)}`}
+                    />
+                  </div>
+
+                  <DimensionsLink vehicleId={shown.id} name={shown.name} />
+
+                  <p className="border-t border-ink-700 px-3 py-2.5 text-[10.5px] leading-relaxed text-mute-dim">
                     Гадна хэмжээ нь тухайн ангилалд түгээмэл машины ойролцоо
                     утга. Тэвшний хэмжээ, даац нь хүргэлтийн тооцоонд
                     ашиглагдана.
                   </p>
-                </div>
+                </section>
               </div>
             </div>
           ) : null}
@@ -656,5 +696,41 @@ function QtyStepper({
         <PlusIcon className="h-4 w-4" />
       </button>
     </div>
+  );
+}
+
+/** Техникийн үзүүлэлтийн нэг мөр */
+function SpecRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-baseline justify-between gap-3 border-b border-ink-800 py-2 last:border-0">
+      <dt className="text-[11.5px] text-mute">{label}</dt>
+      <dd className="text-right text-[12.5px] font-semibold text-white">
+        {value}
+      </dd>
+    </div>
+  );
+}
+
+/**
+ * Үйлдвэрийн хэмжээсийн зургийг бүтэн хэмжээгээр нээх холбоос.
+ *
+ * Зөвхөн бодит зураг байгаа үед гарна — вектор зураг нь дэлгэц дээрээ
+ * бүтнээрээ харагддаг тул тусад нь нээх утгагүй.
+ */
+function DimensionsLink({ vehicleId, name }: { vehicleId: string; name: string }) {
+  const src = dimensionsSrc(vehicleId);
+  const exists = useImageExists(src);
+  if (!exists) return null;
+
+  return (
+    <a
+      href={src}
+      target="_blank"
+      rel="noreferrer"
+      className="flex items-center justify-between gap-2 border-t border-ink-700 px-3 py-2.5 text-[12px] text-mute transition-colors hover:text-white"
+    >
+      <span>{name} — дэлгэрэнгүй харах</span>
+      <ArrowRightIcon className="h-4 w-4 shrink-0" />
+    </a>
   );
 }

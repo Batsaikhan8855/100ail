@@ -1,7 +1,8 @@
 "use client";
 
 import { useId } from "react";
-import type { VehicleBed, VehicleSpec } from "./cart-context";
+import type { Vehicle, VehicleBed, VehicleSpec } from "./cart-context";
+import { useImageExists } from "./vehicle-art";
 
 /**
  * Машины хэмжээсийн зураг — үйлдвэрийн каталогийн дөрвөн харагдац.
@@ -573,3 +574,47 @@ const Guide = (props: { x1: number; y1: number; x2: number; y2: number }) => (
     className="text-ink-700"
   />
 );
+
+/**
+ * Машины хэмжээсийн зураг.
+ *
+ * Үйлдвэрийн бодит хэмжээсийн зураг байвал түүнийг харуулна:
+ * `public/vehicles/<id>-dimensions.jpg` (`VEHICLES`-ийн id — porter,
+ * truck-3, truck-5, truck-10, truck-20). Файл байхгүй бол доорх вектор
+ * зурагт шилжинэ — ингэснээр зургаа нэмэхэд код өөрчлөх шаардлагагүй.
+ */
+export function VehicleDrawing({
+  vehicle,
+  loadM3 = 0,
+}: {
+  vehicle: Vehicle;
+  loadM3?: number;
+}) {
+  const src = dimensionsSrc(vehicle.id);
+  const real = useImageExists(src);
+
+  if (real) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={src}
+        alt={`${vehicle.name} — үйлдвэрийн хэмжээсийн зураг`}
+        loading="lazy"
+        className="w-full rounded bg-white object-contain"
+      />
+    );
+  }
+
+  return (
+    <VehicleBlueprint
+      spec={vehicle.spec}
+      bed={vehicle.bed}
+      loadM3={loadM3}
+      volumeM3={vehicle.volumeM3}
+    />
+  );
+}
+
+/** Үйлдвэрийн хэмжээсийн зургийн зам */
+export const dimensionsSrc = (id: string): string =>
+  `/vehicles/${id}-dimensions.jpg`;

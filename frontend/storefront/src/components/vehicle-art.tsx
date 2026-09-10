@@ -272,25 +272,35 @@ const ART: Record<string, () => React.JSX.Element> = {
   "truck-20": Trailer20,
 };
 
-export function VehicleArt({ id, name }: { id: string; name?: string }) {
-  const Art = ART[id] ?? Truck3;
-  const src = `/vehicles/${id}.jpg`;
-  const [photo, setPhoto] = useState(false);
+/**
+ * Зураг байгаа эсэхийг шалгана.
+ *
+ * `<img>`-ыг шууд тавибал файл байхгүй үед хоосон хүрээ анивчина. Тиймээс
+ * эхлээд вектор дүрслэлийг харуулж, зураг байгаа нь батлагдвал л солино.
+ */
+export function useImageExists(src: string): boolean {
+  const [exists, setExists] = useState(false);
 
-  // Вектор дүрслэлийг эхлээд харуулж, гэрэл зураг байгаа нь батлагдвал
-  // түүн рүү солино. `<img>`-ыг шууд тавибал файл байхгүй үед хоосон
-  // хүрээ анивчина.
   useEffect(() => {
     let live = true;
+    setExists(false);
     const probe = new Image();
     probe.onload = () => {
-      if (live) setPhoto(true);
+      if (live) setExists(true);
     };
     probe.src = src;
     return () => {
       live = false;
     };
   }, [src]);
+
+  return exists;
+}
+
+export function VehicleArt({ id, name }: { id: string; name?: string }) {
+  const Art = ART[id] ?? Truck3;
+  const src = `/vehicles/${id}.jpg`;
+  const photo = useImageExists(src);
 
   if (photo) {
     return (
