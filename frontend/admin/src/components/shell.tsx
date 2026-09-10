@@ -53,7 +53,7 @@ export function Shell({ children }: { children: ReactNode }) {
     <div className="flex min-h-screen">
       <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-ink-700 bg-ink-900 md:flex">
         <div className="flex items-center gap-2.5 border-b border-ink-700 px-4 py-4">
-          <LogoMark className="h-7 w-7 text-brand" />
+          <LogoMark className="h-7 w-7" />
           <div>
             <div className="text-[14px] font-semibold text-white">100 Айл</div>
             <div className="text-[11.5px] text-mute-dim">Админ панел</div>
@@ -96,7 +96,7 @@ export function Shell({ children }: { children: ReactNode }) {
       <div className="min-w-0 flex-1">
         <header className="flex items-center justify-between gap-3 border-b border-ink-700 bg-ink-900 px-4 py-3 md:hidden">
           <div className="flex items-center gap-2">
-            <LogoMark className="h-6 w-6 text-brand" />
+            <LogoMark className="h-6 w-6" />
             <span className="text-[14px] font-semibold text-white">
               Админ панел
             </span>
@@ -162,7 +162,7 @@ function LoginView() {
     <div className="flex min-h-screen items-center justify-center px-4">
       <Panel className="w-full max-w-sm p-6">
         <div className="mb-5 flex items-center gap-2.5">
-          <LogoMark className="h-8 w-8 text-brand" />
+          <LogoMark className="h-8 w-8" />
           <div>
             <div className="text-[15px] font-semibold text-white">100 Айл</div>
             <div className="text-[12px] text-mute-dim">Админ панел</div>

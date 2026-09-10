@@ -245,33 +245,23 @@ export const ToolsIcon = (p: IconProps) => (
   </svg>
 );
 
-export const LogoMark = (p: IconProps) => (
-  <svg
-    viewBox="0 0 40 40"
-    fill="none"
+/**
+ * Брэндийн лого.
+ *
+ * Бусад дүрсээс ялгаатай нь вектор биш, зураг: логоны налалт өнгө,
+ * гэрэлтэлтийг `currentColor`-оор давтах боломжгүй. Дуудаж буй газрууд
+ * `className`-аар хэмжээг нь өөрчилдөг тул өргөн, өндрийг CSS давхарлана.
+ */
+export const LogoMark = ({ className }: { className?: string }) => (
+  // eslint-disable-next-line @next/next/no-img-element
+  <img
+    src="/logo.png"
+    alt=""
     width={38}
     height={38}
     aria-hidden
-    {...p}
-  >
-    <rect
-      x="1.2"
-      y="1.2"
-      width="37.6"
-      height="37.6"
-      rx="8"
-      stroke="currentColor"
-      strokeWidth="2.4"
-    />
-    <path
-      d="M20 8.5 32 17v1.5H8V17L20 8.5Z"
-      fill="currentColor"
-      opacity="0.9"
-    />
-    <rect x="11" y="22" width="4" height="9" rx="1" fill="currentColor" />
-    <rect x="18" y="19" width="4" height="12" rx="1" fill="currentColor" />
-    <rect x="25" y="24.5" width="4" height="6.5" rx="1" fill="currentColor" />
-  </svg>
+    className={`shrink-0 object-contain ${className ?? ""}`}
+  />
 );
 
 export const CATEGORY_ICONS = {

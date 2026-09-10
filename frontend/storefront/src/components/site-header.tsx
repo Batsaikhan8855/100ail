@@ -56,7 +56,7 @@ export function SiteHeader({
     <header className="sticky top-0 z-30 border-b border-ink-700 bg-ink-900/95 backdrop-blur">
       <div className="mx-auto flex h-[72px] max-w-[1660px] items-center gap-6 px-4 xl:px-6">
         <Link href="/" className="flex shrink-0 items-center gap-2.5">
-          <LogoMark className="text-brand" />
+          <LogoMark />
           <span className="leading-none">
             <span className="block text-[26px] font-extrabold tracking-tight text-white">
               100 АЙЛ
