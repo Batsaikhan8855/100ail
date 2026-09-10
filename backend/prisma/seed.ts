@@ -669,24 +669,29 @@ async function main() {
     data: {
       name: "Эрчим Барилга ХХК",
       regNo: "5412345",
-      phone: "7011-2233",
+      phone: "70112233",
       address: "Улаанбаатар, ХУД, 3-р хороо",
     },
   });
 
   await prisma.user.create({
-    data: { email: "admin@100ail.mn", name: "Системийн админ", passwordHash, role: UserRole.ADMIN, phone: "9900-0000" },
+    data: { email: "admin@100ail.mn", name: "Системийн админ", passwordHash, role: UserRole.ADMIN, phone: "99000000" },
   });
   await prisma.user.create({
-    data: { email: "buyer@100ail.mn", name: "Б. Ганбаатар", passwordHash, role: UserRole.BUYER, phone: "9911-2233" },
+    data: { email: "buyer@100ail.mn", name: "Б. Ганбаатар", passwordHash, role: UserRole.BUYER, phone: "99112233" },
   });
   await prisma.user.create({
     data: {
       email: "company@100ail.mn", name: "Д. Оюунаа", passwordHash, role: UserRole.BUYER,
-      phone: "9922-3344", organizationId: organization.id,
+      phone: "99223344", organizationId: organization.id,
     },
   });
-  for (const slug of ["montsement", "barilga-eco", "gan-trade", "altan-group"]) {
+  for (const [index, slug] of [
+    "montsement",
+    "barilga-eco",
+    "gan-trade",
+    "altan-group",
+  ].entries()) {
     const supplier = SUPPLIERS.find((s) => s.slug === slug);
     await prisma.user.create({
       data: {
@@ -695,7 +700,8 @@ async function main() {
         passwordHash,
         role: UserRole.SUPPLIER,
         supplierId: supplierIds.get(slug),
-        phone: "9933-4455",
+        // Утсаар нэвтрэх боломжтой тул нийлүүлэгч бүрд өөр дугаар
+        phone: `9933445${index + 1}`,
       },
     });
   }

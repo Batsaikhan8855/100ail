@@ -8,7 +8,13 @@
 # явж, сервер шууд асна.
 set -e
 
-npx prisma db push --skip-generate
+# Шинэ хязгаарлалт нэмэхэд одоогийн өгөгдөл нийцэхгүй байвал db push
+# унадаг тул эхлээд цэгцэлнэ (давхардсан утасны дугаар гэх мэт).
+node dist/prisma/premigrate.js
+
+# `--accept-data-loss` нь интерактив бус орчинд шаардлагатай: Prisma нь
+# хязгаарлалт нэмэх бүрд баталгаажуулалт асуудаг.
+npx prisma db push --skip-generate --accept-data-loss
 
 node dist/prisma/bootstrap.js &
 

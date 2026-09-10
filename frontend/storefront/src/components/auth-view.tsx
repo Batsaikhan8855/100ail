@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useCart } from "./cart-context";
@@ -14,9 +14,15 @@ export function AuthView() {
   const { login, register, user } = useSession();
   // Зочны сагс нэвтрэхэд серверт нэгддэг тул шинэчилж авна
   const { reload: reloadCart } = useCart();
-  const [mode, setMode] = useState<"login" | "register">(
-    searchParams.get("mode") === "register" ? "register" : "login",
-  );
+  // URL-аас уншина. Толгойн "Нэвтрэх"/"Бүртгүүлэх" товч дарахад Next
+  // энэ компонентыг дахин ачаалдаггүй тул зөвхөн эхлэх утга болгож
+  // уншвал форм солигдохгүй үлддэг байв.
+  const urlMode =
+    searchParams.get("mode") === "register" ? "register" : "login";
+  const [mode, setMode] = useState<"login" | "register">(urlMode);
+  useEffect(() => {
+    setMode(urlMode);
+  }, [urlMode]);
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -32,7 +38,7 @@ export function AuthView() {
     setError(null);
     try {
       if (mode === "login") {
-        await login(form.email, form.password);
+        await login(form.email.trim(), form.password);
       } else {
         await register({
           name: form.name,
@@ -82,10 +88,15 @@ export function AuthView() {
             ) : null}
 
             <Field
-              label="И-мэйл"
-              type="email"
+              label={mode === "login" ? "И-мэйл эсвэл утас" : "И-мэйл"}
+              // Нэвтрэхэд утасны дугаар ч болно тул `email` төрлийн
+              // хөтчийн шалгалт саад болно
+              type={mode === "login" ? "text" : "email"}
               value={form.email}
               onChange={(value) => setForm({ ...form, email: value })}
+              placeholder={
+                mode === "login" ? "нэр@жишээ.mn эсвэл 99112233" : undefined
+              }
               required
             />
             <Field

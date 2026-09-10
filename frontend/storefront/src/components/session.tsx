@@ -23,7 +23,8 @@ export interface SessionUser {
 interface SessionValue {
   user: SessionUser | null;
   ready: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  /** И-мэйл эсвэл утасны дугаараар нэвтэрнэ */
+  login: (identifier: string, password: string) => Promise<void>;
   register: (input: {
     name: string;
     email: string;
@@ -61,9 +62,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = useCallback(
-    async (email: string, password: string) => {
+    async (identifier: string, password: string) => {
       const result = await apiPost<{ accessToken: string }>("/auth/login", {
-        email,
+        identifier,
         password,
       });
       await finish(result.accessToken);
@@ -72,8 +73,16 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   );
 
   const register = useCallback(
-    async (input: { name: string; email: string; password: string; phone?: string }) => {
-      const result = await apiPost<{ accessToken: string }>("/auth/register", input);
+    async (input: {
+      name: string;
+      email: string;
+      password: string;
+      phone?: string;
+    }) => {
+      const result = await apiPost<{ accessToken: string }>(
+        "/auth/register",
+        input,
+      );
       await finish(result.accessToken);
     },
     [finish],
@@ -89,7 +98,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     [user, ready, login, register, logout],
   );
 
-  return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
+  return (
+    <SessionContext.Provider value={value}>{children}</SessionContext.Provider>
+  );
 }
 
 export function useSession(): SessionValue {

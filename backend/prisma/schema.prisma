@@ -108,7 +108,9 @@ enum BannerPlacement {
 model User {
   id             String        @id @default(cuid())
   email          String        @unique
-  phone          String?
+  /// Зөвхөн цифр хэлбэрээр хадгална (`normalizePhone`) — и-мэйлийн
+  /// оронд утсаараа нэвтрэх боломжтой тул давхардах ёсгүй.
+  phone          String?       @unique
   passwordHash   String
   name           String
   role           UserRole      @default(BUYER)

@@ -18,8 +18,18 @@ export class RegisterDto {
 }
 
 export class LoginDto {
-  @IsEmail()
-  email!: string;
+  /**
+   * И-мэйл эсвэл утасны дугаар. Хуучин клиентүүд `email` талбараар
+   * илгээдэг тул хоёуланг нь хүлээж авна.
+   */
+  @IsOptional()
+  @IsString()
+  @MinLength(4, { message: "И-мэйл эсвэл утасны дугаараа оруулна уу" })
+  identifier?: string;
+
+  @IsOptional()
+  @IsString()
+  email?: string;
 
   @IsString()
   password!: string;

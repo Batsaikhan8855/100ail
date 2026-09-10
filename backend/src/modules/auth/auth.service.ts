@@ -6,6 +6,12 @@ import * as bcrypt from "bcryptjs";
 import { PrismaService } from "../../common/prisma.service";
 import { LoginDto, RegisterDto } from "./dto";
 
+/** Утасны дугаарыг зөвхөн цифр болгоно: "9911-2233" → "99112233" */
+export const normalizePhone = (value: string): string => value.replace(/\D/g, "");
+
+/** Оруулсан утга и-мэйл мөн эсэх */
+const looksLikeEmail = (value: string): boolean => value.includes("@");
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -21,11 +27,19 @@ export class AuthService {
       throw new ConflictException("Энэ и-мэйл хаягаар бүртгэл үүссэн байна");
     }
 
+    const phone = dto.phone ? normalizePhone(dto.phone) : null;
+    if (phone) {
+      const taken = await this.prisma.user.findUnique({ where: { phone } });
+      if (taken) {
+        throw new ConflictException("Энэ утасны дугаараар бүртгэл үүссэн байна");
+      }
+    }
+
     const user = await this.prisma.user.create({
       data: {
         email: dto.email,
         name: dto.name,
-        phone: dto.phone,
+        phone,
         passwordHash: await bcrypt.hash(dto.password, 10),
         role: UserRole.BUYER,
       },
@@ -35,11 +49,24 @@ export class AuthService {
   }
 
   async login(dto: LoginDto) {
-    const user = await this.prisma.user.findUnique({
-      where: { email: dto.email },
-    });
+    const identifier = (dto.identifier ?? dto.email ?? "").trim();
+    if (!identifier) {
+      throw new UnauthorizedException("И-мэйл эсвэл утасны дугаараа оруулна уу");
+    }
+
+    // И-мэйл эсвэл утас — аль нэгээр нь нэвтэрч болно
+    const user = looksLikeEmail(identifier)
+      ? await this.prisma.user.findUnique({
+          where: { email: identifier.toLowerCase() },
+        })
+      : await this.prisma.user.findUnique({
+          where: { phone: normalizePhone(identifier) },
+        });
+
     if (!user || !(await bcrypt.compare(dto.password, user.passwordHash))) {
-      throw new UnauthorizedException("И-мэйл эсвэл нууц үг буруу байна");
+      throw new UnauthorizedException(
+        "И-мэйл, утасны дугаар эсвэл нууц үг буруу байна",
+      );
     }
     return this.sign(user.id);
   }
