@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type { FilterGroup } from "@/data/catalog";
 import { formatNumber } from "@/lib/format";
 import { Checkbox, Collapsible, Panel, PanelHeader } from "./ui";
@@ -189,6 +190,15 @@ export function FilterPanel({
   );
 }
 
+/**
+ * Үнийн талбар.
+ *
+ * Урьд нь товчлуур дарах болгонд шүүлт илгээгдэж, талбар нь хэзээ ч
+ * хоосон болдоггүй байсан тул одоогийн утгын ард шинэ орон залгагдаж
+ * ("100" дээр "22" бичихэд "10022") байв. Одоо бичиж байх хугацаанд
+ * дотоод төлөвт хадгалж, фокус алдах эсвэл Enter дарахад л илгээнэ.
+ * Фокус авахад бүх текстийг сонгоно — бичихэд шууд солигдоно.
+ */
 function PriceInput({
   label,
   value,
@@ -198,8 +208,17 @@ function PriceInput({
   value: number;
   onCommit: (value: number) => void;
 }) {
+  const [draft, setDraft] = useState<string | null>(null);
+
+  const commit = () => {
+    if (draft === null) return;
+    const digits = draft.replace(/[^\d]/g, "");
+    onCommit(digits ? Number(digits) : 0);
+    setDraft(null);
+  };
+
   return (
-    <label className="flex min-w-0 flex-1 items-center gap-1.5 rounded-md border border-ink-700 bg-ink-900 px-2.5 py-2">
+    <label className="flex min-w-0 flex-1 items-center gap-1.5 rounded-md border border-ink-700 bg-ink-900 px-2.5 py-2 focus-within:border-ink-600">
       <span aria-hidden className="text-xs text-mute-dim">
         ₮
       </span>
@@ -207,10 +226,18 @@ function PriceInput({
       <input
         type="text"
         inputMode="numeric"
-        value={formatNumber(value)}
-        onChange={(e) => {
-          const digits = e.target.value.replace(/[^\d]/g, "");
-          onCommit(digits ? Number(digits) : 0);
+        value={draft ?? formatNumber(value)}
+        onFocus={(e) => {
+          setDraft(String(value));
+          e.currentTarget.select();
+        }}
+        onChange={(e) => setDraft(e.target.value.replace(/[^\d]/g, ""))}
+        onBlur={commit}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            commit();
+            e.currentTarget.blur();
+          }
         }}
         className="w-full min-w-0 bg-transparent text-[13px] text-white outline-none"
       />
