@@ -207,7 +207,10 @@ export function SiteHeader({
           <div className="mx-auto flex max-w-[1660px] items-stretch gap-2.5 overflow-x-auto px-4 py-4 xl:px-6">
             <button
               type="button"
-              onClick={() => onCategoryChange(openRow.slug)}
+              onClick={() => {
+                onCategoryChange(openRow.slug);
+                setOpenCategory("");
+              }}
               aria-pressed={activeCategory === openRow.slug}
               className={`flex h-[104px] w-[104px] shrink-0 flex-col items-center justify-center rounded-md border px-2 text-center text-[11px] font-bold uppercase leading-tight tracking-wide transition-colors ${
                 activeCategory === openRow.slug
@@ -226,9 +229,10 @@ export function SiteHeader({
                 <button
                   key={child.id}
                   type="button"
-                  onClick={() =>
-                    onCategoryChange(chosen ? openRow.slug : child.slug)
-                  }
+                  onClick={() => {
+                    onCategoryChange(chosen ? openRow.slug : child.slug);
+                    setOpenCategory("");
+                  }}
                   aria-pressed={chosen}
                   title={`${child.name} — ${formatNumber(child.productCount)} бараа`}
                   className={`group/tile flex h-[104px] w-[104px] shrink-0 flex-col overflow-hidden rounded-md border bg-ink-850 transition-colors ${
