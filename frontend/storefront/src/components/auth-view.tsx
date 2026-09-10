@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useCart } from "./cart-context";
 import { useSession } from "./session";
 import { SiteHeader } from "./site-header";
 import { Panel, PanelHeader } from "./ui";
@@ -11,6 +12,8 @@ export function AuthView() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login, register, user } = useSession();
+  // Зочны сагс нэвтрэхэд серверт нэгддэг тул шинэчилж авна
+  const { reload: reloadCart } = useCart();
   const [mode, setMode] = useState<"login" | "register">(
     searchParams.get("mode") === "register" ? "register" : "login",
   );
@@ -38,7 +41,10 @@ export function AuthView() {
           phone: form.phone || undefined,
         });
       }
-      router.push("/account/orders");
+      await reloadCart();
+      // Хаанаас нэвтэрсэн бол тийш нь буцаана (жишээ нь checkout дундаас)
+      const next = searchParams.get("next");
+      router.push(next && next.startsWith("/") ? next : "/account/orders");
     } catch (cause) {
       setError((cause as Error).message);
     } finally {

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { NAV_LINKS } from "@/data/catalog";
 import { toCategory, type ApiCategory } from "@/lib/catalog-api";
 import { formatNumber } from "@/lib/format";
@@ -27,11 +28,18 @@ export function SiteHeader({
   activeCategory?: string;
   onCategoryChange?: (id: string) => void;
 }) {
-  const { count: cartCount } = useCart();
+  const { count: cartCount, reload: reloadCart } = useCart();
   const { user, logout } = useSession();
   const categories = useResource<ApiCategory[]>("/categories");
   /** Дэд ангиллын мөр нээлттэй байгаа үндсэн ангилал */
   const [openCategory, setOpenCategory] = useState("");
+
+  // Нэвтэрсний дараа байсан хуудас руугаа буцаана
+  const pathname = usePathname();
+  const loginHref =
+    pathname && pathname !== "/login"
+      ? `/login?next=${encodeURIComponent(pathname)}`
+      : "/login";
 
   const rows = categories.data ?? [];
   // Дэд ангилал нь зөвхөн каталогийн хуудсанд утгатай (шүүлтүүр солино)
@@ -109,7 +117,10 @@ export function SiteHeader({
               </Link>
               <button
                 type="button"
-                onClick={logout}
+                onClick={() => {
+                  logout();
+                  void reloadCart();
+                }}
                 className="rounded-md border border-ink-600 px-4 py-2.5 text-[13px] font-bold uppercase tracking-wide text-[#c2c7cf] transition-colors hover:text-white"
               >
                 Гарах
@@ -118,7 +129,7 @@ export function SiteHeader({
           ) : (
             <>
               <Link
-                href="/login"
+                href={loginHref}
                 className="hidden items-center gap-2 text-[13px] font-semibold uppercase tracking-wide text-[#c2c7cf] transition-colors hover:text-white sm:flex"
               >
                 <UserIcon className="h-5 w-5" />

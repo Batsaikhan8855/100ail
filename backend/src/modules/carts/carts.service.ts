@@ -47,15 +47,57 @@ export class CartsService {
       : offer.price;
   }
 
+  /**
+   * Зочны сагсыг нэвтэрсэн хэрэглэгчийн сагстай нэгтгэнэ.
+   *
+   * Хэрэглэгч зочноор бараагаа түүгээд, төлбөр төлөх гэж нэвтэрдэг.
+   * Урьд нь нэвтрэхэд өөр сагс (userId-аар) үүсээд зочны сагс алга
+   * болдог байв. Одоо нэвтрэх үед session id хамт ирвэл түүний
+   * барааг зөөж, зочны сагсыг устгана. Ижил санал хоёуланд нь байвал
+   * илүү тоо хэмжээг үлдээнэ.
+   */
+  private async mergeGuestCart(userCartId: string, sessionId: string) {
+    const guest = await this.prisma.cart.findUnique({
+      where: { sessionId },
+      include: { items: true },
+    });
+    if (!guest || guest.id === userCartId) return;
+
+    if (guest.items.length > 0) {
+      const mine = await this.prisma.cartItem.findMany({
+        where: { cartId: userCartId },
+      });
+      const qtyByOffer = new Map(mine.map((item) => [item.offerId, item.qty]));
+
+      for (const item of guest.items) {
+        const current = qtyByOffer.get(item.offerId);
+        await this.prisma.cartItem.upsert({
+          where: {
+            cartId_offerId: { cartId: userCartId, offerId: item.offerId },
+          },
+          update: { qty: Math.max(current ?? 0, item.qty) },
+          create: { cartId: userCartId, offerId: item.offerId, qty: item.qty },
+        });
+      }
+    }
+
+    await this.prisma.cart.delete({ where: { id: guest.id } });
+  }
+
   async getOrCreate(owner: CartOwner): Promise<CartWithItems> {
     if (owner.userId) {
       const existing = await this.prisma.cart.findFirst({
         where: { userId: owner.userId },
         include: cartInclude,
       });
-      if (existing) return existing;
-      return this.prisma.cart.create({
-        data: { userId: owner.userId },
+      const cartId =
+        existing?.id ??
+        (await this.prisma.cart.create({ data: { userId: owner.userId } })).id;
+
+      if (owner.sessionId) await this.mergeGuestCart(cartId, owner.sessionId);
+
+      return this.prisma.cart.findUniqueOrThrow({
+        where: { id: cartId },
         include: cartInclude,
       });
     }
