@@ -328,10 +328,15 @@ function VehiclePicker({ group }: { group: SupplierGroup }) {
   const { vehicles, vehicleFor, setVehicle, shipments } = useCart();
   const plan = shipments[group.supplierId];
   const selected = vehicleFor(group.supplierId);
+  // Хэмжээсийн зургийг сонгосон машинаас үл хамааран аль ч машин дээр
+  // үзэж болно — багтахгүй машиныг сонгох аргагүй ч хэмжээг нь харах
+  // хэрэгтэй байдаг (хашааны хаалга нарийн гэх мэт)
+  const [shownId, setShownId] = useState<string | null>(null);
 
   if (group.weightKg <= 0 || vehicles.length === 0) return null;
 
   const recommended = plan?.vehicle ?? null;
+  const shown = vehicles.find((v) => v.id === shownId) ?? selected;
 
   return (
     <section className="border-t border-ink-700 px-4 py-3.5">
@@ -386,7 +391,10 @@ function VehiclePicker({ group }: { group: SupplierGroup }) {
                 // ч хэтэрсэн үед санал болгосон нь өөрөө багтахгүй тул
                 // түүнийг үлдээнэ
                 disabled={!fits && !isRecommended}
-                onClick={() => setVehicle(group.supplierId, vehicle.id)}
+                onClick={() => {
+                  setShownId(null);
+                  setVehicle(group.supplierId, vehicle.id);
+                }}
                 className={`flex w-full flex-col items-stretch gap-1.5 rounded-md border p-2 text-left transition-colors ${
                   active
                     ? "border-brand bg-brand/10"
@@ -478,32 +486,58 @@ function VehiclePicker({ group }: { group: SupplierGroup }) {
             </span>
           </div>
 
-          {/* Тэвшний хэмжээ ба ачаа хэр эзлэхийг нүдээр харуулна. Тэвшний
-              хэмжээгүй хуучин серверт энэ хэсэг гарахгүй. */}
-          {selected.volumeM3 > 0 ? (
-            <div className="grid gap-4 border-t border-ink-700 px-3 py-3 sm:grid-cols-[minmax(0,300px)_minmax(0,1fr)] sm:items-center">
-              <VehicleBlueprint
-                bed={selected.bed}
-                loadM3={group.volumeM3}
-                volumeM3={selected.volumeM3}
-              />
-              <div className="flex flex-col gap-2.5">
-                <FillBar
-                  label="Даац"
-                  value={group.weightKg}
-                  max={selected.capacityKg}
-                  text={`${group.weightEstimated ? "~" : ""}${formatWeight(
-                    group.weightKg,
-                  )} / ${formatWeight(selected.capacityKg)}`}
+          {/* Хэмжээсийн зураг. Габаритгүй хуучин серверт энэ хэсэг гарахгүй. */}
+          {shown && shown.spec.lengthM > 0 ? (
+            <div className="border-t border-ink-700 px-3 py-3">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="mr-1 text-[11.5px] text-mute">Хэмжээ:</span>
+                {vehicles.map((vehicle) => (
+                  <button
+                    key={vehicle.id}
+                    type="button"
+                    aria-pressed={vehicle.id === shown.id}
+                    onClick={() => setShownId(vehicle.id)}
+                    className={`rounded border px-2 py-1 text-[11px] transition-colors ${
+                      vehicle.id === shown.id
+                        ? "border-brand bg-brand/10 font-semibold text-brand"
+                        : "border-ink-700 bg-ink-900 text-mute hover:border-mute-dim hover:text-white"
+                    }`}
+                  >
+                    {vehicle.name}
+                  </button>
+                ))}
+              </div>
+
+              <div className="mt-3 grid gap-4 lg:grid-cols-[minmax(0,440px)_minmax(0,1fr)] lg:items-center">
+                <VehicleBlueprint
+                  spec={shown.spec}
+                  bed={shown.bed}
+                  loadM3={group.volumeM3}
+                  volumeM3={shown.volumeM3}
                 />
-                <FillBar
-                  label="Тэвш"
-                  value={group.volumeM3}
-                  max={selected.volumeM3}
-                  text={`${group.weightEstimated ? "~" : ""}${formatVolume(
-                    group.volumeM3,
-                  )} / ${formatVolume(selected.volumeM3)}`}
-                />
+                <div className="flex flex-col gap-2.5">
+                  <FillBar
+                    label="Даац"
+                    value={group.weightKg}
+                    max={shown.capacityKg}
+                    text={`${group.weightEstimated ? "~" : ""}${formatWeight(
+                      group.weightKg,
+                    )} / ${formatWeight(shown.capacityKg)}`}
+                  />
+                  <FillBar
+                    label="Тэвш"
+                    value={group.volumeM3}
+                    max={shown.volumeM3}
+                    text={`${group.weightEstimated ? "~" : ""}${formatVolume(
+                      group.volumeM3,
+                    )} / ${formatVolume(shown.volumeM3)}`}
+                  />
+                  <p className="text-[10.5px] leading-relaxed text-mute-dim">
+                    Гадна хэмжээ нь тухайн ангилалд түгээмэл машины ойролцоо
+                    утга. Тэвшний хэмжээ, даац нь хүргэлтийн тооцоонд
+                    ашиглагдана.
+                  </p>
+                </div>
               </div>
             </div>
           ) : null}

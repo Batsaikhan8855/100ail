@@ -18,6 +18,33 @@ export interface VehicleBed {
   heightM: number;
 }
 
+/**
+ * Машины гадна габарит ба гүүрний байрлал, метрээр.
+ *
+ * Эдгээр нь тухайн **ангилалд түгээмэл** машины ойролцоо хэмжээ (Портер
+ * нь Hyundai Porter II, 3 тонн нь Hyundai Mighty гэх мэт) — тодорхой нэг
+ * загварын үйлдвэрийн паспорт биш. Худалдан авагчид «хашааны хаалганд
+ * багтах уу, эргэх зай хүрэх үү» гэдгийг төсөөлүүлэх зорилготой.
+ * Тээврийн хамтрагчтай гэрээ байгуулсны дараа бодит хэмжээгээр солино.
+ *
+ * `frontOverhangM + wheelbaseM + rearOverhangM` нь `lengthM`-тэй тэнцэнэ
+ * (`logistics.spec.ts` шалгана).
+ */
+export interface VehicleSpec {
+  /** Гадна урт — хамрын үзүүрээс арын үзүүр хүртэл */
+  lengthM: number;
+  /** Гадна өргөн (толь оролцуулаагүй) */
+  widthM: number;
+  /** Гадна өндөр — хамгийн өндөр цэг хүртэл */
+  heightM: number;
+  /** Урд гүүрнээс хойд гүүр хүртэл */
+  wheelbaseM: number;
+  /** Хамрын үзүүрээс урд гүүр хүртэл */
+  frontOverhangM: number;
+  /** Хойд гүүрнээс арын үзүүр хүртэл */
+  rearOverhangM: number;
+}
+
 /** Хүргэлтийн машины ангилал, даацаар нь эрэмбэлсэн */
 export interface Vehicle {
   id: string;
@@ -31,6 +58,8 @@ export interface Vehicle {
   bed: VehicleBed;
   /** Тэвшний эзэлхүүн, м³ (`bed`-ээс тооцоолсон) */
   volumeM3: number;
+  /** Гадна габарит — хэмжээсийн зураг үүгээр зурагдана */
+  spec: VehicleSpec;
   /**
    * Улаанбаатар хот доторх нэг ачилтын үнэ (₮).
    *
@@ -51,36 +80,99 @@ const vehicle = (
   capacityKg: number,
   price: number,
   bed: VehicleBed,
-): Vehicle => ({ id, name, capacityKg, price, bed, volumeM3: bedVolume(bed) });
+  spec: VehicleSpec,
+): Vehicle => ({
+  id,
+  name,
+  capacityKg,
+  price,
+  bed,
+  spec,
+  volumeM3: bedVolume(bed),
+});
 
 export const VEHICLES: Vehicle[] = [
   // Портер задгай тэвштэй тул өндрийг бодитоор нь (ачаа боох боломжтой
   // хэмжээгээр) авсан
-  vehicle("porter", "Портер", 1000, 25_000, {
-    lengthM: 2.5,
-    widthM: 1.6,
-    heightM: 1.0,
-  }),
-  vehicle("truck-3", "3 тонны ачааны машин", 3000, 45_000, {
-    lengthM: 4.3,
-    widthM: 2.0,
-    heightM: 2.0,
-  }),
-  vehicle("truck-5", "5 тонны ачааны машин", 5000, 70_000, {
-    lengthM: 5.5,
-    widthM: 2.2,
-    heightM: 2.2,
-  }),
-  vehicle("truck-10", "10 тонны ачааны машин", 10_000, 120_000, {
-    lengthM: 7.5,
-    widthM: 2.4,
-    heightM: 2.5,
-  }),
-  vehicle("truck-20", "20 тонны чиргүүл", 20_000, 200_000, {
-    lengthM: 13.6,
-    widthM: 2.45,
-    heightM: 2.7,
-  }),
+  // Портер задгай тэвштэй тул өндрийг бодитоор нь (ачаа боох боломжтой
+  // хэмжээгээр) авсан
+  vehicle(
+    "porter",
+    "Портер",
+    1000,
+    25_000,
+    { lengthM: 2.5, widthM: 1.6, heightM: 1.0 },
+    {
+      lengthM: 4.85,
+      widthM: 1.74,
+      heightM: 1.97,
+      wheelbaseM: 2.43,
+      frontOverhangM: 1.185,
+      rearOverhangM: 1.235,
+    },
+  ),
+  vehicle(
+    "truck-3",
+    "3 тонны ачааны машин",
+    3000,
+    45_000,
+    { lengthM: 4.3, widthM: 2.0, heightM: 2.0 },
+    {
+      lengthM: 6.6,
+      widthM: 2.05,
+      heightM: 3.1,
+      wheelbaseM: 3.4,
+      frontOverhangM: 1.2,
+      rearOverhangM: 2.0,
+    },
+  ),
+  vehicle(
+    "truck-5",
+    "5 тонны ачааны машин",
+    5000,
+    70_000,
+    { lengthM: 5.5, widthM: 2.2, heightM: 2.2 },
+    {
+      lengthM: 8.0,
+      widthM: 2.25,
+      heightM: 3.3,
+      wheelbaseM: 4.2,
+      frontOverhangM: 1.35,
+      rearOverhangM: 2.45,
+    },
+  ),
+  vehicle(
+    "truck-10",
+    "10 тонны ачааны машин",
+    10_000,
+    120_000,
+    { lengthM: 7.5, widthM: 2.4, heightM: 2.5 },
+    {
+      lengthM: 10.2,
+      widthM: 2.45,
+      heightM: 3.6,
+      wheelbaseM: 5.4,
+      frontOverhangM: 1.4,
+      rearOverhangM: 3.4,
+    },
+  ),
+  // Чиргүүлийн «гүүр хоорондын зай» нь чирэгчийн урд гүүрнээс чиргүүлийн
+  // тэнхлэг хүртэлх зай — хажуу талын зурагт дугуйн байрлалыг заана
+  vehicle(
+    "truck-20",
+    "20 тонны чиргүүл",
+    20_000,
+    200_000,
+    { lengthM: 13.6, widthM: 2.45, heightM: 2.7 },
+    {
+      lengthM: 16.5,
+      widthM: 2.5,
+      heightM: 4.0,
+      wheelbaseM: 11.6,
+      frontOverhangM: 1.4,
+      rearOverhangM: 3.5,
+    },
+  ),
 ];
 
 /** Ачааны хэмжээ — жин ба овор хоёулаа */

@@ -1,43 +1,50 @@
 "use client";
 
 import { useId } from "react";
-import type { VehicleBed } from "./cart-context";
+import type { VehicleBed, VehicleSpec } from "./cart-context";
 
 /**
- * Тэвшний техникийн хэмжээсийн зураг.
+ * Машины хэмжээсийн зураг — үйлдвэрийн каталогийн дөрвөн харагдац.
  *
- * «Миний ачаа энэ машинд багтах уу» гэдгийг тоо ширтэж бодохын оронд
- * нүдээр шалгуулах зорилготой: хажуу ба ар талыг үйлдвэрийн каталогийн
- * маягаар, хэмжээсийн сумтай нь зурна.
+ * Дээрээс, урдаас, хажуугаас, араас нь нэг масштабаар зурна. Худалдан
+ * авагч «хашааны хаалганд багтах уу, эргэх зай хүрэх үү, миний ачаа
+ * тэвшинд яаж багтах вэ» гэдгээ тоо ширтэлгүй нүдээр шалгана.
  *
- * Хоёр харагдац нэг масштабтай тул өндөр нь хоорондоо таарна. Харин
- * машин хооронд масштаб ижил биш — нэг дор ганц машин харагддаг тул
- * дэлгэцийг дүүргэж, уншигдац сайжирсан нь дээр. Машин хоорондын
- * харьцааг `VehicleArt` дээрх зураг харуулна.
+ * Хэмжээ бүр `VehicleSpec`, `VehicleBed`-ээс шууд ирнэ. Кабины хэлбэр,
+ * дугуйн байрлал зэрэг зөвхөн дүрслэлийн зориулалттай хэсэгт хэмжээсийн
+ * шугам заагаагүй — учир нь тэдгээр нь өгөгдөл биш, зургийн харьцаа.
  *
- * Зөвхөн `bed`-ийн гурван хэмжээг зурна — кабин зэрэг зохиосон хэсэг
- * нэмбэл байхгүй мэдээллийг байгаа мэт харуулах тул оруулаагүй.
+ * Машин хооронд масштаб ижил биш: нэг дор ганц машин харагддаг тул
+ * хүрээг дүүргэсэн нь дээр. Машин хоорондын харьцааг `VehicleArt` дээрх
+ * зураг харуулна.
  */
 
-const W = 300;
-const H = 142;
-/** Босоо хэмжээсийн шугамд үлдээх зай */
-const PAD_L = 30;
-/** Хэвтээ хэмжээсийн шугамд үлдээх зай */
-const PAD_B = 28;
-/** Харагдацын гарчигт үлдээх зай */
-const PAD_T = 18;
-const SIDE_W = 148;
-const GAP = 26;
-const REAR_W = 76;
+const W = 420;
+const H = 300;
 
-const BODY_H = H - PAD_T - PAD_B;
-const BASE_Y = PAD_T + BODY_H;
+/** Зүүн талын босоо хэмжээсэд үлдээх зай */
+const PAD_L = 38;
+/** Дээрээс ба хажуугаас харсан харагдацын өргөн */
+const COL1_W = 236;
+const GAP = 34;
+/** Урд ба ард харсан харагдацын өргөн */
+const COL2_W = 74;
 
-/** Хэмжээг уншихад эвтэйхэн: 2 → "2 м", 2.45 → "2.45 м" */
+/** Мөр бүрийн зургийн өндөр */
+const ROW_H = 92;
+const ROW1_TOP = 16;
+const ROW1_BASE = ROW1_TOP + ROW_H;
+const ROW2_TOP = 152;
+const ROW2_BASE = ROW2_TOP + ROW_H;
+
+const COL1_X = PAD_L;
+const COL2_X = PAD_L + COL1_W + GAP;
+
+/** 2 → "2 м", 1.185 → "1.19 м" */
 const meters = (value: number): string => `${Number(value.toFixed(2))} м`;
 
 interface BlueprintProps {
+  spec: VehicleSpec;
   bed: VehicleBed;
   /** Ачааны овор, м³ — тэвшинд эзлэх хэсгийг сүүдэрлэнэ */
   loadM3?: number;
@@ -47,32 +54,56 @@ interface BlueprintProps {
 }
 
 export function VehicleBlueprint({
+  spec,
   bed,
   loadM3 = 0,
   volumeM3 = 0,
   className,
 }: BlueprintProps) {
-  const id = useId();
-  const arrow = `${id}-arrow`;
-  const hatch = `${id}-hatch`;
+  const uid = useId();
+  const arrow = `${uid}-arrow`;
+  const hatch = `${uid}-hatch`;
 
-  if (bed.lengthM <= 0 || bed.widthM <= 0 || bed.heightM <= 0) return null;
+  if (spec.lengthM <= 0 || spec.widthM <= 0 || spec.heightM <= 0) return null;
 
-  // Гурван хязгаарын аль багад нь багтаана: өндөр, хажуугийн урт, арын өргөн
+  // Дөрвөн харагдац нэг масштабтай байж л хоорондоо жишигдэнэ
   const scale = Math.min(
-    BODY_H / bed.heightM,
-    SIDE_W / bed.lengthM,
-    REAR_W / bed.widthM,
+    COL1_W / spec.lengthM,
+    ROW_H / spec.widthM,
+    ROW_H / spec.heightM,
+    COL2_W / spec.widthM,
   );
-  const length = bed.lengthM * scale;
-  const width = bed.widthM * scale;
-  const height = bed.heightM * scale;
 
-  const sideX = PAD_L + (SIDE_W - length) / 2;
-  const rearX = PAD_L + SIDE_W + GAP + (REAR_W - width) / 2;
-  const topY = BASE_Y - height;
+  const length = spec.lengthM * scale;
+  const width = spec.widthM * scale;
+  const height = spec.heightM * scale;
+  const bedLength = bed.lengthM * scale;
+  const bedWidth = bed.widthM * scale;
+  const bedHeight = bed.heightM * scale;
 
-  // Ачаа тэвшний хэдэн хувийг эзлэхийг хажуу талын дүрсээр харуулна
+  // Тэвшийг ар талд нь наасан гэж үзнэ — үлдсэн нь кабин ба хамар
+  const cabLength = length - bedLength;
+  // Тэвшний шал: гадна өндрөөс тэвшний өндрийг хассан зай. Энэ нь
+  // тооцоолсон утга тул хэмжээсийн шугам заахгүй.
+  const deck = height - bedHeight;
+
+  const topY = ROW1_BASE - width;
+  const bedTopY = topY + (width - bedWidth) / 2;
+  const sideY = ROW2_BASE - height;
+  const frontY = ROW1_BASE - height;
+  const rearY = ROW2_BASE - height;
+  const col2CenterX = COL2_X + (COL2_W - width) / 2;
+
+  // Задгай тэвштэй машинд кабин хамгийн өндөр цэг; битүү тэвштэйд тэвш
+  // нь кабинаас өндөр. Энэ харьцаа нь зөвхөн дүрслэл.
+  const cabHeight = bed.heightM <= 1.2 ? height : height * 0.78;
+  const wheelRadius = Math.max(3, deck * 0.35);
+  const frontAxleX = COL1_X + spec.frontOverhangM * scale;
+  const rearAxleX =
+    COL1_X + (spec.frontOverhangM + spec.wheelbaseM) * scale;
+  // Урт машин хос тэнхлэгтэй — дүрслэлийн нарийвчлал
+  const tandem = spec.lengthM >= 9;
+
   const ratio = volumeM3 > 0 && loadM3 > 0 ? loadM3 / volumeM3 : 0;
   const fill = Math.min(1, ratio);
   const over = ratio > 1;
@@ -80,11 +111,13 @@ export function VehicleBlueprint({
   return (
     <svg
       viewBox={`0 0 ${W} ${H}`}
-      className={className ?? "h-full w-full"}
+      className={className ?? "h-auto w-full"}
       role="img"
-      aria-label={`Тэвшний хэмжээ: урт ${meters(bed.lengthM)}, өргөн ${meters(
+      aria-label={`Хэмжээ: гадна ${meters(spec.lengthM)} × ${meters(
+        spec.widthM,
+      )} × ${meters(spec.heightM)}, тэвш ${meters(bed.lengthM)} × ${meters(
         bed.widthM,
-      )}, өндөр ${meters(bed.heightM)}`}
+      )} × ${meters(bed.heightM)}`}
     >
       <defs>
         <marker
@@ -118,201 +151,425 @@ export function VehicleBlueprint({
         </pattern>
       </defs>
 
-      <g className="text-mute-dim" fill="currentColor">
-        <text x={PAD_L + SIDE_W / 2} y={11} fontSize="7.5" textAnchor="middle">
-          ХАЖУУ ТАЛ
-        </text>
-        <text
-          x={PAD_L + SIDE_W + GAP + REAR_W / 2}
-          y={11}
-          fontSize="7.5"
-          textAnchor="middle"
-        >
-          АР ТАЛ
-        </text>
+      <ViewTitle x={COL1_X + COL1_W / 2} y={10}>
+        ДЭЭРЭЭС
+      </ViewTitle>
+      <ViewTitle x={COL2_X + COL2_W / 2} y={10}>
+        УРДААС
+      </ViewTitle>
+      <ViewTitle x={COL1_X + COL1_W / 2} y={ROW2_TOP - 6}>
+        ХАЖУУГААС
+      </ViewTitle>
+      <ViewTitle x={COL2_X + COL2_W / 2} y={ROW2_TOP - 6}>
+        АРААС
+      </ViewTitle>
+
+      {/* ── Дээрээс: гадна габарит дотор тэвшний талбай ── */}
+      <g>
+        <Outline x={COL1_X} y={topY} width={length} height={width} />
+        <rect
+          x={COL1_X + cabLength}
+          y={bedTopY}
+          width={bedLength}
+          height={bedWidth}
+          className="fill-brand/10"
+        />
+        <Outline
+          x={COL1_X + cabLength}
+          y={bedTopY}
+          width={bedLength}
+          height={bedWidth}
+          thin
+        />
       </g>
 
-      {/* Газрын шугам — хоёр харагдац нэг түвшинд суусныг харуулна */}
-      <line
-        x1={PAD_L - 8}
-        y1={BASE_Y}
-        x2={W - 6}
-        y2={BASE_Y}
-        stroke="currentColor"
-        strokeWidth="0.75"
-        strokeDasharray="3 3"
-        className="text-ink-700"
-      />
+      {/* ── Урдаас ── */}
+      <Outline x={col2CenterX} y={frontY} width={width} height={height} />
 
-      {/* Хажуу тал */}
+      {/* ── Хажуугаас: кабин, тэвш, дугуй ── */}
       <g>
+        <line
+          x1={COL1_X - 10}
+          y1={ROW2_BASE}
+          x2={COL1_X + length + 10}
+          y2={ROW2_BASE}
+          stroke="currentColor"
+          strokeWidth="0.75"
+          strokeDasharray="3 3"
+          className="text-ink-700"
+        />
+
+        {/* Кабин — хэмжээс заагаагүй дүрслэл */}
+        <polygon
+          points={[
+            `${COL1_X},${ROW2_BASE}`,
+            `${COL1_X},${ROW2_BASE - cabHeight * 0.55}`,
+            `${COL1_X + cabLength * 0.34},${ROW2_BASE - cabHeight}`,
+            `${COL1_X + cabLength},${ROW2_BASE - cabHeight}`,
+            `${COL1_X + cabLength},${ROW2_BASE}`,
+          ].join(" ")}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.1"
+          className="text-mute"
+        />
+
+        {/* Тэвш — ачаа эзлэх хэсгийг дотор нь сүүдэрлэнэ */}
         {fill > 0 ? (
           <rect
-            x={sideX}
-            y={topY}
-            width={length * fill}
-            height={height}
+            x={COL1_X + cabLength}
+            y={ROW2_BASE - deck - bedHeight}
+            width={bedLength * fill}
+            height={bedHeight}
             className="fill-brand/20"
           />
         ) : null}
         {over ? (
           <rect
-            x={sideX}
-            y={topY}
-            width={length}
-            height={height}
+            x={COL1_X + cabLength}
+            y={ROW2_BASE - deck - bedHeight}
+            width={bedLength}
+            height={bedHeight}
             fill={`url(#${hatch})`}
             opacity="0.35"
           />
         ) : null}
-        <rect
-          x={sideX}
-          y={topY}
-          width={length}
-          height={height}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.25"
-          className="text-mute"
+        <Outline
+          x={COL1_X + cabLength}
+          y={ROW2_BASE - deck - bedHeight}
+          width={bedLength}
+          height={bedHeight}
         />
         {fill > 0 && fill < 1 ? (
           <line
-            x1={sideX + length * fill}
-            y1={topY}
-            x2={sideX + length * fill}
-            y2={BASE_Y}
+            x1={COL1_X + cabLength + bedLength * fill}
+            y1={ROW2_BASE - deck - bedHeight}
+            x2={COL1_X + cabLength + bedLength * fill}
+            y2={ROW2_BASE - deck}
             stroke="currentColor"
             strokeWidth="1"
             strokeDasharray="3 2"
             className="text-brand"
           />
         ) : null}
+
+        {/* Хүрээ */}
+        <line
+          x1={COL1_X + cabLength * 0.5}
+          y1={ROW2_BASE - deck}
+          x2={COL1_X + length}
+          y2={ROW2_BASE - deck}
+          stroke="currentColor"
+          strokeWidth="1.1"
+          className="text-mute"
+        />
+
+        <Wheel cx={frontAxleX} cy={ROW2_BASE - wheelRadius} r={wheelRadius} />
+        <Wheel cx={rearAxleX} cy={ROW2_BASE - wheelRadius} r={wheelRadius} />
+        {tandem ? (
+          <Wheel
+            cx={rearAxleX - wheelRadius * 2.2}
+            cy={ROW2_BASE - wheelRadius}
+            r={wheelRadius}
+          />
+        ) : null}
       </g>
 
-      {/* Ар тал */}
-      <rect
-        x={rearX}
-        y={topY}
-        width={width}
-        height={height}
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.25"
-        className="text-mute"
-      />
+      {/* ── Араас: тэвшний онгорхойн хэмжээ ── */}
+      <g>
+        <Outline x={col2CenterX} y={rearY} width={width} height={height} />
+        <rect
+          x={col2CenterX + (width - bedWidth) / 2}
+          y={ROW2_BASE - deck - bedHeight}
+          width={bedWidth}
+          height={bedHeight}
+          className="fill-brand/10"
+        />
+        <Outline
+          x={col2CenterX + (width - bedWidth) / 2}
+          y={ROW2_BASE - deck - bedHeight}
+          width={bedWidth}
+          height={bedHeight}
+          thin
+        />
+      </g>
 
       <g className="text-mute-dim">
-        {/* Урт — хажуу талын доор */}
-        <Extension x1={sideX} y1={BASE_Y} x2={sideX} y2={BASE_Y + 16} />
-        <Extension
-          x1={sideX + length}
-          y1={BASE_Y}
-          x2={sideX + length}
-          y2={BASE_Y + 16}
-        />
-        <Dim
-          x1={sideX}
-          y1={BASE_Y + 12}
-          x2={sideX + length}
-          y2={BASE_Y + 12}
-          marker={arrow}
-        />
-        <Label x={sideX + length / 2} y={BASE_Y + 24}>
-          {meters(bed.lengthM)}
-        </Label>
-
-        {/* Өндөр — хажуу талын зүүн талд */}
-        <Extension x1={sideX} y1={topY} x2={sideX - 18} y2={topY} />
-        <Extension x1={sideX} y1={BASE_Y} x2={sideX - 18} y2={BASE_Y} />
-        <Dim
-          x1={sideX - 14}
+        {/* Дээрээс: гадна өргөн зүүнд, тэвшний урт доор */}
+        <VDim
+          x={COL1_X - 16}
           y1={topY}
-          x2={sideX - 14}
-          y2={BASE_Y}
+          y2={ROW1_BASE}
+          edgeX={COL1_X}
           marker={arrow}
+          label={meters(spec.widthM)}
         />
-        <Label
-          x={sideX - 18}
-          y={topY + height / 2}
-          transform={`rotate(-90 ${sideX - 18} ${topY + height / 2})`}
-        >
-          {meters(bed.heightM)}
-        </Label>
+        <HDim
+          x1={COL1_X + cabLength}
+          x2={COL1_X + length}
+          y={ROW1_BASE + 12}
+          edgeY={ROW1_BASE}
+          marker={arrow}
+          label={meters(bed.lengthM)}
+        />
 
-        {/* Өргөн — арын доор */}
-        <Extension x1={rearX} y1={BASE_Y} x2={rearX} y2={BASE_Y + 16} />
-        <Extension
-          x1={rearX + width}
-          y1={BASE_Y}
-          x2={rearX + width}
-          y2={BASE_Y + 16}
-        />
-        <Dim
-          x1={rearX}
-          y1={BASE_Y + 12}
-          x2={rearX + width}
-          y2={BASE_Y + 12}
+        {/* Урдаас: өргөн доор, гадна өндөр баруунд */}
+        <HDim
+          x1={col2CenterX}
+          x2={col2CenterX + width}
+          y={ROW1_BASE + 12}
+          edgeY={ROW1_BASE}
           marker={arrow}
+          label={meters(spec.widthM)}
         />
-        <Label x={rearX + width / 2} y={BASE_Y + 24}>
-          {meters(bed.widthM)}
-        </Label>
+        <VDim
+          x={col2CenterX + width + 16}
+          y1={frontY}
+          y2={ROW1_BASE}
+          edgeX={col2CenterX + width}
+          marker={arrow}
+          label={meters(spec.heightM)}
+          flip
+        />
+
+        {/* Хажуугаас: гадна өндөр зүүнд, гарц ба гүүр хоорондын зай доор */}
+        <VDim
+          x={COL1_X - 16}
+          y1={sideY}
+          y2={ROW2_BASE}
+          edgeX={COL1_X}
+          marker={arrow}
+          label={meters(spec.heightM)}
+        />
+        <HDim
+          x1={COL1_X}
+          x2={frontAxleX}
+          y={ROW2_BASE + 12}
+          edgeY={ROW2_BASE}
+          marker={arrow}
+          label={meters(spec.frontOverhangM)}
+          small
+        />
+        <HDim
+          x1={frontAxleX}
+          x2={rearAxleX}
+          y={ROW2_BASE + 12}
+          edgeY={ROW2_BASE}
+          marker={arrow}
+          label={meters(spec.wheelbaseM)}
+          small
+        />
+        <HDim
+          x1={rearAxleX}
+          x2={COL1_X + length}
+          y={ROW2_BASE + 12}
+          edgeY={ROW2_BASE}
+          marker={arrow}
+          label={meters(spec.rearOverhangM)}
+          small
+        />
+        <HDim
+          x1={COL1_X}
+          x2={COL1_X + length}
+          y={ROW2_BASE + 32}
+          edgeY={ROW2_BASE + 20}
+          marker={arrow}
+          label={meters(spec.lengthM)}
+        />
+
+        {/* Араас: тэвшний өргөн доор, тэвшний өндөр баруунд */}
+        <HDim
+          x1={col2CenterX + (width - bedWidth) / 2}
+          x2={col2CenterX + (width + bedWidth) / 2}
+          y={ROW2_BASE + 12}
+          edgeY={ROW2_BASE}
+          marker={arrow}
+          label={meters(bed.widthM)}
+        />
+        <VDim
+          x={col2CenterX + width + 16}
+          y1={ROW2_BASE - deck - bedHeight}
+          y2={ROW2_BASE - deck}
+          edgeX={col2CenterX + width}
+          marker={arrow}
+          label={meters(bed.heightM)}
+          flip
+        />
       </g>
     </svg>
   );
 }
 
-/** Хэмжээсийн туслах шугам — дүрснээс хэмжээс рүү сунгасан нимгэн зураас */
-const Extension = (props: {
-  x1: number;
-  y1: number;
-  x2: number;
-  y2: number;
+const ViewTitle = ({
+  x,
+  y,
+  children,
+}: {
+  x: number;
+  y: number;
+  children: React.ReactNode;
 }) => (
+  <text
+    x={x}
+    y={y}
+    fontSize="7.5"
+    textAnchor="middle"
+    fill="currentColor"
+    className="text-mute-dim"
+  >
+    {children}
+  </text>
+);
+
+/** Харагдацын гадна хүрээ */
+const Outline = ({
+  x,
+  y,
+  width,
+  height,
+  thin,
+}: {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  thin?: boolean;
+}) => (
+  <rect
+    x={x}
+    y={y}
+    width={width}
+    height={height}
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={thin ? 0.9 : 1.25}
+    className={thin ? "text-mute-dim" : "text-mute"}
+  />
+);
+
+const Wheel = ({ cx, cy, r }: { cx: number; cy: number; r: number }) => (
+  <g>
+    <circle
+      cx={cx}
+      cy={cy}
+      r={r}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.1"
+      className="text-mute"
+    />
+    <circle
+      cx={cx}
+      cy={cy}
+      r={r * 0.45}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="0.8"
+      className="text-mute-dim"
+    />
+  </g>
+);
+
+/** Хэвтээ хэмжээс — дүрснээс доош татсан туслах шугам, хоёр талдаа сумтай */
+const HDim = ({
+  x1,
+  x2,
+  y,
+  edgeY,
+  marker,
+  label,
+  small,
+}: {
+  x1: number;
+  x2: number;
+  y: number;
+  edgeY: number;
+  marker: string;
+  label: string;
+  small?: boolean;
+}) => (
+  <g>
+    <Guide x1={x1} y1={edgeY} x2={x1} y2={y + 4} />
+    <Guide x1={x2} y1={edgeY} x2={x2} y2={y + 4} />
+    <line
+      x1={x1}
+      y1={y}
+      x2={x2}
+      y2={y}
+      stroke="currentColor"
+      strokeWidth="0.75"
+      markerStart={`url(#${marker})`}
+      markerEnd={`url(#${marker})`}
+    />
+    <text
+      x={(x1 + x2) / 2}
+      y={y + (small ? 8.5 : 10)}
+      fontSize={small ? 7 : 8.5}
+      textAnchor="middle"
+      fill="currentColor"
+      className="font-semibold"
+    >
+      {label}
+    </text>
+  </g>
+);
+
+/** Босоо хэмжээс — шошго нь 90° эргэсэн */
+const VDim = ({
+  x,
+  y1,
+  y2,
+  edgeX,
+  marker,
+  label,
+  flip,
+}: {
+  x: number;
+  y1: number;
+  y2: number;
+  edgeX: number;
+  marker: string;
+  label: string;
+  /** Шошгыг баруун талд байрлуулах */
+  flip?: boolean;
+}) => {
+  const labelX = flip ? x + 4 : x - 4;
+  const midY = (y1 + y2) / 2;
+  return (
+    <g>
+      <Guide x1={edgeX} y1={y1} x2={x + (flip ? -4 : 4)} y2={y1} />
+      <Guide x1={edgeX} y1={y2} x2={x + (flip ? -4 : 4)} y2={y2} />
+      <line
+        x1={x}
+        y1={y1}
+        x2={x}
+        y2={y2}
+        stroke="currentColor"
+        strokeWidth="0.75"
+        markerStart={`url(#${marker})`}
+        markerEnd={`url(#${marker})`}
+      />
+      <text
+        x={labelX}
+        y={midY}
+        fontSize="8.5"
+        textAnchor="middle"
+        fill="currentColor"
+        className="font-semibold"
+        transform={`rotate(-90 ${labelX} ${midY})`}
+      >
+        {label}
+      </text>
+    </g>
+  );
+};
+
+/** Дүрснээс хэмжээс рүү сунгасан нимгэн туслах шугам */
+const Guide = (props: { x1: number; y1: number; x2: number; y2: number }) => (
   <line
     {...props}
     stroke="currentColor"
     strokeWidth="0.6"
     className="text-ink-700"
   />
-);
-
-/** Хоёр талдаа сумтай хэмжээсийн шугам */
-const Dim = ({
-  marker,
-  ...props
-}: {
-  x1: number;
-  y1: number;
-  x2: number;
-  y2: number;
-  marker: string;
-}) => (
-  <line
-    {...props}
-    stroke="currentColor"
-    strokeWidth="0.75"
-    markerStart={`url(#${marker})`}
-    markerEnd={`url(#${marker})`}
-  />
-);
-
-const Label = ({
-  children,
-  ...props
-}: {
-  x: number;
-  y: number;
-  transform?: string;
-  children: React.ReactNode;
-}) => (
-  <text
-    {...props}
-    fontSize="8.5"
-    textAnchor="middle"
-    fill="currentColor"
-    className="font-semibold"
-  >
-    {children}
-  </text>
 );

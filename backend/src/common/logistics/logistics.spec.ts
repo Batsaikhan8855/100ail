@@ -12,6 +12,32 @@ import {
   VEHICLES,
 } from "./logistics";
 
+describe("VEHICLES габарит", () => {
+  it("урд гарц + гүүр хоорондын зай + хойд гарц нь гадна урттай тэнцэнэ", () => {
+    for (const { name, spec } of VEHICLES) {
+      const sum =
+        spec.frontOverhangM + spec.wheelbaseM + spec.rearOverhangM;
+      expect(`${name}: ${Number(sum.toFixed(3))}`).toBe(
+        `${name}: ${Number(spec.lengthM.toFixed(3))}`,
+      );
+    }
+  });
+
+  it("тэвш нь машины гадна габаритад багтана", () => {
+    for (const { name, bed, spec } of VEHICLES) {
+      expect(`${name} урт`).toBe(
+        bed.lengthM < spec.lengthM ? `${name} урт` : "хэтэрсэн",
+      );
+      expect(`${name} өргөн`).toBe(
+        bed.widthM <= spec.widthM ? `${name} өргөн` : "хэтэрсэн",
+      );
+      expect(`${name} өндөр`).toBe(
+        bed.heightM < spec.heightM ? `${name} өндөр` : "хэтэрсэн",
+      );
+    }
+  });
+});
+
 describe("logistics", () => {
   describe("defaultUnitWeight", () => {
     it("ангилал, нэгжийн хослолоор жин олно", () => {

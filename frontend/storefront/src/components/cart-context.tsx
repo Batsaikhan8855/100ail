@@ -121,6 +121,18 @@ export interface Vehicle {
   bed: VehicleBed;
   /** Тэвшний эзэлхүүн, м³. Сервер өгөөгүй бол 0 — оврыг тооцохгүй */
   volumeM3: number;
+  /** Гадна габарит. Сервер өгөөгүй бол тэг — хэмжээсийн зураг гарахгүй */
+  spec: VehicleSpec;
+}
+
+/** Машины гадна габарит ба гүүрний байрлал, метрээр */
+export interface VehicleSpec {
+  lengthM: number;
+  widthM: number;
+  heightM: number;
+  wheelbaseM: number;
+  frontOverhangM: number;
+  rearOverhangM: number;
 }
 
 /** Тэвшний дотор хэмжээ, метрээр */
@@ -130,13 +142,22 @@ export interface VehicleBed {
   heightM: number;
 }
 
-/** Оврын талбарууд нь хуучин серверээс ирэхгүй байж болно */
-interface ApiVehicle extends Omit<Vehicle, "bed" | "volumeM3"> {
+/** Овор, габаритын талбарууд нь хуучин серверээс ирэхгүй байж болно */
+interface ApiVehicle extends Omit<Vehicle, "bed" | "volumeM3" | "spec"> {
   bed?: VehicleBed | null;
   volumeM3?: number | null;
+  spec?: VehicleSpec | null;
 }
 
 const ZERO_BED: VehicleBed = { lengthM: 0, widthM: 0, heightM: 0 };
+const ZERO_SPEC: VehicleSpec = {
+  lengthM: 0,
+  widthM: 0,
+  heightM: 0,
+  wheelbaseM: 0,
+  frontOverhangM: 0,
+  rearOverhangM: 0,
+};
 
 /**
  * Машины оврыг гүйцээнэ. Хуучин сервер `bed`, `volumeM3` буцаахгүй тул
@@ -148,6 +169,7 @@ const toVehicle = (vehicle: ApiVehicle): Vehicle => {
   return {
     ...vehicle,
     bed,
+    spec: vehicle.spec ?? ZERO_SPEC,
     volumeM3:
       vehicle.volumeM3 ??
       Math.round(bed.lengthM * bed.widthM * bed.heightM * 10) / 10,
