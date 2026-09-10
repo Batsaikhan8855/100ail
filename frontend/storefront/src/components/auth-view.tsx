@@ -43,8 +43,8 @@ export function AuthView() {
         await login(form.email.trim(), form.password);
       } else {
         await register({
-          name: form.name,
-          email: form.email,
+          name: form.name.trim(),
+          email: form.email.trim(),
           password: form.password,
           phone: form.phone || undefined,
         });
@@ -77,12 +77,18 @@ export function AuthView() {
               <>
                 <Field
                   label="Нэр"
+                  name="name"
+                  autoComplete="name"
                   value={form.name}
                   onChange={(value) => setForm({ ...form, name: value })}
                   required
                 />
                 <Field
                   label="Утас"
+                  name="phone"
+                  autoComplete="tel"
+                  inputMode="tel"
+                  type="tel"
                   value={form.phone}
                   onChange={(value) => setForm({ ...form, phone: value })}
                   placeholder="9911-2233"
@@ -95,6 +101,9 @@ export function AuthView() {
               // Нэвтрэхэд утасны дугаар ч болно тул `email` төрлийн
               // хөтчийн шалгалт саад болно
               type={mode === "login" ? "text" : "email"}
+              name={mode === "login" ? "username" : "email"}
+              autoComplete={mode === "login" ? "username" : "email"}
+              inputMode={mode === "login" ? "text" : "email"}
               value={form.email}
               onChange={(value) => setForm({ ...form, email: value })}
               placeholder={
@@ -105,6 +114,10 @@ export function AuthView() {
             <Field
               label="Нууц үг"
               type="password"
+              name="password"
+              autoComplete={
+                mode === "login" ? "current-password" : "new-password"
+              }
               value={form.password}
               onChange={(value) => setForm({ ...form, password: value })}
               required
@@ -161,6 +174,9 @@ function Field({
   type = "text",
   placeholder,
   required,
+  name,
+  autoComplete,
+  inputMode,
 }: {
   label: string;
   value: string;
@@ -168,12 +184,20 @@ function Field({
   type?: string;
   placeholder?: string;
   required?: boolean;
+  name?: string;
+  autoComplete?: string;
+  inputMode?: "text" | "tel" | "email";
 }) {
   return (
     <label className="flex flex-col gap-1.5">
       <span className="text-[12px] text-mute">{label}</span>
       <input
         type={type}
+        // name/autoComplete байхгүй бол хөтөч талбаруудыг таамаглаж
+        // утасны дугаарыг и-мэйл нүдэнд бөглөчихдөг байв
+        name={name}
+        autoComplete={autoComplete}
+        inputMode={inputMode}
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}

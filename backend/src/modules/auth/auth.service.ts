@@ -9,6 +9,10 @@ import { LoginDto, RegisterDto } from "./dto";
 /** Утасны дугаарыг зөвхөн цифр болгоно: "9911-2233" → "99112233" */
 export const normalizePhone = (value: string): string => value.replace(/\D/g, "");
 
+/** И-мэйлийг жигдрүүлнэ: илүү зай, том жижиг үсгийн ялгааг арилгана */
+export const normalizeEmail = (value: string): string =>
+  value.trim().toLowerCase();
+
 /** Оруулсан утга и-мэйл мөн эсэх */
 const looksLikeEmail = (value: string): boolean => value.includes("@");
 
@@ -20,8 +24,10 @@ export class AuthService {
   ) {}
 
   async register(dto: RegisterDto) {
-    const existing = await this.prisma.user.findUnique({
-      where: { email: dto.email },
+    // Бүртгэл ба нэвтрэлт хоёр ижил хэлбэрт оруулж байж таарна
+    const email = normalizeEmail(dto.email);
+    const existing = await this.prisma.user.findFirst({
+      where: { email: { equals: email, mode: "insensitive" } },
     });
     if (existing) {
       throw new ConflictException("Энэ и-мэйл хаягаар бүртгэл үүссэн байна");
@@ -37,7 +43,7 @@ export class AuthService {
 
     const user = await this.prisma.user.create({
       data: {
-        email: dto.email,
+        email,
         name: dto.name,
         phone,
         passwordHash: await bcrypt.hash(dto.password, 10),
@@ -55,9 +61,11 @@ export class AuthService {
     }
 
     // И-мэйл эсвэл утас — аль нэгээр нь нэвтэрч болно
+    // Хуучин бүртгэлүүд том үсэгтэй хадгалагдсан байж болзошгүй тул
+    // и-мэйлийг том жижиг үсэг ялгалгүй хайна
     const user = looksLikeEmail(identifier)
-      ? await this.prisma.user.findUnique({
-          where: { email: identifier.toLowerCase() },
+      ? await this.prisma.user.findFirst({
+          where: { email: { equals: normalizeEmail(identifier), mode: "insensitive" } },
         })
       : await this.prisma.user.findUnique({
           where: { phone: normalizePhone(identifier) },
