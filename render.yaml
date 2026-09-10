@@ -50,8 +50,15 @@ services:
         sync: false
       - key: PUBLIC_WEB_URL
         sync: false
-      # Зураг: S3/R2 тохируулаагүй тул барааны зураг эх сайтын хаягаар
-      # холбогдоно. Өөрийн санд шилжүүлэх бол S3_* утгуудыг нэмж,
-      # S3_PUBLIC_URL-ыг bucket-ийн нийтийн хаягаар тавина.
+      # Барааны зураг: WebP хэлбэрээр frontend-ийн `public/media/barilga/`
+      # дор байрлаж, Vercel-ийн CDN-ээс өгөгддөг (`prisma/data/barilga/
+      # webp.py`). `StorageService.publicUrl` нь `barilga/<хэш>.webp`
+      # түлхүүрийг доорх суурьтай залгана, тухайлбал:
+      #   https://100ail.vercel.app/media
+      # Дараа нь S3/R2 санд шилжүүлбэл энэ утгыг bucket-ийн нийтийн
+      # хаягаар солиход л хангалттай.
+      - key: S3_PUBLIC_URL
+        sync: false
+      # Хэрэглэгчийн байршуулсан файл (нэхэмжлэх, баримт) локал сан руу
       - key: MEDIA_DIR
         value: media
