@@ -12,6 +12,7 @@ import {
 } from "@/lib/catalog-api";
 import { useResource } from "@/lib/use-resource";
 import { CartPanel } from "./cart-panel";
+import { useFavorites } from "./favorites-context";
 import { CatalogPanel } from "./catalog-panel";
 import { ComparisonPanel } from "./comparison-panel";
 import { FilterPanel, type PriceRange } from "./filter-panel";
@@ -38,12 +39,12 @@ export function Storefront() {
   const [sortId, setSortId] = useState("price");
   const [view, setView] = useState<"grid" | "list">("grid");
   const [page, setPage] = useState(1);
-  const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [selected, setSelected] =
     useState<Record<string, Set<string>>>(emptySelection);
   const [price, setPrice] = useState<PriceRange | null>(null);
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
   const [compare, setCompare] = useState<Set<string>>(new Set());
+  const favorites = useFavorites();
   const { lines: cart, setQty, removeLine } = useCart();
 
   // Хайлтын мөр бичих бүрд хүсэлт явуулахгүй
@@ -126,15 +127,6 @@ export function Storefront() {
     setPrice(null);
   };
 
-  const toggleFavorite = (productId: string) => {
-    setFavorites((prev) => {
-      const next = new Set(prev);
-      if (next.has(productId)) next.delete(productId);
-      else next.add(productId);
-      return next;
-    });
-  };
-
   const toggleCompare = (productId: string) => {
     setCompare((prev) => {
       const next = new Set(prev);
@@ -170,8 +162,8 @@ export function Storefront() {
               onSortChange={setSortId}
               view={view}
               onViewChange={setView}
-              favorites={favorites}
-              onToggleFavorite={toggleFavorite}
+              favorites={favorites.ids}
+              onToggleFavorite={favorites.toggle}
               page={page}
               onPageChange={setPage}
             />

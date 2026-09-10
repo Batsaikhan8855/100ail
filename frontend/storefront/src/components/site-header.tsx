@@ -8,12 +8,14 @@ import { toCategory, type ApiCategory } from "@/lib/catalog-api";
 import { formatNumber } from "@/lib/format";
 import { useResource } from "@/lib/use-resource";
 import { useCart } from "./cart-context";
+import { useFavorites } from "./favorites-context";
 import { NotificationBell } from "./notification-menu";
 import { useSession } from "./session";
 import {
   CATEGORY_ICONS,
   CartIcon,
   ChevronDownIcon,
+  HeartIcon,
   LogoMark,
   UserIcon,
 } from "./icons";
@@ -30,6 +32,7 @@ export function SiteHeader({
 }) {
   const { count: cartCount, reload: reloadCart } = useCart();
   const { user, logout } = useSession();
+  const { count: favoriteCount, reload: reloadFavorites } = useFavorites();
   const categories = useResource<ApiCategory[]>("/categories");
   /** Дэд ангиллын мөр нээлттэй байгаа үндсэн ангилал */
   const [openCategory, setOpenCategory] = useState("");
@@ -102,6 +105,19 @@ export function SiteHeader({
             ) : null}
           </Link>
 
+          <Link
+            href="/favorites"
+            className="relative flex h-10 w-10 items-center justify-center rounded-md text-[#c2c7cf] transition-colors hover:text-white"
+            aria-label={`Хадгалсан бараа, ${favoriteCount}`}
+          >
+            <HeartIcon className="h-[22px] w-[22px]" />
+            {favoriteCount > 0 ? (
+              <span className="absolute right-1 top-1 flex h-[17px] min-w-[17px] items-center justify-center rounded-full bg-brand px-1 text-[10px] font-bold text-ink-950">
+                {favoriteCount}
+              </span>
+            ) : null}
+          </Link>
+
           <span aria-hidden className="hidden h-6 w-px bg-ink-700 sm:block" />
 
           {user ? <NotificationBell /> : null}
@@ -120,6 +136,7 @@ export function SiteHeader({
                 onClick={() => {
                   logout();
                   void reloadCart();
+                  void reloadFavorites();
                 }}
                 className="rounded-md border border-ink-600 px-4 py-2.5 text-[13px] font-bold uppercase tracking-wide text-[#c2c7cf] transition-colors hover:text-white"
               >

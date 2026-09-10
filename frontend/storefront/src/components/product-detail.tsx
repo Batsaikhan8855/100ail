@@ -25,6 +25,7 @@ import {
   WarehouseIcon,
 } from "./icons";
 import { useCart } from "./cart-context";
+import { useFavorites } from "./favorites-context";
 import { MapView, mapsLink } from "./map";
 import { OfferList, Rating, VerifiedBadge } from "./offer-list";
 import { ReviewForm } from "./review-form";
@@ -55,7 +56,9 @@ export function ProductDetail({
   const [offerId, setOfferId] = useState(offers[0]?.id ?? "");
   const [qty, setQty] = useState(1);
   const [tab, setTab] = useState<TabId>("spec");
-  const [favorite, setFavorite] = useState(false);
+  // Зүрх нь каталогтой нэг эх сурвалжтай — серверт хадгалагдана
+  const { has: isFavorite, toggle: toggleFavorite } = useFavorites();
+  const favorite = isFavorite(product.id);
   const [added, setAdded] = useState(false);
   /** Галерейд сонгогдсон зураг (олон зурагтай бараанд) */
   const [imageIndex, setImageIndex] = useState(0);
@@ -151,7 +154,7 @@ export function ProductDetail({
                     )}
                     <button
                       type="button"
-                      onClick={() => setFavorite((v) => !v)}
+                      onClick={() => void toggleFavorite(product.id)}
                       aria-label={favorite ? "Хадгалснаас хасах" : "Хадгалах"}
                       aria-pressed={favorite}
                       className={`absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-ink-950/60 backdrop-blur transition-colors ${

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { CartProvider } from "@/components/cart-context";
+import { FavoritesProvider } from "@/components/favorites-context";
 import { SessionProvider } from "@/components/session";
 import "./globals.css";
 
@@ -23,7 +24,9 @@ export default function RootLayout({
     <html lang="mn">
       <body>
         <SessionProvider>
-          <CartProvider>{children}</CartProvider>
+          <CartProvider>
+            <FavoritesProvider>{children}</FavoritesProvider>
+          </CartProvider>
         </SessionProvider>
       </body>
     </html>

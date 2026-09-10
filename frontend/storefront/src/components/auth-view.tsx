@@ -4,6 +4,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useCart } from "./cart-context";
+import { useFavorites } from "./favorites-context";
 import { useSession } from "./session";
 import { SiteHeader } from "./site-header";
 import { Panel, PanelHeader } from "./ui";
@@ -14,6 +15,7 @@ export function AuthView() {
   const { login, register, user } = useSession();
   // Зочны сагс нэвтрэхэд серверт нэгддэг тул шинэчилж авна
   const { reload: reloadCart } = useCart();
+  const { reload: reloadFavorites } = useFavorites();
   // URL-аас уншина. Толгойн "Нэвтрэх"/"Бүртгүүлэх" товч дарахад Next
   // энэ компонентыг дахин ачаалдаггүй тул зөвхөн эхлэх утга болгож
   // уншвал форм солигдохгүй үлддэг байв.
@@ -48,6 +50,7 @@ export function AuthView() {
         });
       }
       await reloadCart();
+      await reloadFavorites();
       // Хаанаас нэвтэрсэн бол тийш нь буцаана (жишээ нь checkout дундаас)
       const next = searchParams.get("next");
       router.push(next && next.startsWith("/") ? next : "/account/orders");

@@ -122,6 +122,7 @@ model User {
   updatedAt      DateTime      @updatedAt
 
   carts         Cart[]
+  favorites     Favorite[]
   orders        Order[]
   reviews       Review[]
   notifications Notification[]
@@ -240,6 +241,7 @@ model Product {
   variants   ProductVariant[]
   offers     Offer[]
   attributes AttributeValue[]
+  favorites  Favorite[]
   reviews    Review[]
   images     ProductImage[]
 
@@ -335,6 +337,24 @@ model Inventory {
 }
 
 /// Худалдан авалтын сагс
+/// Хадгалсан бараа. Сагстай ижил зарчмаар зочин `sessionId`-аар,
+/// нэвтэрсэн хэрэглэгч `userId`-аар хадгална; нэвтрэхэд зочны
+/// хадгалсан бараа нь хэрэглэгч рүү шилжинэ.
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessionId String?
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+  @@unique([sessionId, productId])
+  @@index([sessionId])
+  @@map("favorites")
+}
+
 model Cart {
   id        String   @id @default(cuid())
   userId    String?

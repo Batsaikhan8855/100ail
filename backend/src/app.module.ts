@@ -7,6 +7,7 @@ import { QueueModule } from "./common/queue/queue.module";
 import { AttributesModule } from "./modules/attributes/attributes.module";
 import { AuthModule } from "./modules/auth/auth.module";
 import { CartsModule } from "./modules/carts/carts.module";
+import { FavoritesModule } from "./modules/favorites/favorites.module";
 import { CategoriesModule } from "./modules/categories/categories.module";
 import { CommissionsModule } from "./modules/commissions/commissions.module";
 import { DeliveriesModule } from "./modules/deliveries/deliveries.module";
@@ -64,6 +65,7 @@ import { WarehousesModule } from "./modules/warehouses/warehouses.module";
     GeoModule,
 
     CartsModule,
+    FavoritesModule,
     OrdersModule,
     PaymentsModule,
     CommissionsModule,
