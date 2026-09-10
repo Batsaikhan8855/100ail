@@ -28,6 +28,7 @@ import {
 import { ProductThumb } from "./product-art";
 import { SiteHeader } from "./site-header";
 import { VehicleArt } from "./vehicle-art";
+import { VehicleBlueprint } from "./vehicle-blueprint";
 import { Panel, PanelHeader } from "./ui";
 
 export function CartView() {
@@ -478,24 +479,56 @@ function VehiclePicker({ group }: { group: SupplierGroup }) {
       </ul>
 
       {selected ? (
-        <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2 rounded-md border border-ink-700 bg-ink-900 px-3 py-2">
-          <span className="flex items-center gap-1.5 text-[11.5px] text-mute">
-            <TruckIcon className="h-3.5 w-3.5 text-brand" />
-            {plan?.chosen ? "Таны сонгосон" : "Санал болгож буй"}:{" "}
-            <span className="font-semibold text-[#c6ccd4]">
-              {selected.name}
+        <div className="mt-2.5 overflow-hidden rounded-md border border-ink-700 bg-ink-900">
+          <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-2">
+            <span className="flex items-center gap-1.5 text-[11.5px] text-mute">
+              <TruckIcon className="h-3.5 w-3.5 text-brand" />
+              {plan?.chosen ? "Таны сонгосон" : "Санал болгож буй"}:{" "}
+              <span className="font-semibold text-[#c6ccd4]">
+                {selected.name}
+              </span>
+              {plan && plan.trips > 1 ? ` · ${plan.trips} ачилт` : ""}
+              {plan?.limitedBy
+                ? ` · ${plan.limitedBy === "volume" ? "овроор" : "жингээр"} тодорсон`
+                : ""}
             </span>
-            {plan && plan.trips > 1 ? ` · ${plan.trips} ачилт` : ""}
-            {plan?.limitedBy
-              ? ` · ${plan.limitedBy === "volume" ? "овроор" : "жингээр"} тодорсон`
-              : ""}
-          </span>
-          <span className="text-[12.5px] text-mute">
-            Хүргэлт{" "}
-            <span className="text-[14px] font-bold text-brand">
-              {formatPrice(plan?.price ?? 0)}
+            <span className="text-[12.5px] text-mute">
+              Хүргэлт{" "}
+              <span className="text-[14px] font-bold text-brand">
+                {formatPrice(plan?.price ?? 0)}
+              </span>
             </span>
-          </span>
+          </div>
+
+          {/* Тэвшний хэмжээ ба ачаа хэр эзлэхийг нүдээр харуулна. Тэвшний
+              хэмжээгүй хуучин серверт энэ хэсэг гарахгүй. */}
+          {selected.volumeM3 > 0 ? (
+            <div className="grid gap-4 border-t border-ink-700 px-3 py-3 sm:grid-cols-[minmax(0,300px)_minmax(0,1fr)] sm:items-center">
+              <VehicleBlueprint
+                bed={selected.bed}
+                loadM3={group.volumeM3}
+                volumeM3={selected.volumeM3}
+              />
+              <div className="flex flex-col gap-2.5">
+                <FillBar
+                  label="Даац"
+                  value={group.weightKg}
+                  max={selected.capacityKg}
+                  text={`${group.weightEstimated ? "~" : ""}${formatWeight(
+                    group.weightKg,
+                  )} / ${formatWeight(selected.capacityKg)}`}
+                />
+                <FillBar
+                  label="Тэвш"
+                  value={group.volumeM3}
+                  max={selected.volumeM3}
+                  text={`${group.weightEstimated ? "~" : ""}${formatVolume(
+                    group.volumeM3,
+                  )} / ${formatVolume(selected.volumeM3)}`}
+                />
+              </div>
+            </div>
+          ) : null}
         </div>
       ) : null}
 
@@ -506,5 +539,47 @@ function VehiclePicker({ group }: { group: SupplierGroup }) {
         </p>
       ) : null}
     </section>
+  );
+}
+
+
+/**
+ * Даац, тэвшний дүүрэлт.
+ *
+ * Аль хязгаар нь эхлээд дүүрч байгааг харуулна: 40 м³ дулаалга нь
+ * жингээрээ 20% ч тэвшээрээ 100% дүүрдэг — энэ хоёр зураас зэрэгцэж
+ * байж л «яагаад том машин хэрэгтэй вэ» гэдэг ойлгогдоно.
+ */
+function FillBar({
+  label,
+  text,
+  value,
+  max,
+}: {
+  label: string;
+  text: string;
+  value: number;
+  max: number;
+}) {
+  const percent = max > 0 ? (value / max) * 100 : 0;
+  const over = percent > 100;
+
+  return (
+    <div>
+      <div className="flex items-baseline justify-between gap-2 text-[11.5px]">
+        <span className="text-mute">{label}</span>
+        <span className="font-medium text-[#c6ccd4]">{text}</span>
+      </div>
+      <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-ink-800">
+        <div
+          className={`h-full rounded-full ${over ? "bg-brand-lo" : "bg-brand"}`}
+          style={{ width: `${Math.min(100, percent)}%` }}
+        />
+      </div>
+      <p className="mt-0.5 text-[10.5px] text-mute-dim">
+        {Math.round(percent)}% дүүрнэ
+        {over ? " — нэг ачилтад багтахгүй" : ""}
+      </p>
+    </div>
   );
 }
