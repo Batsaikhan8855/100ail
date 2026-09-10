@@ -11,11 +11,26 @@
  * даруйд тэр нь давамгайлна.
  */
 
+/** Тэвшний дотор хэмжээ, метрээр */
+export interface VehicleBed {
+  lengthM: number;
+  widthM: number;
+  heightM: number;
+}
+
 /** Хүргэлтийн машины ангилал, даацаар нь эрэмбэлсэн */
 export interface Vehicle {
   id: string;
   name: string;
   capacityKg: number;
+  /**
+   * Тэвшний дотор хэмжээ. Хөнгөн ч овор ихтэй ачаа (дулаалгын хавтан,
+   * хоолой) даацаас өмнө тэвшинд багтахаа болих тул машиныг зөвхөн
+   * жингээр сонгож болохгүй.
+   */
+  bed: VehicleBed;
+  /** Тэвшний эзэлхүүн, м³ (`bed`-ээс тооцоолсон) */
+  volumeM3: number;
   /**
    * Улаанбаатар хот доторх нэг ачилтын үнэ (₮).
    *
@@ -26,21 +41,80 @@ export interface Vehicle {
   price: number;
 }
 
+/** Эзэлхүүнийг тэвшний хэмжээнээс бодож, нэг аравтын нарийвчлалд */
+const bedVolume = (bed: VehicleBed): number =>
+  Math.round(bed.lengthM * bed.widthM * bed.heightM * 10) / 10;
+
+const vehicle = (
+  id: string,
+  name: string,
+  capacityKg: number,
+  price: number,
+  bed: VehicleBed,
+): Vehicle => ({ id, name, capacityKg, price, bed, volumeM3: bedVolume(bed) });
+
 export const VEHICLES: Vehicle[] = [
-  { id: "porter", name: "Портер", capacityKg: 1000, price: 25_000 },
-  { id: "truck-3", name: "3 тонны ачааны машин", capacityKg: 3000, price: 45_000 },
-  { id: "truck-5", name: "5 тонны ачааны машин", capacityKg: 5000, price: 70_000 },
-  { id: "truck-10", name: "10 тонны ачааны машин", capacityKg: 10_000, price: 120_000 },
-  { id: "truck-20", name: "20 тонны чиргүүл", capacityKg: 20_000, price: 200_000 },
+  // Портер задгай тэвштэй тул өндрийг бодитоор нь (ачаа боох боломжтой
+  // хэмжээгээр) авсан
+  vehicle("porter", "Портер", 1000, 25_000, {
+    lengthM: 2.5,
+    widthM: 1.6,
+    heightM: 1.0,
+  }),
+  vehicle("truck-3", "3 тонны ачааны машин", 3000, 45_000, {
+    lengthM: 4.3,
+    widthM: 2.0,
+    heightM: 2.0,
+  }),
+  vehicle("truck-5", "5 тонны ачааны машин", 5000, 70_000, {
+    lengthM: 5.5,
+    widthM: 2.2,
+    heightM: 2.2,
+  }),
+  vehicle("truck-10", "10 тонны ачааны машин", 10_000, 120_000, {
+    lengthM: 7.5,
+    widthM: 2.4,
+    heightM: 2.5,
+  }),
+  vehicle("truck-20", "20 тонны чиргүүл", 20_000, 200_000, {
+    lengthM: 13.6,
+    widthM: 2.45,
+    heightM: 2.7,
+  }),
 ];
 
-/** Сонгосон машинаар хэдэн ачилт хийхийг бодно */
-export const tripsFor = (totalKg: number, vehicle: Vehicle): number =>
-  totalKg <= 0 ? 0 : Math.max(1, Math.ceil(totalKg / vehicle.capacityKg));
+/** Ачааны хэмжээ — жин ба овор хоёулаа */
+export interface Load {
+  kg: number;
+  m3: number;
+}
+
+/** Ачаа машинд нэг ачилтаар багтах эсэх — жин ба овор хоёул таарна */
+export const fitsIn = (load: Load, v: Vehicle): boolean =>
+  load.kg <= v.capacityKg && load.m3 <= v.volumeM3;
+
+/**
+ * Сонгосон машинаар хэдэн ачилт хийхийг бодно.
+ *
+ * Жин ба оврын аль хязгаарлагдмал нь ачилтын тоог тодорхойлно: 40 шоо
+ * метр дулаалга нь хөнгөн ч 3 тонны машинд (17 м³) хоёр удаа л багтана.
+ */
+export const tripsFor = (load: Load, v: Vehicle): number => {
+  if (load.kg <= 0 && load.m3 <= 0) return 0;
+  return Math.max(
+    1,
+    Math.ceil(load.kg / v.capacityKg),
+    Math.ceil(load.m3 / v.volumeM3),
+  );
+};
+
+/** Ачилтыг жин нь тодорхойлж байна уу, овор нь уу */
+export const limitedBy = (load: Load, v: Vehicle): "weight" | "volume" =>
+  load.m3 / v.volumeM3 > load.kg / v.capacityKg ? "volume" : "weight";
 
 /** Тухайн машинаар ачааг хүргэх нийт үнэ */
-export const shipmentPrice = (totalKg: number, vehicle: Vehicle): number =>
-  vehicle.price * tripsFor(totalKg, vehicle);
+export const shipmentPrice = (load: Load, v: Vehicle): number =>
+  v.price * tripsFor(load, v);
 
 /** id-гаар машиныг олно */
 export const vehicleById = (id: string | null | undefined): Vehicle | null =>
@@ -112,6 +186,72 @@ const UNIT_WEIGHTS: Record<string, number> = {
   "tools:*": 6,
 };
 
+/**
+ * Нэгж тутмын анхдагч овор (м³), `UNIT_WEIGHTS`-тэй ижил түлхүүртэй.
+ *
+ * Ачилтын байдлаар (өрж тавьсан) авсан ойролцоо утга: 50 кг цементийн
+ * шуудай ~0.035 м³, өрлөгийн тоосго ~0.002 м³, 50мм дулаалгын хавтан
+ * м² тутамд ~0.05 м³. Нийлүүлэгч `volumeM3` оруулсан бол тэр давамгайлна.
+ */
+const UNIT_VOLUMES: Record<string, number> = {
+  // Цемент, бетон
+  "cement:ш": 0.035,
+  "cement:шуудай": 0.035,
+  "cement:тн": 0.7,
+  "cement:м3": 1,
+  "cement:*": 0.035,
+
+  // Тоосго, блок
+  "brick:ш": 0.002,
+  "brick:м2": 0.12,
+  "brick:*": 0.002,
+
+  // Арматур, төмөр
+  "rebar:м": 0.0002,
+  "rebar:кг": 0.00013,
+  "rebar:тн": 0.13,
+  "rebar:ш": 0.002,
+  "rebar:*": 0.0002,
+
+  // Модон материал
+  "wood:м": 0.006,
+  "wood:м2": 0.02,
+  "wood:м3": 1,
+  "wood:ш": 0.02,
+  "wood:*": 0.02,
+
+  // Дээвэр
+  "roof:м2": 0.01,
+  "roof:ш": 0.04,
+  "roof:*": 0.02,
+
+  // Дулаалга — хөнгөн ч овор их
+  "insulation:м2": 0.05,
+  "insulation:м3": 1,
+  "insulation:ш": 0.15,
+  "insulation:*": 0.1,
+
+  // Сантехник
+  "plumbing:м": 0.005,
+  "plumbing:ш": 0.02,
+  "plumbing:*": 0.02,
+
+  // Цахилгаан
+  "electric:м": 0.0005,
+  "electric:ш": 0.005,
+  "electric:*": 0.005,
+
+  // Будаг
+  "paint:л": 0.0012,
+  "paint:кг": 0.001,
+  "paint:ш": 0.02,
+  "paint:*": 0.015,
+
+  // Багаж
+  "tools:ш": 0.03,
+  "tools:*": 0.03,
+};
+
 /** Ангилал, нэгжээр таамагласан нэгж тутмын жин (кг) */
 export function defaultUnitWeight(
   categoryIcon: string | null | undefined,
@@ -132,9 +272,33 @@ export function unitWeight(offer: {
   return defaultUnitWeight(offer.product?.category?.icon, offer.unit);
 }
 
+/** Ангилал, нэгжээр таамагласан нэгж тутмын овор (м³) */
+export function defaultUnitVolume(
+  categoryIcon: string | null | undefined,
+  unit: string | null | undefined,
+): number {
+  const icon = (categoryIcon ?? "tools").toLowerCase();
+  const key = (unit ?? "ш").toLowerCase().trim();
+  return UNIT_VOLUMES[`${icon}:${key}`] ?? UNIT_VOLUMES[`${icon}:*`] ?? 0.03;
+}
+
+/** Саналын нэгж тутмын овор: оруулсан утга байвал тэр, үгүй бол таамаг */
+export function unitVolume(offer: {
+  volumeM3?: number | null;
+  unit?: string | null;
+  product?: { category?: { icon?: string | null } | null } | null;
+}): number {
+  if (offer.volumeM3 && offer.volumeM3 > 0) return offer.volumeM3;
+  return defaultUnitVolume(offer.product?.category?.icon, offer.unit);
+}
+
 export interface ShipmentPlan {
   /** Нийт жин, кг */
   totalKg: number;
+  /** Нийт овор, м³ */
+  totalM3: number;
+  /** Машиныг жин нь тодорхойлсон уу, овор нь уу */
+  limitedBy: "weight" | "volume";
   /** Сонгогдсон машин. Хоосон ачаанд null */
   vehicle: Vehicle | null;
   /** Хэдэн удаагийн ачилт шаардлагатай */
@@ -148,19 +312,23 @@ export interface ShipmentPlan {
 }
 
 /**
- * Нийт жингээс хүргэлтийн төлөвлөгөө гаргана: багтах хамгийн жижиг
- * машиныг сонгож, хамгийн том машинаас хэтэрвэл ачилтын тоог бодно.
+ * Ачааны жин ба овроос хүргэлтийн төлөвлөгөө гаргана: хоёуланд нь багтах
+ * хамгийн жижиг машиныг сонгож, хамгийн том машинаас хэтэрвэл ачилтын
+ * тоог бодно.
  */
 export function planShipment(
-  totalKg: number,
+  load: Load,
   estimated = false,
   /** Худалдан авагчийн сонгосон машин — багтахгүй бол үл тоомсорлоно */
   preferred?: Vehicle | null,
 ): ShipmentPlan {
-  const kg = Math.max(0, Math.round(totalKg * 10) / 10);
-  if (kg <= 0)
+  const kg = Math.max(0, Math.round(load.kg * 10) / 10);
+  const m3 = Math.max(0, Math.round(load.m3 * 100) / 100);
+  if (kg <= 0 && m3 <= 0)
     return {
       totalKg: 0,
+      totalM3: 0,
+      limitedBy: "weight",
       vehicle: null,
       trips: 0,
       estimated,
@@ -168,24 +336,38 @@ export function planShipment(
       chosen: false,
     };
 
-  // Багтах хамгийн жижиг машин — санал болгох хувилбар
-  const fit = VEHICLES.find((vehicle) => kg <= vehicle.capacityKg);
+  const actual: Load = { kg, m3 };
+  // Жин ба овор хоёуланд нь багтах хамгийн жижиг машин — санал болгох нь
+  const fit = VEHICLES.find((v) => fitsIn(actual, v));
   const fallback = fit ?? VEHICLES[VEHICLES.length - 1];
 
   // Сонгосон машин ачаанд багтаж байвал л хүндэтгэнэ. Багтахгүй машин
   // сонгосон хэвээр үлдвэл хүргэлт биелэхгүй үнэ харагдана.
-  const chosen = preferred && preferred.capacityKg >= kg ? preferred : null;
+  const chosen = preferred && fitsIn(actual, preferred) ? preferred : null;
   const vehicle = chosen ?? fallback;
 
   return {
     totalKg: kg,
+    totalM3: m3,
+    limitedBy: limitedBy(actual, vehicle),
     vehicle,
-    trips: tripsFor(kg, vehicle),
+    trips: tripsFor(actual, vehicle),
     estimated,
-    price: shipmentPrice(kg, vehicle),
+    price: shipmentPrice(actual, vehicle),
     chosen: chosen !== null,
   };
 }
+
+/** Оврыг уншихад эвтэйхэн бичиглэл болгоно: 0.35 → "0.35 м³" */
+export function formatVolume(m3: number): string {
+  if (m3 >= 10) return `${Math.round(m3)} м³`;
+  if (m3 >= 1) return `${Number(m3.toFixed(1))} м³`;
+  return `${Number(m3.toFixed(2))} м³`;
+}
+
+/** Тэвшний хэмжээ: "4.3 × 2.0 × 2.0 м" */
+export const formatBed = (bed: VehicleBed): string =>
+  `${bed.lengthM} × ${bed.widthM} × ${bed.heightM} м`;
 
 /** Жинг уншихад эвтэйхэн бичиглэл болгоно: 2,400 кг → "2.4 т" */
 export function formatWeight(kg: number): string {

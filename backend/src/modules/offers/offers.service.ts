@@ -12,6 +12,8 @@ export interface OfferInput {
   unit?: string;
   /** Нэгж тутмын жин, кг — хүргэлтийн машиныг үүгээр тодорхойлно */
   weightKg?: number | null;
+  /** Нэгж тутмын овор, м³ — хөнгөн ачаа даацаас өмнө тэвшийг дүүргэдэг */
+  volumeM3?: number | null;
   deliveryPrice?: number;
   deliveryDays?: number | null;
   deliversTo?: string[];
@@ -51,6 +53,7 @@ export class OffersService {
       bulkMinQty: offer.bulkMinQty,
       unit: offer.unit,
       weightKg: offer.weightKg,
+      volumeM3: offer.volumeM3,
       deliveryPrice: offer.deliveryPrice,
       deliveryDays: offer.deliveryDays,
       deliversTo: offer.deliversTo,
@@ -86,6 +89,7 @@ export class OffersService {
         bulkMinQty: input.bulkMinQty ?? null,
         unit: input.unit ?? "ш",
         weightKg: input.weightKg ?? null,
+        volumeM3: input.volumeM3 ?? null,
         deliveryPrice: input.deliveryPrice ?? 0,
         deliveryDays: input.deliveryDays ?? null,
         deliversTo: input.deliversTo ?? [],
@@ -106,6 +110,7 @@ export class OffersService {
         bulkMinQty: input.bulkMinQty,
         unit: input.unit,
         weightKg: input.weightKg,
+        volumeM3: input.volumeM3,
         deliveryPrice: input.deliveryPrice,
         deliveryDays: input.deliveryDays,
         deliversTo: input.deliversTo,

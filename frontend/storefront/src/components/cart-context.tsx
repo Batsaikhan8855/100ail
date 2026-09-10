@@ -34,8 +34,9 @@ export interface SupplierGroup {
   lines: CartLine[];
   goodsTotal: number;
   total: number;
-  /** Бүлгийн нийт жин (кг) */
+  /** Бүлгийн нийт жин (кг) ба овор (м³) */
   weightKg: number;
+  volumeM3: number;
   /** Аль нэг мөрийн жин таамагласан бол */
   weightEstimated: boolean;
 }
@@ -57,6 +58,7 @@ export const groupBySupplier = (lines: CartLine[]): SupplierGroup[] => {
         goodsTotal: 0,
         total: 0,
         weightKg: 0,
+        volumeM3: 0,
         weightEstimated: false,
       };
       map.set(key, group);
@@ -64,6 +66,7 @@ export const groupBySupplier = (lines: CartLine[]): SupplierGroup[] => {
     group.lines.push(line);
     group.goodsTotal += lineTotal(line);
     group.weightKg += line.lineWeightKg ?? 0;
+    group.volumeM3 += line.lineVolumeM3 ?? 0;
     if (line.weightEstimated) group.weightEstimated = true;
     // Нэг нийлүүлэгчээс нэг удаа хүргэнэ: хамгийн өндөр хүргэлтийн үнийг авна
     group.deliveryPrice = Math.max(group.deliveryPrice, line.deliveryPrice ?? 0);
@@ -75,6 +78,7 @@ export const groupBySupplier = (lines: CartLine[]): SupplierGroup[] => {
     deliveryDays: group.deliveryDays || undefined,
     total: group.goodsTotal + group.deliveryPrice,
     weightKg: Math.round(group.weightKg * 10) / 10,
+    volumeM3: Math.round(group.volumeM3 * 100) / 100,
   }));
 };
 
@@ -101,6 +105,8 @@ interface ApiCartLine {
   stock: number;
   unitWeightKg: number;
   lineWeightKg: number;
+  unitVolumeM3: number;
+  lineVolumeM3: number;
   weightEstimated: boolean;
 }
 
@@ -111,12 +117,21 @@ export interface Vehicle {
   capacityKg: number;
   /** Улаанбаатар доторх нэг ачилтын тариф (₮) */
   price: number;
+  /** Тэвшний дотор хэмжээ, метрээр */
+  bed: { lengthM: number; widthM: number; heightM: number };
+  /** Тэвшний эзэлхүүн, м³ */
+  volumeM3: number;
 }
 
 /** Хүргэлтийн төлөвлөгөө — серверт тооцогдоно (common/logistics) */
 export interface Shipment {
   totalKg: number;
   label: string;
+  /** Нийт овор, м³ ба уншигдахуйц бичиглэл */
+  totalM3: number;
+  volumeLabel: string;
+  /** Машиныг жин нь тодорхойлсон уу, овор нь уу */
+  limitedBy: "weight" | "volume";
   trips: number;
   /** Жин нь таамагласан эсэх (нийлүүлэгч оруулаагүй) */
   estimated: boolean;
@@ -137,6 +152,8 @@ interface ApiCart {
   count: number;
   weightKg: number;
   weightLabel: string;
+  volumeM3: number;
+  volumeLabel: string;
   vehicles: Vehicle[];
 }
 
@@ -161,6 +178,8 @@ const toLine = (line: ApiCartLine): CartLine => ({
   stock: line.stock,
   unitWeightKg: line.unitWeightKg,
   lineWeightKg: line.lineWeightKg,
+  unitVolumeM3: line.unitVolumeM3,
+  lineVolumeM3: line.lineVolumeM3,
   weightEstimated: line.weightEstimated,
 });
 
@@ -179,9 +198,11 @@ interface CartContextValue {
   vehicleFor: (supplierId: string) => Vehicle | null;
   /** Худалдан авагч машинаа өөрөө солино (зөвхөн багтах машин) */
   setVehicle: (supplierId: string, vehicleId: string) => Promise<void>;
-  /** Сагсны нийт жин */
+  /** Сагсны нийт жин ба овор */
   weightKg: number;
   weightLabel: string;
+  volumeM3: number;
+  volumeLabel: string;
   loading: boolean;
   error: string | null;
   /** Ижил offer дахин нэмэгдвэл тоо хэмжээ нэмэгдэнэ */
@@ -201,6 +222,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [shipments, setShipments] = useState<Record<string, Shipment>>({});
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [weight, setWeight] = useState({ kg: 0, label: "" });
+  const [volume, setVolume] = useState({ m3: 0, label: "" });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -213,6 +235,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     );
     setVehicles(cart.vehicles ?? []);
     setWeight({ kg: cart.weightKg ?? 0, label: cart.weightLabel ?? "" });
+    setVolume({ m3: cart.volumeM3 ?? 0, label: cart.volumeLabel ?? "" });
     setError(null);
   }, []);
 
@@ -333,6 +356,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
       setVehicle,
       weightKg: weight.kg,
       weightLabel: weight.label,
+      volumeM3: volume.m3,
+      volumeLabel: volume.label,
       loading,
       error,
       addLine,
@@ -354,6 +379,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     shipments,
     vehicleFor,
     vehicles,
+    volume,
     weight,
   ]);
 

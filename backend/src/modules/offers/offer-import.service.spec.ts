@@ -52,6 +52,21 @@ describe("mapColumns", () => {
       unit: 2,
     });
   });
+
+  it("жин, овор хоёрыг хооронд нь андуурахгүй", () => {
+    expect(mapColumns(["Бараа", "Үнэ", "Нэгжийн жин", "Нэгжийн овор"])).toEqual({
+      product: 0,
+      price: 1,
+      weightKg: 2,
+      volumeM3: 3,
+    });
+    expect(mapColumns(["product", "price", "volume", "weight"])).toEqual({
+      product: 0,
+      price: 1,
+      volumeM3: 2,
+      weightKg: 3,
+    });
+  });
 });
 
 describe("parseAmount", () => {

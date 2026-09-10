@@ -30,3 +30,10 @@ export const formatWeight = (kg: number): string => {
   }
   return `${Math.round(kg * 10) / 10} кг`;
 };
+
+/** Ачааны овор: 0.35 -> "0.35 м³", 17.2 -> "17 м³" */
+export const formatVolume = (m3: number): string => {
+  if (m3 >= 10) return `${Math.round(m3)} м³`;
+  if (m3 >= 1) return `${Number(m3.toFixed(1))} м³`;
+  return `${Number(m3.toFixed(2))} м³`;
+};

@@ -119,6 +119,9 @@ export interface CartLine {
   /** Нэгжийн жин (кг) ба мөрийн нийт жин — серверт тооцогдоно */
   unitWeightKg?: number;
   lineWeightKg?: number;
+  /** Нэгжийн овор (м³) ба мөрийн нийт овор */
+  unitVolumeM3?: number;
+  lineVolumeM3?: number;
   /** Жин нь ангиллаар таамагласан утга эсэх */
   weightEstimated?: boolean;
 }

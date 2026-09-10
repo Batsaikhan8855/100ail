@@ -12,6 +12,7 @@ const COLUMN_ALIASES: Record<string, string[]> = {
   bulkMinQty: ["бөөний доод тоо", "бөөний тоо", "bulk min", "bulkminqty"],
   unit: ["нэгж", "хэмжих нэгж", "unit"],
   weightKg: ["жин", "жин кг", "нэгжийн жин", "weight", "weightkg"],
+  volumeM3: ["овор", "эзэлхүүн", "овор м3", "нэгжийн овор", "volume", "volumem3"],
   deliveryPrice: ["хүргэлтийн үнэ", "хүргэлт", "delivery price"],
   deliveryDays: ["хүргэх хоног", "хугацаа", "delivery days"],
   warehouse: ["агуулах", "салбар", "warehouse"],
@@ -104,6 +105,7 @@ export class OfferImportService {
       "бөөний доод тоо",
       "нэгж",
       "жин",
+      "овор",
       "хүргэлтийн үнэ",
       "хүргэх хоног",
       "агуулах",
@@ -119,6 +121,7 @@ export class OfferImportService {
         offer.bulkMinQty ?? "",
         offer.unit,
         offer.weightKg ?? "",
+        offer.volumeM3 ?? "",
         offer.deliveryPrice,
         offer.deliveryDays ?? "",
         inventory?.warehouse.name ?? "",
@@ -226,6 +229,9 @@ export class OfferImportService {
         // Нэгж тутмын жин — хүргэлтийн машиныг үүгээр тодорхойлно.
         // Хоосон бол ангилал, нэгжээр таамаглана (common/logistics).
         weightKg: parseAmount(cell("weightKg")) ?? undefined,
+        // Овор нь жингээс тусдаа хязгаар: 40 м³ дулаалга хөнгөн ч
+        // 3 тонны тэвшинд (17 м³) нэг ачилтаар багтахгүй
+        volumeM3: parseAmount(cell("volumeM3")) ?? undefined,
         deliveryPrice: parseAmount(cell("deliveryPrice")) ?? undefined,
         deliveryDays: parseAmount(cell("deliveryDays")),
       };
@@ -249,6 +255,7 @@ export class OfferImportService {
               bulkMinQty: data.bulkMinQty,
               unit: data.unit ?? "ш",
               weightKg: data.weightKg,
+              volumeM3: data.volumeM3,
               deliveryPrice: data.deliveryPrice ?? 0,
               deliveryDays: data.deliveryDays,
             },

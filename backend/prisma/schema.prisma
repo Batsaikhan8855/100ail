@@ -289,6 +289,9 @@ model Offer {
   /// Нэгж тутмын жин, кг. Хоосон бол ангилал, нэгжээр таамаглана
   /// (`common/logistics`) — хүргэлтийн машиныг үүгээр тодорхойлно.
   weightKg      Float?
+  /// Нэгж тутмын овор, м³. Хоосон бол ангилал, нэгжээр таамаглана —
+  /// хөнгөн ч овор ихтэй ачаа даацаас өмнө тэвшийг дүүргэдэг.
+  volumeM3      Float?
   deliveryPrice Int             @default(0)
   deliveryDays  Int?
   deliversTo    String[]        @default([])

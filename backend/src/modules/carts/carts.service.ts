@@ -5,7 +5,9 @@ import { StorageService } from "../storage/storage.service";
 import {
   VEHICLES,
   formatWeight,
+  formatVolume,
   planShipment,
+  unitVolume,
   unitWeight,
   vehicleById,
 } from "../../common/logistics/logistics";
@@ -189,6 +191,7 @@ export class CartsService {
         (a, b) => b.quantity - a.quantity,
       )[0];
       const lineUnitWeight = unitWeight(item.offer);
+      const lineUnitVolume = unitVolume(item.offer);
 
       return {
         offerId: item.offerId,
@@ -213,8 +216,11 @@ export class CartsService {
         lineTotal: unitPrice * item.qty,
         unitWeightKg: lineUnitWeight,
         lineWeightKg: Math.round(lineUnitWeight * item.qty * 10) / 10,
-        /** Жин нь таамагласан эсэх (нийлүүлэгч оруулаагүй) */
-        weightEstimated: !item.offer.weightKg,
+        // Хөнгөн ч овор ихтэй ачаа даацаас өмнө тэвшийг дүүргэдэг
+        unitVolumeM3: lineUnitVolume,
+        lineVolumeM3: Math.round(lineUnitVolume * item.qty * 100) / 100,
+        /** Жин, овор нь таамагласан эсэх (нийлүүлэгч оруулаагүй) */
+        weightEstimated: !item.offer.weightKg || !item.offer.volumeM3,
         deliveryPrice: item.offer.deliveryPrice,
         deliveryDays: item.offer.deliveryDays,
         location: main?.warehouse.city ?? null,
@@ -233,6 +239,7 @@ export class CartsService {
         lines: typeof lines;
         goodsTotal: number;
         weightKg: number;
+        volumeM3: number;
         weightEstimated: boolean;
         total: number;
       }
@@ -248,12 +255,14 @@ export class CartsService {
         lines: [] as typeof lines,
         goodsTotal: 0,
         weightKg: 0,
+        volumeM3: 0,
         weightEstimated: false,
         total: 0,
       };
       group.lines.push(line);
       group.goodsTotal += line.lineTotal;
       group.weightKg += line.lineWeightKg;
+      group.volumeM3 += line.lineVolumeM3;
       if (line.weightEstimated) group.weightEstimated = true;
       // Нэг нийлүүлэгчээс нэг удаа хүргэнэ
       group.deliveryPrice = Math.max(group.deliveryPrice, line.deliveryPrice);
@@ -267,7 +276,7 @@ export class CartsService {
     const choice = CartsService.vehicleChoice(cart);
     const groups = [...groupMap.values()].map((group) => {
       const shipment = planShipment(
-        group.weightKg,
+        { kg: group.weightKg, m3: group.volumeM3 },
         group.weightEstimated,
         vehicleById(choice[group.supplierId]),
       );
@@ -278,7 +287,11 @@ export class CartsService {
         ...group,
         deliveryPrice,
         total: group.goodsTotal + deliveryPrice,
-        shipment: { ...shipment, label: formatWeight(shipment.totalKg) },
+        shipment: {
+          ...shipment,
+          label: formatWeight(shipment.totalKg),
+          volumeLabel: formatVolume(shipment.totalM3),
+        },
       };
     });
 
@@ -286,6 +299,8 @@ export class CartsService {
     const deliveryTotal = groups.reduce((sum, g) => sum + g.deliveryPrice, 0);
     const weightKg =
       Math.round(groups.reduce((s, g) => s + g.weightKg, 0) * 10) / 10;
+    const volumeM3 =
+      Math.round(groups.reduce((s, g) => s + g.volumeM3, 0) * 100) / 100;
 
     return {
       id: cart.id,
@@ -298,6 +313,8 @@ export class CartsService {
       total: goodsTotal + deliveryTotal,
       weightKg,
       weightLabel: formatWeight(weightKg),
+      volumeM3,
+      volumeLabel: formatVolume(volumeM3),
       // Худалдан авагч машинаа өөрөө сонгож болохын тулд бүх ангиллыг
       // даацынх нь хамт өгнө. Тохирох нь `shipment.vehicle`.
       vehicles: VEHICLES,

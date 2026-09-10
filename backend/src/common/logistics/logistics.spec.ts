@@ -1,8 +1,12 @@
 import {
+  defaultUnitVolume,
   defaultUnitWeight,
+  formatBed,
+  formatVolume,
   formatWeight,
   planShipment,
   shipmentPrice,
+  unitVolume,
   unitWeight,
   vehicleById,
   VEHICLES,
@@ -53,8 +57,10 @@ describe("logistics", () => {
 
   describe("planShipment", () => {
     it("хоосон ачаанд машин сонгохгүй", () => {
-      expect(planShipment(0)).toEqual({
+      expect(planShipment({ kg: 0, m3: 0 })).toEqual({
         totalKg: 0,
+        totalM3: 0,
+        limitedBy: "weight",
         vehicle: null,
         trips: 0,
         estimated: false,
@@ -64,14 +70,14 @@ describe("logistics", () => {
     });
 
     it("багтах хамгийн жижиг машиныг сонгоно", () => {
-      expect(planShipment(800).vehicle?.id).toBe("porter");
-      expect(planShipment(1000).vehicle?.id).toBe("porter");
-      expect(planShipment(1001).vehicle?.id).toBe("truck-3");
-      expect(planShipment(4500).vehicle?.id).toBe("truck-5");
+      expect(planShipment({ kg: 800, m3: 0 }).vehicle?.id).toBe("porter");
+      expect(planShipment({ kg: 1000, m3: 0 }).vehicle?.id).toBe("porter");
+      expect(planShipment({ kg: 1001, m3: 0 }).vehicle?.id).toBe("truck-3");
+      expect(planShipment({ kg: 4500, m3: 0 }).vehicle?.id).toBe("truck-5");
     });
 
     it("40 шуудай цемент 3 тонны машин шаардана", () => {
-      const plan = planShipment(40 * 50);
+      const plan = planShipment({ kg: 40 * 50, m3: 0 });
       expect(plan.totalKg).toBe(2000);
       expect(plan.vehicle?.id).toBe("truck-3");
       expect(plan.trips).toBe(1);
@@ -79,7 +85,7 @@ describe("logistics", () => {
 
     it("хамгийн том машинаас хэтэрвэл ачилтын тоог бодно", () => {
       const largest = VEHICLES[VEHICLES.length - 1];
-      const plan = planShipment(largest.capacityKg * 2 + 1);
+      const plan = planShipment({ kg: largest.capacityKg * 2 + 1, m3: 0 });
       expect(plan.vehicle?.id).toBe(largest.id);
       expect(plan.trips).toBe(3);
     });
@@ -99,29 +105,29 @@ describe("logistics", () => {
     const truck5 = vehicleById("truck-5")!;
 
     it("сонгосон машины тарифаар үнэ гарна", () => {
-      expect(shipmentPrice(240, porter)).toBe(porter.price);
-      expect(shipmentPrice(240, truck5)).toBe(truck5.price);
+      expect(shipmentPrice({ kg: 240, m3: 0 }, porter)).toBe(porter.price);
+      expect(shipmentPrice({ kg: 240, m3: 0 }, truck5)).toBe(truck5.price);
     });
 
     it("даацаас хэтэрсэн ачаанд ачилтын тоогоор үржинэ", () => {
       // 2.5 т ачаа 1 тонны Портероор 3 удаа явна
-      expect(shipmentPrice(2500, porter)).toBe(porter.price * 3);
+      expect(shipmentPrice({ kg: 2500, m3: 0 }, porter)).toBe(porter.price * 3);
     });
 
     it("сонгосон машин багтвал түүгээр, эс бөгөөс санал болгосноор", () => {
-      const chosen = planShipment(240, false, truck5);
+      const chosen = planShipment({ kg: 240, m3: 0 }, false, truck5);
       expect(chosen.vehicle?.id).toBe("truck-5");
       expect(chosen.price).toBe(truck5.price);
       expect(chosen.chosen).toBe(true);
 
       // 2.5 т ачаа Портерт багтахгүй тул санал болгосон машин руу буцна
-      const tooSmall = planShipment(2500, false, porter);
+      const tooSmall = planShipment({ kg: 2500, m3: 0 }, false, porter);
       expect(tooSmall.vehicle?.id).toBe("truck-3");
       expect(tooSmall.chosen).toBe(false);
     });
 
     it("хоосон ачаанд үнэ 0", () => {
-      expect(planShipment(0).price).toBe(0);
+      expect(planShipment({ kg: 0, m3: 0 }).price).toBe(0);
     });
 
     it("vehicleById танихгүй id-д null өгнө", () => {
@@ -134,7 +140,7 @@ describe("logistics", () => {
       // нэг удаа (45,000₮) явуулах нь хямд. Санал болгох нь үргэлж
       // хамгийн хямд сонголт байх ёстой.
       for (const kg of [50, 900, 1100, 2500, 3200, 4800, 9000, 12_000]) {
-        const plan = planShipment(kg);
+        const plan = planShipment({ kg, m3: 0 });
         const cheapestThatFits = Math.min(
           ...VEHICLES.filter((v) => v.capacityKg >= kg).map((v) => v.price),
         );
@@ -148,6 +154,86 @@ describe("logistics", () => {
       expect(VEHICLES.every((v) => v.price > 0)).toBe(true);
       const prices = VEHICLES.map((v) => v.price);
       expect([...prices].sort((a, b) => a - b)).toEqual(prices);
+    });
+  });
+
+  describe("овор", () => {
+    it("бүх машин тэвшийн хэмжээ, эзэлхүүнтэй", () => {
+      for (const v of VEHICLES) {
+        expect(v.bed.lengthM).toBeGreaterThan(0);
+        expect(v.volumeM3).toBeCloseTo(
+          v.bed.lengthM * v.bed.widthM * v.bed.heightM,
+          1,
+        );
+      }
+      // Даац өсөхийн хэрээр тэвш ч томордог
+      const vols = VEHICLES.map((v) => v.volumeM3);
+      expect([...vols].sort((a, b) => a - b)).toEqual(vols);
+    });
+
+    it("хөнгөн ч овор ихтэй ачаанд том машин сонгоно", () => {
+      // 300 м² дулаалга: 450 кг (Портерын даацад багтана) ба 15 м³
+      // (Портерын 4 м³ тэвшинд багтахгүй)
+      const load = { kg: 450, m3: 15 };
+      const porter = vehicleById("porter")!;
+      expect(load.kg).toBeLessThan(porter.capacityKg);
+      expect(load.m3).toBeGreaterThan(porter.volumeM3);
+
+      const plan = planShipment(load);
+      expect(plan.vehicle?.id).toBe("truck-3");
+      expect(plan.limitedBy).toBe("volume");
+      expect(plan.trips).toBe(1);
+    });
+
+    it("оврын хязгаараар ачилтын тоог бодно", () => {
+      // 200 м³ ачаа хөнгөн ч чиргүүлийн 90 м³ тэвшинд 3 удаа л багтана
+      const largest = VEHICLES[VEHICLES.length - 1];
+      const plan = planShipment({ kg: 1000, m3: 200 });
+      expect(plan.vehicle?.id).toBe(largest.id);
+      expect(plan.limitedBy).toBe("volume");
+      expect(plan.trips).toBe(Math.ceil(200 / largest.volumeM3));
+      expect(plan.price).toBe(largest.price * plan.trips);
+    });
+
+    it("овор багтахгүй бол дараагийн том машин руу шилжинэ", () => {
+      // 40 м³ нь 3 тонны машины 17 м³ тэвшинд багтахгүй тул 10 тонных
+      const plan = planShipment({ kg: 100, m3: 40 }, false, vehicleById("truck-3"));
+      expect(plan.chosen).toBe(false);
+      expect(plan.vehicle?.id).toBe("truck-10");
+      expect(plan.trips).toBe(1);
+    });
+
+    it("овор багтахгүй машиныг сонгуулахгүй", () => {
+      const plan = planShipment({ kg: 450, m3: 15 }, false, vehicleById("porter"));
+      expect(plan.chosen).toBe(false);
+      expect(plan.vehicle?.id).toBe("truck-3");
+    });
+
+    it("жин давамгайлбал limitedBy нь weight", () => {
+      const plan = planShipment({ kg: 2900, m3: 1 });
+      expect(plan.limitedBy).toBe("weight");
+    });
+
+    it("defaultUnitVolume ангилал, нэгжээр овор олно", () => {
+      expect(defaultUnitVolume("cement", "ш")).toBe(0.035);
+      expect(defaultUnitVolume("insulation", "м2")).toBe(0.05);
+      expect(defaultUnitVolume("mystery", "багц")).toBe(0.03);
+    });
+
+    it("unitVolume нь нийлүүлэгчийн утгыг илүүд үзнэ", () => {
+      expect(unitVolume({ volumeM3: 2, unit: "ш" })).toBe(2);
+      expect(
+        unitVolume({ unit: "ш", product: { category: { icon: "cement" } } }),
+      ).toBe(0.035);
+    });
+
+    it("formatVolume, formatBed уншигдахуйц", () => {
+      expect(formatVolume(0.35)).toBe("0.35 м³");
+      expect(formatVolume(4)).toBe("4 м³");
+      expect(formatVolume(17.2)).toBe("17 м³");
+      expect(formatBed({ lengthM: 4.3, widthM: 2, heightM: 2 })).toBe(
+        "4.3 × 2 × 2 м",
+      );
     });
   });
 });
