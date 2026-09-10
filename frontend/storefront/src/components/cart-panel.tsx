@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { CartLine } from "@/data/catalog";
 import { TRUST_ITEMS } from "@/data/catalog";
-import { lineTotal, lineUnitPrice } from "./cart-context";
+import { lineTotal, lineUnitPrice, useCart } from "./cart-context";
 import { formatPrice } from "@/lib/format";
 import {
   ArrowRightIcon,
@@ -11,10 +11,54 @@ import {
   CloseIcon,
   MinusIcon,
   PlusIcon,
+  TruckIcon,
   TRUST_ICONS,
 } from "./icons";
 import { Panel, PanelHeader } from "./ui";
 import { ProductArt } from "./product-art";
+
+/**
+ * Ачааны жин ба гарах машин.
+ *
+ * Барилгын материалын хувьд «ямар машин ирэх вэ» гэдэг нь худалдан
+ * авагчийн хамгийн эхний асуулт (хашаанд багтах уу, кран хэрэгтэй юү).
+ * Нийлүүлэгч тус бүр өөрийн ачаагаа зөөдөг тул машин нь бүлэг тутамд
+ * сонгогдоно; энд нийт дүнг харуулна.
+ */
+function ShipmentSummary() {
+  const { weightKg, weightLabel, shipments } = useCart();
+  if (weightKg <= 0) return null;
+
+  const plans = Object.values(shipments).filter((plan) => plan.vehicle);
+  if (plans.length === 0) return null;
+
+  const estimated = plans.some((plan) => plan.estimated);
+  const trips = plans.reduce((sum, plan) => sum + plan.trips, 0);
+  const vehicles =
+    plans.length === 1
+      ? (plans[0].vehicle?.name ?? "")
+      : `${plans.length} машин`;
+
+  return (
+    <div className="mb-3 flex items-start gap-2.5 rounded-md border border-ink-700 bg-ink-900 px-3 py-2.5">
+      <TruckIcon className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
+      <div className="min-w-0 text-[12px] leading-relaxed">
+        <p className="text-[#c6ccd4]">
+          Нийт жин{" "}
+          <span className="font-semibold text-white">{weightLabel}</span>
+          {" — "}
+          <span className="font-semibold text-brand">{vehicles}</span>
+          {trips > plans.length ? ` (${trips} ачилт)` : ""}
+        </p>
+        {estimated ? (
+          <p className="mt-0.5 text-[11px] text-mute-dim">
+            Жин нь ангиллаар таамагласан ойролцоо утга
+          </p>
+        ) : null}
+      </div>
+    </div>
+  );
+}
 
 export function CartPanel({
   lines,
@@ -106,6 +150,8 @@ export function CartPanel({
       </div>
 
       <div className="border-t border-ink-700 px-4 py-3.5">
+        <ShipmentSummary />
+
         <div className="flex items-baseline justify-between">
           <span className="text-[13px] text-[#c2c7cf]">Нийт дүн:</span>
           <span className="text-[22px] font-bold text-brand">

@@ -1,6 +1,11 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
 import { PrismaService } from "../../common/prisma.service";
+import {
+  formatWeight,
+  planShipment,
+  unitWeight,
+} from "../../common/logistics/logistics";
 
 const cartInclude = {
   items: {
@@ -8,7 +13,8 @@ const cartInclude = {
       offer: {
         include: {
           supplier: true,
-          product: true,
+          // Ангиллын дүрс нь жингийн таамагт хэрэгтэй (common/logistics)
+          product: { include: { category: true } },
           inventory: { include: { warehouse: true } },
         },
       },
@@ -28,7 +34,14 @@ export class CartsService {
   constructor(private readonly prisma: PrismaService) {}
 
   /** Бөөний үнэ нь зөвхөн доод тоо хэмжээнээс дээш захиалгад хүчинтэй */
-  static unitPrice(offer: { price: number; bulkPrice: number | null; bulkMinQty: number | null }, qty: number) {
+  static unitPrice(
+    offer: {
+      price: number;
+      bulkPrice: number | null;
+      bulkMinQty: number | null;
+    },
+    qty: number,
+  ) {
     return offer.bulkPrice && offer.bulkMinQty && qty >= offer.bulkMinQty
       ? offer.bulkPrice
       : offer.price;
@@ -90,7 +103,10 @@ export class CartsService {
         (sum, row) => sum + Math.max(0, row.quantity - row.reserved),
         0,
       );
-      const main = [...item.offer.inventory].sort((a, b) => b.quantity - a.quantity)[0];
+      const main = [...item.offer.inventory].sort(
+        (a, b) => b.quantity - a.quantity,
+      )[0];
+      const lineUnitWeight = unitWeight(item.offer);
 
       return {
         offerId: item.offerId,
@@ -109,6 +125,10 @@ export class CartsService {
         qty: item.qty,
         unit: item.offer.unit,
         lineTotal: unitPrice * item.qty,
+        unitWeightKg: lineUnitWeight,
+        lineWeightKg: Math.round(lineUnitWeight * item.qty * 10) / 10,
+        /** Жин нь таамагласан эсэх (нийлүүлэгч оруулаагүй) */
+        weightEstimated: !item.offer.weightKg,
         deliveryPrice: item.offer.deliveryPrice,
         deliveryDays: item.offer.deliveryDays,
         location: main?.warehouse.city ?? null,
@@ -126,6 +146,8 @@ export class CartsService {
         deliveryDays: number | null;
         lines: typeof lines;
         goodsTotal: number;
+        weightKg: number;
+        weightEstimated: boolean;
         total: number;
       }
     >();
@@ -139,23 +161,36 @@ export class CartsService {
         deliveryDays: null,
         lines: [] as typeof lines,
         goodsTotal: 0,
+        weightKg: 0,
+        weightEstimated: false,
         total: 0,
       };
       group.lines.push(line);
       group.goodsTotal += line.lineTotal;
+      group.weightKg += line.lineWeightKg;
+      if (line.weightEstimated) group.weightEstimated = true;
       // Нэг нийлүүлэгчээс нэг удаа хүргэнэ
       group.deliveryPrice = Math.max(group.deliveryPrice, line.deliveryPrice);
-      group.deliveryDays = Math.max(group.deliveryDays ?? 0, line.deliveryDays ?? 0) || null;
+      group.deliveryDays =
+        Math.max(group.deliveryDays ?? 0, line.deliveryDays ?? 0) || null;
       groupMap.set(line.supplierId, group);
     }
 
-    const groups = [...groupMap.values()].map((group) => ({
-      ...group,
-      total: group.goodsTotal + group.deliveryPrice,
-    }));
+    // Нийлүүлэгч бүр өөрийн ачаагаа тусад нь хүргэдэг тул машиныг
+    // бүлэг тутамд сонгоно
+    const groups = [...groupMap.values()].map((group) => {
+      const shipment = planShipment(group.weightKg, group.weightEstimated);
+      return {
+        ...group,
+        total: group.goodsTotal + group.deliveryPrice,
+        shipment: { ...shipment, label: formatWeight(shipment.totalKg) },
+      };
+    });
 
     const goodsTotal = groups.reduce((sum, g) => sum + g.goodsTotal, 0);
     const deliveryTotal = groups.reduce((sum, g) => sum + g.deliveryPrice, 0);
+    const weightKg =
+      Math.round(groups.reduce((s, g) => s + g.weightKg, 0) * 10) / 10;
 
     return {
       id: cart.id,
@@ -166,6 +201,8 @@ export class CartsService {
       goodsTotal,
       deliveryTotal,
       total: goodsTotal + deliveryTotal,
+      weightKg,
+      weightLabel: formatWeight(weightKg),
     };
   }
 
@@ -174,14 +211,16 @@ export class CartsService {
   }
 
   async addItem(owner: CartOwner, offerId: string, qty: number) {
-    if (qty < 1) throw new BadRequestException("Тоо хэмжээ 1-ээс багагүй байна");
+    if (qty < 1)
+      throw new BadRequestException("Тоо хэмжээ 1-ээс багагүй байна");
     const cart = await this.getOrCreate(owner);
 
     const offer = await this.prisma.offer.findUnique({
       where: { id: offerId },
       include: { inventory: true },
     });
-    if (!offer || !offer.active) throw new BadRequestException("Санал олдсонгүй");
+    if (!offer || !offer.active)
+      throw new BadRequestException("Санал олдсонгүй");
 
     const available = offer.inventory.reduce(
       (sum, row) => sum + Math.max(0, row.quantity - row.reserved),
@@ -190,7 +229,9 @@ export class CartsService {
     const existing = cart.items.find((item) => item.offerId === offerId);
     const nextQty = (existing?.qty ?? 0) + qty;
     if (nextQty > available) {
-      throw new BadRequestException(`Үлдэгдэл хүрэлцэхгүй байна (${available})`);
+      throw new BadRequestException(
+        `Үлдэгдэл хүрэлцэхгүй байна (${available})`,
+      );
     }
 
     await this.prisma.cartItem.upsert({
@@ -215,7 +256,9 @@ export class CartsService {
 
   async removeItem(owner: CartOwner, offerId: string) {
     const cart = await this.getOrCreate(owner);
-    await this.prisma.cartItem.deleteMany({ where: { cartId: cart.id, offerId } });
+    await this.prisma.cartItem.deleteMany({
+      where: { cartId: cart.id, offerId },
+    });
     return this.get(owner);
   }
 

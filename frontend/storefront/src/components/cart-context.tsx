@@ -91,13 +91,26 @@ interface ApiCartLine {
   stock: number;
 }
 
+/** Хүргэлтийн төлөвлөгөө — серверт тооцогдоно (common/logistics) */
+export interface Shipment {
+  totalKg: number;
+  label: string;
+  trips: number;
+  /** Жин нь таамагласан эсэх (нийлүүлэгч оруулаагүй) */
+  estimated: boolean;
+  vehicle: { id: string; name: string; capacityKg: number } | null;
+}
+
 interface ApiCart {
   id: string;
   lines: ApiCartLine[];
+  groups: { supplierId: string; shipment: Shipment }[];
   goodsTotal: number;
   deliveryTotal: number;
   total: number;
   count: number;
+  weightKg: number;
+  weightLabel: string;
 }
 
 const toLine = (line: ApiCartLine): CartLine => ({
@@ -127,6 +140,11 @@ interface CartContextValue {
   goodsTotal: number;
   deliveryTotal: number;
   total: number;
+  /** Нийлүүлэгч тус бүрийн хүргэлтийн төлөвлөгөө */
+  shipments: Record<string, Shipment>;
+  /** Сагсны нийт жин */
+  weightKg: number;
+  weightLabel: string;
   loading: boolean;
   error: string | null;
   /** Ижил offer дахин нэмэгдвэл тоо хэмжээ нэмэгдэнэ */
@@ -141,11 +159,21 @@ const CartContext = createContext<CartContextValue | null>(null);
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [lines, setLines] = useState<CartLine[]>([]);
+  // Машины сонголтыг сервер тооцдог тул логикийг энд давхардуулахгүй.
+  // Сагс өөрчлөгдөх бүрд хариунаас шинэчлэгдэнэ.
+  const [shipments, setShipments] = useState<Record<string, Shipment>>({});
+  const [weight, setWeight] = useState({ kg: 0, label: "" });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const apply = useCallback((cart: ApiCart) => {
     setLines(cart.lines.map(toLine));
+    setShipments(
+      Object.fromEntries(
+        (cart.groups ?? []).map((group) => [group.supplierId, group.shipment]),
+      ),
+    );
+    setWeight({ kg: cart.weightKg ?? 0, label: cart.weightLabel ?? "" });
     setError(null);
   }, []);
 
@@ -227,6 +255,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
       goodsTotal,
       deliveryTotal,
       total: goodsTotal + deliveryTotal,
+      shipments,
+      weightKg: weight.kg,
+      weightLabel: weight.label,
       loading,
       error,
       addLine,
@@ -235,7 +266,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
       clear,
       reload,
     };
-  }, [addLine, clear, error, lines, loading, reload, removeLine, setQty]);
+  }, [
+    addLine,
+    clear,
+    error,
+    lines,
+    loading,
+    reload,
+    removeLine,
+    setQty,
+    shipments,
+    weight,
+  ]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }

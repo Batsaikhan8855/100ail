@@ -282,6 +282,9 @@ model Offer {
   bulkPrice     Int?
   bulkMinQty    Int?
   unit          String          @default("ш")
+  /// Нэгж тутмын жин, кг. Хоосон бол ангилал, нэгжээр таамаглана
+  /// (`common/logistics`) — хүргэлтийн машиныг үүгээр тодорхойлно.
+  weightKg      Float?
   deliveryPrice Int             @default(0)
   deliveryDays  Int?
   deliversTo    String[]        @default([])

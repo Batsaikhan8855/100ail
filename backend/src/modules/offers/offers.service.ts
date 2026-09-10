@@ -10,6 +10,8 @@ export interface OfferInput {
   bulkPrice?: number | null;
   bulkMinQty?: number | null;
   unit?: string;
+  /** Нэгж тутмын жин, кг — хүргэлтийн машиныг үүгээр тодорхойлно */
+  weightKg?: number | null;
   deliveryPrice?: number;
   deliveryDays?: number | null;
   deliversTo?: string[];
@@ -48,6 +50,7 @@ export class OffersService {
       bulkPrice: offer.bulkPrice,
       bulkMinQty: offer.bulkMinQty,
       unit: offer.unit,
+      weightKg: offer.weightKg,
       deliveryPrice: offer.deliveryPrice,
       deliveryDays: offer.deliveryDays,
       deliversTo: offer.deliversTo,
@@ -82,6 +85,7 @@ export class OffersService {
         bulkPrice: input.bulkPrice ?? null,
         bulkMinQty: input.bulkMinQty ?? null,
         unit: input.unit ?? "ш",
+        weightKg: input.weightKg ?? null,
         deliveryPrice: input.deliveryPrice ?? 0,
         deliveryDays: input.deliveryDays ?? null,
         deliversTo: input.deliversTo ?? [],
@@ -101,6 +105,7 @@ export class OffersService {
         bulkPrice: input.bulkPrice,
         bulkMinQty: input.bulkMinQty,
         unit: input.unit,
+        weightKg: input.weightKg,
         deliveryPrice: input.deliveryPrice,
         deliveryDays: input.deliveryDays,
         deliversTo: input.deliversTo,
