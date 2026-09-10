@@ -107,6 +107,8 @@ export interface ApiCategory {
     name: string;
     icon: string | null;
     productCount: number;
+    /** Тухайн дэд ангиллыг төлөөлөх барааны зураг */
+    image: string | null;
   }[];
 }
 

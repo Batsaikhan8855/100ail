@@ -38,6 +38,8 @@ export function SiteHeader({
   const openRow = onCategoryChange
     ? rows.find((row) => row.slug === openCategory && row.children.length > 0)
     : undefined;
+  // Зураггүй дэд ангилалд эцэг ангиллын вектор дүрсийг харуулна
+  const OpenIcon = openRow ? CATEGORY_ICONS[toCategory(openRow).icon] : null;
 
   return (
     <header className="sticky top-0 z-30 border-b border-ink-700 bg-ink-900/95 backdrop-blur">
@@ -201,19 +203,21 @@ export function SiteHeader({
       {/* Задарсан дэд ангиллын мөр. Ангилалд 40 хүртэл дэд ангилал байдаг
           тул хэвтээ гүйлгэнэ. */}
       {openRow && onCategoryChange ? (
-        <div className="border-t border-ink-700 bg-ink-850">
-          <div className="mx-auto flex max-w-[1660px] items-center gap-2 overflow-x-auto px-4 py-2.5 xl:px-6">
+        <div className="border-t border-ink-700 bg-ink-950">
+          <div className="mx-auto flex max-w-[1660px] items-stretch gap-2.5 overflow-x-auto px-4 py-4 xl:px-6">
             <button
               type="button"
               onClick={() => onCategoryChange(openRow.slug)}
               aria-pressed={activeCategory === openRow.slug}
-              className={`shrink-0 rounded-md border px-3 py-1.5 text-[12px] font-semibold whitespace-nowrap transition-colors ${
+              className={`flex h-[104px] w-[104px] shrink-0 flex-col items-center justify-center rounded-md border px-2 text-center text-[11px] font-bold uppercase leading-tight tracking-wide transition-colors ${
                 activeCategory === openRow.slug
-                  ? "border-brand bg-brand/12 text-brand"
-                  : "border-ink-700 text-[#aeb4bd] hover:border-ink-600 hover:text-white"
+                  ? "border-brand bg-brand/10 text-brand"
+                  : "border-ink-700 bg-ink-850 text-[#aeb4bd] hover:border-ink-600 hover:text-white"
               }`}
             >
-              Бүгдийг харах
+              Бүгдийг
+              <br />
+              харах
             </button>
 
             {openRow.children.map((child) => {
@@ -226,15 +230,37 @@ export function SiteHeader({
                     onCategoryChange(chosen ? openRow.slug : child.slug)
                   }
                   aria-pressed={chosen}
-                  className={`flex shrink-0 items-center gap-2 rounded-md border px-3 py-1.5 text-[12px] whitespace-nowrap transition-colors ${
+                  title={`${child.name} — ${formatNumber(child.productCount)} бараа`}
+                  className={`group/tile flex h-[104px] w-[104px] shrink-0 flex-col overflow-hidden rounded-md border bg-ink-850 transition-colors ${
                     chosen
-                      ? "border-brand bg-brand/12 text-brand"
-                      : "border-ink-700 text-[#aeb4bd] hover:border-ink-600 hover:text-white"
+                      ? "border-brand"
+                      : "border-ink-700 hover:border-ink-600"
                   }`}
                 >
-                  {child.name}
-                  <span className={chosen ? "text-brand/70" : "text-mute-dim"}>
-                    {formatNumber(child.productCount)}
+                  <span className="relative flex h-[58px] w-full items-center justify-center bg-gradient-to-b from-ink-700/40 to-ink-900">
+                    {child.image ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={child.image}
+                        alt=""
+                        loading="lazy"
+                        className="h-full w-full object-contain p-1.5"
+                      />
+                    ) : OpenIcon ? (
+                      <OpenIcon className="h-7 w-7 text-mute-dim" />
+                    ) : null}
+                    <span className="absolute right-1 top-1 rounded bg-ink-950/80 px-1 text-[9.5px] font-semibold text-mute-dim">
+                      {formatNumber(child.productCount)}
+                    </span>
+                  </span>
+                  <span
+                    className={`flex flex-1 items-center justify-center px-1.5 text-center text-[10px] font-bold uppercase leading-[1.15] tracking-wide transition-colors ${
+                      chosen
+                        ? "text-brand"
+                        : "text-[#aeb4bd] group-hover/tile:text-white"
+                    }`}
+                  >
+                    <span className="line-clamp-2">{child.name}</span>
                   </span>
                 </button>
               );
