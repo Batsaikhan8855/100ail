@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import {
   formatNumber,
   formatPrice,
@@ -198,34 +199,11 @@ export function CartView() {
                             ) : null}
                           </div>
 
-                          <div className="flex items-center overflow-hidden rounded-md border border-ink-700 bg-ink-900">
-                            <button
-                              type="button"
-                              aria-label={`${line.productName} тоо хэмжээ хасах`}
-                              onClick={() => setQty(line.offerId, line.qty - 1)}
-                              className="flex h-9 w-9 items-center justify-center text-mute transition-colors hover:text-white"
-                            >
-                              <MinusIcon className="h-4 w-4" />
-                            </button>
-                            <input
-                              type="number"
-                              min={1}
-                              value={line.qty}
-                              aria-label={`${line.productName} тоо хэмжээ`}
-                              onChange={(e) =>
-                                setQty(line.offerId, Number(e.target.value))
-                              }
-                              className="h-9 w-14 border-x border-ink-700 bg-transparent text-center text-[13px] font-semibold text-white outline-none"
-                            />
-                            <button
-                              type="button"
-                              aria-label={`${line.productName} тоо хэмжээ нэмэх`}
-                              onClick={() => setQty(line.offerId, line.qty + 1)}
-                              className="flex h-9 w-9 items-center justify-center text-mute transition-colors hover:text-white"
-                            >
-                              <PlusIcon className="h-4 w-4" />
-                            </button>
-                          </div>
+                          <QtyStepper
+                            label={line.productName}
+                            qty={line.qty}
+                            onChange={(qty) => setQty(line.offerId, qty)}
+                          />
 
                           <span className="w-[104px] shrink-0 text-right text-[14px] font-bold text-white">
                             {formatPrice(lineTotal(line))}
@@ -580,6 +558,69 @@ function FillBar({
         {Math.round(percent)}% дүүрнэ
         {over ? " — нэг ачилтад багтахгүй" : ""}
       </p>
+    </div>
+  );
+}
+
+
+/**
+ * Тоо хэмжээний товч.
+ *
+ * Сагсанд арав гаруй мөр байхад тоо 4-өөс 5 болсныг анзаарахад хэцүү тул
+ * өөрчлөгдөх бүрд хүрээ, тоог богино хугацаанд тодруулна.
+ */
+function QtyStepper({
+  label,
+  qty,
+  onChange,
+}: {
+  label: string;
+  qty: number;
+  onChange: (qty: number) => void;
+}) {
+  const [bumped, setBumped] = useState(false);
+  const previous = useRef(qty);
+
+  useEffect(() => {
+    if (previous.current === qty) return;
+    previous.current = qty;
+    setBumped(true);
+    const timer = setTimeout(() => setBumped(false), 450);
+    return () => clearTimeout(timer);
+  }, [qty]);
+
+  return (
+    <div
+      className={`flex items-center overflow-hidden rounded-md border bg-ink-900 transition-colors duration-300 ${
+        bumped ? "border-brand" : "border-ink-700"
+      }`}
+    >
+      <button
+        type="button"
+        aria-label={`${label} тоо хэмжээ хасах`}
+        onClick={() => onChange(qty - 1)}
+        className="flex h-9 w-9 items-center justify-center text-mute transition-colors hover:text-white"
+      >
+        <MinusIcon className="h-4 w-4" />
+      </button>
+      <input
+        type="number"
+        min={1}
+        value={qty}
+        aria-label={`${label} тоо хэмжээ`}
+        onChange={(event) => onChange(Number(event.target.value))}
+        className={`h-9 w-14 border-x bg-transparent text-center text-[13px] font-semibold outline-none transition-colors duration-300 ${
+          bumped ? "border-brand text-brand" : "border-ink-700 text-white"
+        }`}
+      />
+      <button
+        type="button"
+        aria-label={`${label} тоо хэмжээ нэмэх`}
+        onClick={() => onChange(qty + 1)}
+        className="flex h-9 w-9 items-center justify-center text-mute transition-colors hover:text-white"
+      >
+        <PlusIcon className="h-4 w-4" />
+      </button>
     </div>
   );
 }

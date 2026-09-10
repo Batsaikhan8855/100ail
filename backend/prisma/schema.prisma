@@ -393,6 +393,10 @@ model CartItem {
   offerId String
   offer   Offer  @relation(fields: [offerId], references: [id], onDelete: Cascade)
   qty     Int    @default(1)
+  /// Сагсанд нэмсэн дараалал. Тоо хэмжээ засахад мөр байрандаа үлдэхийн
+  /// тулд эрэмбийг үүгээр тогтооно (эс бөгөөс PostgreSQL шинэчилсэн
+  /// мөрийг өөр байранд буцааж, жагсаалт холилдоно).
+  createdAt DateTime @default(now())
 
   @@unique([cartId, offerId])
   @@map("cart_items")
