@@ -118,10 +118,41 @@ export interface Vehicle {
   /** Улаанбаатар доторх нэг ачилтын тариф (₮) */
   price: number;
   /** Тэвшний дотор хэмжээ, метрээр */
-  bed: { lengthM: number; widthM: number; heightM: number };
-  /** Тэвшний эзэлхүүн, м³ */
+  bed: VehicleBed;
+  /** Тэвшний эзэлхүүн, м³. Сервер өгөөгүй бол 0 — оврыг тооцохгүй */
   volumeM3: number;
 }
+
+/** Тэвшний дотор хэмжээ, метрээр */
+export interface VehicleBed {
+  lengthM: number;
+  widthM: number;
+  heightM: number;
+}
+
+/** Оврын талбарууд нь хуучин серверээс ирэхгүй байж болно */
+interface ApiVehicle extends Omit<Vehicle, "bed" | "volumeM3"> {
+  bed?: VehicleBed | null;
+  volumeM3?: number | null;
+}
+
+const ZERO_BED: VehicleBed = { lengthM: 0, widthM: 0, heightM: 0 };
+
+/**
+ * Машины оврыг гүйцээнэ. Хуучин сервер `bed`, `volumeM3` буцаахгүй тул
+ * тэднийг 0 болгож, хүргэлтийг өмнөх шигээ зөвхөн жингээр бодуулна —
+ * сагс бүхэлдээ уншихаа болихоос тэр нь дээр.
+ */
+const toVehicle = (vehicle: ApiVehicle): Vehicle => {
+  const bed = vehicle.bed ?? ZERO_BED;
+  return {
+    ...vehicle,
+    bed,
+    volumeM3:
+      vehicle.volumeM3 ??
+      Math.round(bed.lengthM * bed.widthM * bed.heightM * 10) / 10,
+  };
+};
 
 /** Хүргэлтийн төлөвлөгөө — серверт тооцогдоно (common/logistics) */
 export interface Shipment {
@@ -130,8 +161,8 @@ export interface Shipment {
   /** Нийт овор, м³ ба уншигдахуйц бичиглэл */
   totalM3: number;
   volumeLabel: string;
-  /** Машиныг жин нь тодорхойлсон уу, овор нь уу */
-  limitedBy: "weight" | "volume";
+  /** Машиныг жин нь тодорхойлсон уу, овор нь уу. Хуучин серверт хоосон */
+  limitedBy?: "weight" | "volume";
   trips: number;
   /** Жин нь таамагласан эсэх (нийлүүлэгч оруулаагүй) */
   estimated: boolean;
@@ -154,7 +185,7 @@ interface ApiCart {
   weightLabel: string;
   volumeM3: number;
   volumeLabel: string;
-  vehicles: Vehicle[];
+  vehicles: ApiVehicle[];
 }
 
 const toLine = (line: ApiCartLine): CartLine => ({
@@ -233,7 +264,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         (cart.groups ?? []).map((group) => [group.supplierId, group.shipment]),
       ),
     );
-    setVehicles(cart.vehicles ?? []);
+    setVehicles((cart.vehicles ?? []).map(toVehicle));
     setWeight({ kg: cart.weightKg ?? 0, label: cart.weightLabel ?? "" });
     setVolume({ m3: cart.volumeM3 ?? 0, label: cart.volumeLabel ?? "" });
     setError(null);

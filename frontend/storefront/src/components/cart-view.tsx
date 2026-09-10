@@ -118,11 +118,15 @@ export function CartView() {
                           {group.weightEstimated ? "~" : ""}
                           {formatWeight(group.weightKg)}
                         </span>
-                        <span className="text-mute-dim">·</span>
-                        <span className="font-semibold text-[#c6ccd4]">
-                          {group.weightEstimated ? "~" : ""}
-                          {formatVolume(group.volumeM3)}
-                        </span>
+                        {group.volumeM3 > 0 ? (
+                          <>
+                            <span className="text-mute-dim">·</span>
+                            <span className="font-semibold text-[#c6ccd4]">
+                              {group.weightEstimated ? "~" : ""}
+                              {formatVolume(group.volumeM3)}
+                            </span>
+                          </>
+                        ) : null}
                       </span>
                     ) : null}
                   </div>
@@ -285,12 +289,14 @@ export function CartView() {
                             {weightLabel}
                           </dd>
                         </div>
-                        <div className="flex items-baseline justify-between">
-                          <dt className="text-mute">Ачааны овор</dt>
-                          <dd className="font-medium text-white">
-                            {volumeLabel || formatVolume(volumeM3)}
-                          </dd>
-                        </div>
+                        {volumeM3 > 0 ? (
+                          <div className="flex items-baseline justify-between">
+                            <dt className="text-mute">Ачааны овор</dt>
+                            <dd className="font-medium text-white">
+                              {volumeLabel || formatVolume(volumeM3)}
+                            </dd>
+                          </div>
+                        ) : null}
                       </>
                     ) : null}
                     <div className="mt-1 flex items-baseline justify-between border-t border-ink-700 pt-3">
@@ -356,8 +362,11 @@ function VehiclePicker({ group }: { group: SupplierGroup }) {
         </h3>
         <p className="text-[11.5px] text-mute-dim">
           {group.weightEstimated ? "~" : ""}
-          {formatWeight(group.weightKg)} · {group.weightEstimated ? "~" : ""}
-          {formatVolume(group.volumeM3)} ачаанд тохирохыг сонгоно уу
+          {formatWeight(group.weightKg)}
+          {group.volumeM3 > 0
+            ? ` · ${group.weightEstimated ? "~" : ""}${formatVolume(group.volumeM3)}`
+            : ""}{" "}
+          ачаанд тохирохыг сонгоно уу
         </p>
       </div>
 
@@ -367,9 +376,12 @@ function VehiclePicker({ group }: { group: SupplierGroup }) {
         className="mt-2.5 grid gap-2 sm:grid-cols-3 xl:grid-cols-5"
       >
         {vehicles.map((vehicle) => {
-          // Жин ба овор хоёул багтаж байж л нэг ачилтаар явна
+          // Жин ба овор хоёул багтаж байж л нэг ачилтаар явна. Хуучин
+          // сервер тэвшний хэмжээг өгөхгүй (volumeM3 = 0) — тэр үед
+          // оврын хязгаарыг тооцохгүй, өмнөх шигээ зөвхөн жингээр.
+          const hasVolume = vehicle.volumeM3 > 0;
           const fitsWeight = vehicle.capacityKg >= group.weightKg;
-          const fitsVolume = vehicle.volumeM3 >= group.volumeM3;
+          const fitsVolume = !hasVolume || vehicle.volumeM3 >= group.volumeM3;
           const fits = fitsWeight && fitsVolume;
           const isRecommended = vehicle.id === recommended?.id;
           const active = selected?.id === vehicle.id;
@@ -381,7 +393,7 @@ function VehiclePicker({ group }: { group: SupplierGroup }) {
             ? (plan?.trips ?? 1)
             : Math.max(
                 Math.ceil(group.weightKg / vehicle.capacityKg),
-                Math.ceil(group.volumeM3 / vehicle.volumeM3),
+                hasVolume ? Math.ceil(group.volumeM3 / vehicle.volumeM3) : 0,
               );
           const price = fits || isRecommended ? vehicle.price * trips : null;
 
@@ -415,13 +427,15 @@ function VehiclePicker({ group }: { group: SupplierGroup }) {
                   {vehicle.name}
                 </span>
                 <span className="text-[11px] text-mute-dim">
-                  Даац {formatWeight(vehicle.capacityKg)} ·{" "}
-                  {formatVolume(vehicle.volumeM3)}
+                  Даац {formatWeight(vehicle.capacityKg)}
+                  {hasVolume ? ` · ${formatVolume(vehicle.volumeM3)}` : ""}
                 </span>
-                <span className="text-[10.5px] text-mute-dim">
-                  Тэвш {vehicle.bed.lengthM}×{vehicle.bed.widthM}×
-                  {vehicle.bed.heightM} м
-                </span>
+                {hasVolume ? (
+                  <span className="text-[10.5px] text-mute-dim">
+                    Тэвш {vehicle.bed.lengthM}×{vehicle.bed.widthM}×
+                    {vehicle.bed.heightM} м
+                  </span>
+                ) : null}
                 <span
                   className={`text-[12px] font-bold ${
                     price === null
@@ -472,7 +486,7 @@ function VehiclePicker({ group }: { group: SupplierGroup }) {
               {selected.name}
             </span>
             {plan && plan.trips > 1 ? ` · ${plan.trips} ачилт` : ""}
-            {plan
+            {plan?.limitedBy
               ? ` · ${plan.limitedBy === "volume" ? "овроор" : "жингээр"} тодорсон`
               : ""}
           </span>
