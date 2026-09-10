@@ -16,6 +16,7 @@ import {
   UserRole,
 } from "@prisma/client";
 import { PrismaService } from "../../common/prisma.service";
+import { CITY_POINTS } from "../deliveries/route";
 import type { AuthUser } from "../../common/decorators/current-user.decorator";
 import { CartsService, type CartOwner } from "../carts/carts.service";
 import { NotificationsService } from "../notifications/notifications.service";
@@ -126,6 +127,18 @@ export class OrdersService {
         }
 
         if (!pickup) {
+          // Замын эхлэл нь ачаа гарах агуулах, төгсгөл нь хүргэх хаяг.
+          // Хаягийн координат байхгүй бол хотын төвөөр орлуулна —
+          // хянах зураг дээр чиглэл харагдахад хангалттай.
+          const warehouse = await tx.warehouse.findFirst({
+            where: {
+              supplierId: group.supplierId,
+              lat: { not: null },
+              lng: { not: null },
+            },
+          });
+          const city = CITY_POINTS[dto.city] ?? CITY_POINTS["Улаанбаатар"];
+
           await tx.delivery.create({
             data: {
               supplierOrderId: supplierOrder.id,
@@ -133,6 +146,10 @@ export class OrdersService {
               address: dto.address,
               city: dto.city,
               status: DeliveryStatus.PENDING,
+              originLat: warehouse?.lat ?? city.lat,
+              originLng: warehouse?.lng ?? city.lng,
+              destLat: dto.lat ?? city.lat + 0.045,
+              destLng: dto.lng ?? city.lng + 0.055,
             },
           });
         }

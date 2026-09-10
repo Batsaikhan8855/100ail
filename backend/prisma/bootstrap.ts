@@ -16,6 +16,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as zlib from "zlib";
 import { PrismaClient } from "@prisma/client";
+import { IMPORT_VERSION } from "./import-barilga";
 
 const run = (args: string[]): void => {
   execFileSync(process.execPath, args, { stdio: "inherit" });
@@ -43,8 +44,13 @@ function expectedProducts(): number {
 async function main(): Promise<void> {
   const prisma = new PrismaClient();
   let products = 0;
+  let importedVersion = 0;
   try {
     products = await prisma.product.count();
+    const marker = await prisma.appSetting.findUnique({
+      where: { key: "catalogImportVersion" },
+    });
+    importedVersion = Number(marker?.value ?? 0);
   } finally {
     await prisma.$disconnect();
   }
@@ -56,8 +62,13 @@ async function main(): Promise<void> {
   // `FORCE_IMPORT=1` хувьсагчаар нэг удаа албадаж болно.
   const forced = process.env.FORCE_IMPORT === "1";
 
-  // Бүрэн орсон бол дахин ажиллуулах шаардлагагүй
-  if (!forced && expected > 0 && products >= expected) {
+  // Импортын дүрэм өөрчлөгдсөн бол каталогийг дахин боловсруулна —
+  // эс бөгөөс дүрэм зассан ч (жишээ нь үнийн доод хязгаар) хуучин
+  // өгөгдөл амьд дээр үлдэж, гар аргаар албадахыг хүлээнэ.
+  const stale = importedVersion < IMPORT_VERSION;
+
+  // Бүрэн орсон, дүрэм ч хэвээр бол дахин ажиллуулах шаардлагагүй
+  if (!forced && !stale && expected > 0 && products >= expected) {
     console.log(`[bootstrap] ${products} бараа бүрэн байна — алгаслаа`);
     return;
   }
@@ -66,13 +77,19 @@ async function main(): Promise<void> {
   // үргэлжлүүлнэ (seed нь өгөгдлийг арчих тул дахин ажиллуулж болохгүй).
   // Үнэгүй тарифын instance унтахад импорт таслагдаж дутуу үлдэж болзошгүй
   // тул энэ шалгалт нь дараагийн эхлэлд ажлыг дуусгана.
-  if (forced && products > 0) {
-    console.log("[bootstrap] FORCE_IMPORT=1 — каталогийг дахин боловсруулна");
+  if (products > 0 && (forced || stale)) {
+    console.log(
+      forced
+        ? "[bootstrap] FORCE_IMPORT=1 — каталогийг дахин боловсруулна"
+        : `[bootstrap] Импортын дүрэм шинэчлэгдсэн (${importedVersion} → ${IMPORT_VERSION}) — каталогийг дахин боловсруулна`,
+    );
   }
   if (products === 0) {
-    console.log("[bootstrap] Мэдээллийн сан хоосон — суурь өгөгдөл бэлтгэж байна");
+    console.log(
+      "[bootstrap] Мэдээллийн сан хоосон — суурь өгөгдөл бэлтгэж байна",
+    );
     run([path.join(__dirname, "seed.js")]);
-  } else {
+  } else if (!forced && !stale) {
     console.log(
       `[bootstrap] Каталог дутуу (${products}/${expected}) — импортыг үргэлжлүүлж байна`,
     );

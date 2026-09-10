@@ -3,6 +3,7 @@ import { DeliveryStatus, NotificationType } from "@prisma/client";
 import { PrismaService } from "../../common/prisma.service";
 import { NotificationsService } from "../notifications/notifications.service";
 import type { AuthUser } from "../../common/decorators/current-user.decorator";
+import { deliveryPosition } from "./route";
 
 @Injectable()
 export class DeliveriesService {
@@ -33,6 +34,8 @@ export class DeliveriesService {
       dispatchedAt: delivery.dispatchedAt,
       deliveredAt: delivery.deliveredAt,
       updatedAt: delivery.updatedAt,
+      // Ачаа хаана явааг зураг дээр харуулна (GPS хүртэлх тооцоолол)
+      position: deliveryPosition(delivery),
       supplier: delivery.supplierOrder.supplier.name,
       orderCode: delivery.supplierOrder.order.code,
       supplierOrderCode: delivery.supplierOrder.code,

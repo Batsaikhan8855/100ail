@@ -337,6 +337,17 @@ model Inventory {
 }
 
 /// Худалдан авалтын сагс
+/// Системийн тохиргоо, төлөв. Одоогоор каталогийн импортын хувилбарыг
+/// хадгална — импортын дүрэм (үнийн хязгаар, ангиллын буулгалт) өөрчлөгдвөл
+/// хувилбар нэмэгдэж, дараагийн эхлэлд каталог дахин боловсруулагдана.
+model AppSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+
+  @@map("app_settings")
+}
+
 /// Хадгалсан бараа. Сагстай ижил зарчмаар зочин `sessionId`-аар,
 /// нэвтэрсэн хэрэглэгч `userId`-аар хадгална; нэвтрэхэд зочны
 /// хадгалсан бараа нь хэрэглэгч рүү шилжинэ.
@@ -499,6 +510,13 @@ model Delivery {
   city            String
   dispatchedAt    DateTime?
   deliveredAt     DateTime?
+  /// Хүргэлтийн эхлэх (агуулах) ба очих (хаяг) цэг. Замын явцыг
+  /// эдгээрийн хооронд тооцно — GPS төхөөрөмж холбогдох хүртэлх
+  /// завсрын шийдэл (`deliveries.position`).
+  originLat       Float?
+  originLng       Float?
+  destLat         Float?
+  destLng         Float?
   updatedAt       DateTime       @updatedAt
 
   @@map("deliveries")
