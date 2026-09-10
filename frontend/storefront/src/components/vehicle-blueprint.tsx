@@ -686,20 +686,25 @@ function SideView({
     return `${d} L${x(from)} ${y(floor)}`;
   };
 
+  /** Тэвшний булангийн бөөрөнхийлөлт */
+  const r = Math.min(0.12, bed.heightM * 0.06);
+
   const outline = box
     ? `M${x(0)} ${y(floor)}
-       L${x(0)} ${y(cabTop * 0.86)}
-       Q${x(0)} ${y(cabTop)} ${x(cabL * 0.16)} ${y(cabTop)}
+       C${x(-0.02)} ${y(cabTop * 0.34)} ${x(-0.02)} ${y(cabTop * 0.6)} ${x(0)} ${y(cabTop * 0.84)}
+       C${x(0.02)} ${y(cabTop * 0.97)} ${x(cabL * 0.06)} ${y(cabTop)} ${x(cabL * 0.17)} ${y(cabTop)}
        L${x(cabL)} ${y(cabTop)}
-       L${x(cabL)} ${y(T)}
-       L${x(L)} ${y(T)}
+       L${x(cabL)} ${y(T - r)}
+       Q${x(cabL)} ${y(T)} ${x(cabL + r)} ${y(T)}
+       L${x(L - r)} ${y(T)}
+       Q${x(L)} ${y(T)} ${x(L)} ${y(T - r)}
        L${x(L)} ${y(deck)}
        L${x(cabL)} ${y(deck)}
        L${x(cabL)} ${y(floor)}
        ${underside(0, cabL)} Z`
     : `M${x(0)} ${y(floor)}
-       L${x(0)} ${y(T * 0.62)}
-       Q${x(0)} ${y(T)} ${x(cabL * 0.26)} ${y(T)}
+       C${x(-0.03)} ${y(T * 0.34)} ${x(-0.03)} ${y(T * 0.46)} ${x(0.03)} ${y(T * 0.56)}
+       C${x(0.09)} ${y(T * 0.68)} ${x(cabL * 0.08)} ${y(T * 0.94)} ${x(cabL * 0.17)} ${y(T)}
        L${x(cabL)} ${y(T)}
        L${x(cabL)} ${y(bodyTop)}
        L${x(L)} ${y(bodyTop)}
@@ -743,10 +748,10 @@ function SideView({
 
       {/* Хажуугийн цонх ба хаалга */}
       <path
-        d={`M${x(cabL * 0.14)} ${y(cabTop * 0.93)}
-            L${x(cabL * 0.88)} ${y(cabTop * 0.93)}
-            L${x(cabL * 0.88)} ${y(cabTop * 0.62)}
-            L${x(cabL * 0.14)} ${y(cabTop * 0.62)} Z`}
+        d={`M${x(cabL * 0.24)} ${y(cabTop * 0.93)}
+            L${x(cabL * 0.86)} ${y(cabTop * 0.93)}
+            L${x(cabL * 0.86)} ${y(cabTop * 0.64)}
+            L${x(cabL * 0.28)} ${y(cabTop * 0.64)} Z`}
         fill="none"
         stroke={DETAIL}
         strokeWidth="0.9"
@@ -799,13 +804,13 @@ function SideView({
 
       {/* Шавар хамгаалагч — хойд дугуйн ард */}
       {axles.length > 0 ? (
-        <line
-          x1={x(axles[axles.length - 1] + wheelR * 1.15)}
-          y1={y(floor)}
-          x2={x(axles[axles.length - 1] + wheelR * 1.15)}
-          y2={y(wheelR * 0.25)}
-          stroke={DETAIL}
-          strokeWidth="0.9"
+        <rect
+          x={x(axles[axles.length - 1] + archR * 0.92)}
+          y={y(floor * 0.62)}
+          width={Math.max(1.5, 0.06 * s)}
+          height={(floor * 0.62 - wheelR * 0.2) * s}
+          fill={DETAIL}
+          opacity="0.5"
         />
       ) : null}
 
@@ -827,6 +832,23 @@ function SideView({
               />
             );
           })}
+          {/* Дээд ба доод хаяавч — хос шугам гүнзгийрүүлнэ */}
+          <line
+            x1={x(cabL)}
+            y1={y(T - bed.heightM * 0.09)}
+            x2={x(L)}
+            y2={y(T - bed.heightM * 0.09)}
+            stroke={DETAIL}
+            strokeWidth="0.8"
+          />
+          <line
+            x1={x(cabL)}
+            y1={y(deck + bed.heightM * 0.07)}
+            x2={x(L)}
+            y2={y(deck + bed.heightM * 0.07)}
+            stroke={DETAIL}
+            strokeWidth="0.8"
+          />
           <line
             x1={x(L - 0.08)}
             y1={y(T)}
@@ -873,6 +895,35 @@ function SideView({
         />
       ) : null}
 
+      {/* Дугуйн хаалт — их биен дээр товойсон нуман хаяавч */}
+      {axles.map((at) => (
+        <path
+          key={`arch-${at}`}
+          d={`M${x(at - archR * 1.16)} ${y(floor)}
+              A ${archR * 1.16 * s} ${archR * 1.16 * s} 0 0 1 ${x(
+                at + archR * 1.16,
+              )} ${y(floor)}`}
+          fill="none"
+          stroke={DETAIL}
+          strokeWidth="0.9"
+        />
+      ))}
+
+      {/* Чиргүүлийн урд тулгуур */}
+      {shape === "semi"
+        ? [cabL + 3.4, cabL + 3.75].map((at) => (
+            <line
+              key={at}
+              x1={x(at)}
+              y1={y(deck)}
+              x2={x(at)}
+              y2={y(wheelR * 0.7)}
+              stroke={DETAIL}
+              strokeWidth="0.9"
+            />
+          ))
+        : null}
+
       {axles.map((at) => (
         <g key={at}>
           <circle
@@ -881,16 +932,26 @@ function SideView({
             r={wheelR * s}
             fill="none"
             stroke={BODY}
-            strokeWidth="1.3"
+            strokeWidth="1.4"
+          />
+          {/* Дугуйн ул */}
+          <circle
+            cx={x(at)}
+            cy={y(wheelR)}
+            r={wheelR * 0.84 * s}
+            fill="none"
+            stroke={DETAIL}
+            strokeWidth="0.7"
           />
           <circle
             cx={x(at)}
             cy={y(wheelR)}
-            r={wheelR * 0.42 * s}
+            r={wheelR * 0.44 * s}
             fill="none"
             stroke={DETAIL}
             strokeWidth="0.9"
           />
+          <circle cx={x(at)} cy={y(wheelR)} r={wheelR * 0.13 * s} fill={DETAIL} />
         </g>
       ))}
     </g>
