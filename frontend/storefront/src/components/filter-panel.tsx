@@ -32,10 +32,35 @@ export function FilterPanel({
   openGroups: Record<string, boolean>;
   onToggleGroup: (groupId: string) => void;
 }) {
-  const span = Math.max(1, range.max - range.min);
-  const step = Math.max(1000, Math.round(span / 100 / 1000) * 1000);
-  const leftPct = ((price.min - range.min) / span) * 100;
-  const rightPct = ((price.max - range.min) / span) * 100;
+  // Ангиллын үнэ 200₮-өөс тэрбум₮ хүртэл тэлдэг (гар багажнаас цамхагт
+  // кран хүртэл). Шугаман гулсуур дээр ийм хүрээг чирэх боломжгүй —
+  // 1% нь арван сая₮ үсэрнэ. Тиймээс байрлалыг логарифмаар буулгана:
+  // гулсуурын алхам бүр үнийг үржүүлнэ, хуваахгүй.
+  const LOG_STEPS = 1000;
+  const lo = Math.max(1, range.min);
+  const hi = Math.max(lo + 1, range.max);
+  const logLo = Math.log(lo);
+  const logSpan = Math.log(hi) - logLo;
+
+  /** Үнэ → гулсуурын байрлал (0–LOG_STEPS) */
+  const toPos = (value: number) => {
+    const clamped = Math.min(Math.max(value, lo), hi);
+    return Math.round(((Math.log(clamped) - logLo) / logSpan) * LOG_STEPS);
+  };
+  /** Гулсуурын байрлал → үнэ, уншихад эвтэйхэн болгож дугуйруулна */
+  const toValue = (pos: number) => {
+    const raw = Math.exp(logLo + (pos / LOG_STEPS) * logSpan);
+    if (pos >= LOG_STEPS) return range.max;
+    if (pos <= 0) return range.min;
+    const magnitude = Math.pow(
+      10,
+      Math.max(0, Math.floor(Math.log10(raw)) - 1),
+    );
+    return Math.round(raw / magnitude) * magnitude;
+  };
+
+  const leftPct = (toPos(price.min) / LOG_STEPS) * 100;
+  const rightPct = (toPos(price.max) / LOG_STEPS) * 100;
 
   const clampMin = (value: number) => Math.min(value, price.max);
   const clampMax = (value: number) => Math.max(value, price.min);
@@ -93,24 +118,30 @@ export function FilterPanel({
           <input
             type="range"
             aria-label="Доод үнэ"
-            min={range.min}
-            max={range.max}
-            step={step}
-            value={price.min}
+            min={0}
+            max={LOG_STEPS}
+            step={1}
+            value={toPos(price.min)}
             onChange={(e) =>
-              onPriceChange({ ...price, min: clampMin(Number(e.target.value)) })
+              onPriceChange({
+                ...price,
+                min: clampMin(toValue(Number(e.target.value))),
+              })
             }
             className="absolute inset-x-0 top-0 h-4 w-full"
           />
           <input
             type="range"
             aria-label="Дээд үнэ"
-            min={range.min}
-            max={range.max}
-            step={step}
-            value={price.max}
+            min={0}
+            max={LOG_STEPS}
+            step={1}
+            value={toPos(price.max)}
             onChange={(e) =>
-              onPriceChange({ ...price, max: clampMax(Number(e.target.value)) })
+              onPriceChange({
+                ...price,
+                max: clampMax(toValue(Number(e.target.value))),
+              })
             }
             className="absolute inset-x-0 top-0 h-4 w-full"
           />

@@ -26,6 +26,18 @@ type ProductWithRelations = Prisma.ProductGetPayload<{
   include: typeof productInclude;
 }>;
 
+/**
+ * Гулсуурын дээд хязгаар: эрэмбэлэгдсэн үнийн 99 хувийн цэгийг мянгад
+ * дугуйрсан утга. Бүх үнэ ойролцоо бол жинхэнэ дээд утга буцна.
+ */
+function percentileMax(sorted: number[]): number {
+  if (sorted.length === 0) return 1_000_000;
+  const top = sorted[sorted.length - 1];
+  if (sorted.length < 20) return top;
+  const p99 = sorted[Math.floor(sorted.length * 0.99)] ?? top;
+  return Math.min(top, Math.ceil(p99 / 1000) * 1000);
+}
+
 @Injectable()
 export class ProductsService {
   constructor(
@@ -228,7 +240,7 @@ export class ProductsService {
 
     const start = (page - 1) * limit;
     const items = mapped.slice(start, start + limit);
-    const facets = await this.facets(baseWhere, priceFilter);
+    const facets = await this.facets(baseWhere, query.minPrice, query.maxPrice);
 
     return { ...paginate(items, mapped.length, page, limit), facets };
   }
@@ -236,17 +248,26 @@ export class ProductsService {
   /** Шүүлтүүрийн сонголт бүрийн тоо */
   private async facets(
     baseWhere: Prisma.ProductWhereInput,
-    priceFilter: Prisma.OfferWhereInput,
+    minPrice?: number,
+    maxPrice?: number,
   ) {
+    // Үнийн шүүлтийг энд тавихгүй — гулсуурын хязгаар өөрийнхөө шүүлтээс
+    // хамаарвал нарийсгасны дараа буцаан өргөсгөх боломжгүй болно.
     const products = await this.prisma.product.findMany({
       where: baseWhere,
       include: {
-        offers: {
-          where: { active: true, ...priceFilter },
-          include: offerInclude,
-        },
+        offers: { where: { active: true }, include: offerInclude },
       },
     });
+
+    /** Гулсуурын хязгаар: одоогийн ангилал/хайлтын бүх санал */
+    const bounds = products
+      .flatMap((product) => product.offers.map((offer) => offer.price))
+      .sort((a, b) => a - b);
+
+    const inPrice = (price: number) =>
+      (minPrice === undefined || price >= minPrice) &&
+      (maxPrice === undefined || price <= maxPrice);
 
     const cities = new Map<string, number>();
     const suppliers = new Map<string, { name: string; count: number }>();
@@ -255,11 +276,16 @@ export class ProductsService {
     let preorder = 0;
 
     for (const product of products) {
+      const offers = product.offers.filter((offer) => inPrice(offer.price));
+      // Үнийн хүрээнд тохирох саналгүй бараа үр дүнд ордоггүй тул
+      // шүүлтүүрийн тоонд ч орох ёсгүй
+      if (offers.length === 0) continue;
+
       const productCities = new Set<string>();
       const productSuppliers = new Set<string>();
       let hasStock = false;
 
-      for (const offer of product.offers) {
+      for (const offer of offers) {
         for (const city of offer.deliversTo) productCities.add(city);
         for (const row of offer.inventory) {
           productCities.add(row.warehouse.city);
@@ -289,10 +315,6 @@ export class ProductsService {
       else preorder += 1;
     }
 
-    const prices = products
-      .flatMap((product) => product.offers.map((offer) => offer.price))
-      .sort((a, b) => a - b);
-
     return {
       city: [...cities.entries()]
         .map(([id, count]) => ({ id, label: id, count }))
@@ -308,8 +330,12 @@ export class ProductsService {
         { id: "preorder", label: "Захиалгаар", count: preorder },
       ],
       price: {
-        min: prices[0] ?? 0,
-        max: prices[prices.length - 1] ?? 1_000_000,
+        min: bounds[0] ?? 0,
+        // Ганц хэт өндөр үнэтэй бараа гулсуурыг бүхэлд нь сунгаж,
+        // 99% нь зүүн зах руу шахагддаг. Тиймээс дээд хязгаарыг 99
+        // хувийн цэгээр тогтооно — түүнээс дээш үнийг гараар бичиж,
+        // эсвэл гулсуурыг баруун зах руу аваачиж (хязгааргүй) авна.
+        max: percentileMax(bounds),
       },
     };
   }

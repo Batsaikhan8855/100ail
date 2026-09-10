@@ -39,7 +39,8 @@ export function Storefront() {
   const [view, setView] = useState<"grid" | "list">("grid");
   const [page, setPage] = useState(1);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
-  const [selected, setSelected] = useState<Record<string, Set<string>>>(emptySelection);
+  const [selected, setSelected] =
+    useState<Record<string, Set<string>>>(emptySelection);
   const [price, setPrice] = useState<PriceRange | null>(null);
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
   const [compare, setCompare] = useState<Set<string>>(new Set());
@@ -55,7 +56,12 @@ export function Storefront() {
     setPage(1);
   }, [activeCategory, debouncedQuery, sortId, selected, price]);
 
-  const priceRange = { min: PRICE_RANGE.min, max: PRICE_RANGE.max };
+  /**
+   * Гулсуурын хязгаар. Хариунаас ирсэн facet-аар шинэчлэгдэнэ — статик
+   * тогтмолтой харьцуулж байсан тул 1 сая-аас дээш дээд хязгаар тавихад
+   * шүүлт чимээгүй үл тоомсорлогдож байв.
+   */
+  const [bounds, setBounds] = useState(PRICE_RANGE);
 
   const path = useMemo(() => {
     const search = buildProductQuery({
@@ -65,13 +71,11 @@ export function Storefront() {
       page,
       limit: PAGE_SIZE,
       price: price ?? undefined,
-      priceRange,
+      priceRange: bounds,
       selected,
     });
     // Хайлтын үг байвал Meilisearch/PostgreSQL хайлтын endpoint-оор дамжуулна
-    return debouncedQuery.trim()
-      ? `/search?${search}`
-      : `/products?${search}`;
+    return debouncedQuery.trim() ? `/search?${search}` : `/products?${search}`;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeCategory, debouncedQuery, page, price, selected, sortId]);
 
@@ -96,7 +100,17 @@ export function Storefront() {
     () => (facets ? toFilterGroups(facets) : []),
     [facets],
   );
-  const facetPrice = facets?.price ?? priceRange;
+  const facetPrice = facets?.price ?? bounds;
+
+  // Facet-ийн хязгаар нь ангилал/хайлт солигдоход л өөрчлөгдөнө (үнийн
+  // шүүлтээс хамаарахгүй) тул давтан татах эргэлт үүсэхгүй.
+  useEffect(() => {
+    const next = facets?.price;
+    if (!next) return;
+    setBounds((prev) =>
+      prev.min === next.min && prev.max === next.max ? prev : next,
+    );
+  }, [facets?.price]);
 
   const toggleFilter = (groupId: string, optionId: string) => {
     setSelected((prev) => {
@@ -183,7 +197,11 @@ export function Storefront() {
           </div>
 
           <div className="flex flex-col gap-4 xl:col-start-3 xl:row-start-1">
-            <CartPanel lines={cart} onQtyChange={setQty} onRemove={removeLine} />
+            <CartPanel
+              lines={cart}
+              onQtyChange={setQty}
+              onRemove={removeLine}
+            />
             <ComparisonPanel
               products={products}
               offers={offersByProduct}
