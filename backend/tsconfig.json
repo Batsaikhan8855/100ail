@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "node16",
     "target": "ES2023",
     "lib": ["ES2023"],
-    "moduleResolution": "node",
+    "moduleResolution": "node16",
     "declaration": false,
     "removeComments": true,
     "emitDecoratorMetadata": true,
@@ -12,15 +12,13 @@
     "esModuleInterop": true,
     "sourceMap": true,
     "outDir": "./dist",
-    "baseUrl": "./",
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": true,
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": true,
     "strictBindCallApply": true,
-    "noFallthroughCasesInSwitch": true,
-    "paths": { "src/*": ["src/*"] }
+    "noFallthroughCasesInSwitch": true
   },
   "include": ["src/**/*", "prisma/**/*"],
   "exclude": ["node_modules", "dist"]

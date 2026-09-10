@@ -136,8 +136,12 @@ const EXCLUDED_CATEGORIES = new Set([
  *     байх «үнэ асуух» зарыг үнэгүйд тооцох, дээд хязгаар 600 сая₮
  * 5 — ангилал нь зөв ч нэрээрээ үйлчилгээ болох зарыг хасах
  *     (`SERVICE_NAME`) — зураг төсөл, гуйвуулга, вэб сайт гэх мэт
+ * 6 — зургийг WebP болгож өөрсдийн CDN-ээс өгөх (`webp.py`,
+ *     `images.json.gz`). Эх сайт руу hotlink хийхээ больсон — тэр CDN нь
+ *     гаднын хүсэлтэд хариу өгдөггүй тул зураг хэзээ ч ачаалагддаггүй
+ *     байсан.
  */
-export const IMPORT_VERSION = 5;
+export const IMPORT_VERSION = 6;
 
 /** Импортын эх сурвалжийг төлөөлөх нийлүүлэгч */
 const SOURCE_SUPPLIER_SLUG = "barilga-mn";
@@ -145,6 +149,26 @@ const SOURCE_CITY = "Улаанбаатар";
 /** Татаж авсан зургийн сан: `media/barilga/<файл>` (StorageService-ийн түлхүүр) */
 const MEDIA_DIR = path.resolve(process.env.MEDIA_DIR ?? "media");
 const IMAGE_PREFIX = "barilga";
+
+/**
+ * CDN дээр байгаа зургийн жагсаалт (`webp.py`-ийн гаралт).
+ *
+ * Импорт нь Render дээр ажилладаг бөгөөд тэнд зургийн файл байдаггүй
+ * (`.dockerignore` нь `backend/media`-г хасдаг) тул `fs.existsSync`-ээр
+ * шалгах боломжгүй. Оронд нь репод багтсан энэ жагсаалтаас аль зураг
+ * Vercel дээр байршсаныг мэдэж авна.
+ */
+const imageManifest = ((): Set<string> => {
+  for (const dir of DATA_DIRS) {
+    const file = path.join(dir, "images.json.gz");
+    if (!fs.existsSync(file)) continue;
+    const names = JSON.parse(
+      zlib.gunzipSync(fs.readFileSync(file)).toString("utf-8"),
+    ) as string[];
+    return new Set(names);
+  }
+  return new Set();
+})();
 
 interface ScrapedProduct {
   id: number;
@@ -293,27 +317,31 @@ const toSummary = (product: ScrapedProduct): string | null => {
 };
 
 /**
- * Зургийн түлхүүр.
+ * Зургийн түлхүүр — `barilga/<хэш>.webp`.
  *
- * `images.py`-аар татаж авсан локал файл байвал түүнийг (`barilga/<файл>`),
- * үгүй бол эх хаягаар нь буцаана — CDN нь `?d=0`-гүй хүсэлтийг 403-аар
- * хаадаг тул query-г нөхнө.
+ * Зөвхөн өөр дээрээ буулгасан зургийг авна. Эх сайтын CDN
+ * (`img.barilga.mn`) руу hotlink хийхийг **зориудаар хассан**: тэр CDN нь
+ * `?d=0`-гүй хүсэлтийг 403-аар хаадаг, түүнтэй хүсэлтэд огт хариу
+ * өгдөггүй (хөтөч timeout болтол хүлээнэ). Зурагтай мэт мөртлөө хэзээ ч
+ * ачаалагдахгүй байснаас зураггүй байх нь дээр — тэр үед UI нь
+ * `ProductArt`-ийн вектор дүрслэлийг харуулна.
  *
- * Онцгой тохиолдол: галерейн зураг эх сайтын CDN (`img.barilga.mn`) дээр
- * байдаг бол тайлбар доторх нэмэлт зураг нь ихэвчлэн тусгаарлагч, дүрс
- * зэрэг 1-2KB файл байдаг. `images.py` нь тэднийг хэмжээгээр нь шүүж
- * хадгалдаггүй тул **тайлбарын зургийг зөвхөн локалд буусан үед** авна.
+ * Хоёр эх сурвалжийг шалгана:
+ *  1. `images.json.gz` жагсаалт — Vercel-ийн CDN дээр байршсан зураг
+ *     (Render дээрх импортод энэ л ажиллана, файл байхгүй тул);
+ *  2. локал `media/barilga/` — жагсаалт үүсээгүй үеийн хөгжүүлэлтэд.
  */
-const isGalleryImage = (url: string): boolean => url.includes("img.barilga.mn");
-
 const imageKeys = (item: ScrapedProduct): string[] => {
   const keys: string[] = [];
   for (const url of (item.images ?? []).filter(Boolean).slice(0, 8)) {
     const file = url.split("/files/").pop()?.split("?")[0];
-    if (file && fs.existsSync(path.join(MEDIA_DIR, IMAGE_PREFIX, file))) {
+    if (!file) continue;
+
+    const webp = `${file.replace(/\.[^.]+$/, "")}.webp`;
+    if (imageManifest.has(webp)) {
+      keys.push(`${IMAGE_PREFIX}/${webp}`);
+    } else if (fs.existsSync(path.join(MEDIA_DIR, IMAGE_PREFIX, file))) {
       keys.push(`${IMAGE_PREFIX}/${file}`);
-    } else if (isGalleryImage(url)) {
-      keys.push(url.includes("?") ? url : `${url}?d=0`);
     }
   }
   return keys;
