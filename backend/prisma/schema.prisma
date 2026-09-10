@@ -371,6 +371,10 @@ model Cart {
   userId    String?
   user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   sessionId String?  @unique
+  /// Нийлүүлэгч тус бүрт худалдан авагчийн сонгосон хүргэлтийн машин:
+  /// `{ "<supplierId>": "truck-3" }`. Хүргэлтийн үнэ үүнээс хамаарна
+  /// (`common/logistics`), тиймээс сервер талд хадгална.
+  vehicleChoice Json?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

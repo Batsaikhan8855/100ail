@@ -1,10 +1,13 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
 import { PrismaService } from "../../common/prisma.service";
+import { StorageService } from "../storage/storage.service";
 import {
+  VEHICLES,
   formatWeight,
   planShipment,
   unitWeight,
+  vehicleById,
 } from "../../common/logistics/logistics";
 
 const cartInclude = {
@@ -13,8 +16,14 @@ const cartInclude = {
       offer: {
         include: {
           supplier: true,
-          // Ангиллын дүрс нь жингийн таамагт хэрэгтэй (common/logistics)
-          product: { include: { category: true } },
+          // Ангиллын дүрс нь жингийн таамагт хэрэгтэй (common/logistics),
+          // эхний зураг нь сагсны мөрөнд бодит гэрэл зураг харуулахад
+          product: {
+            include: {
+              category: true,
+              images: { orderBy: { position: "asc" }, take: 1 },
+            },
+          },
           inventory: { include: { warehouse: true } },
         },
       },
@@ -31,7 +40,10 @@ export interface CartOwner {
 
 @Injectable()
 export class CartsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly storage: StorageService,
+  ) {}
 
   /** Бөөний үнэ нь зөвхөн доод тоо хэмжээнээс дээш захиалгад хүчинтэй */
   static unitPrice(
@@ -137,6 +149,34 @@ export class CartsService {
     }
   }
 
+  /** `Cart.vehicleChoice` JSON-ыг найдвартай уншина */
+  private static vehicleChoice(cart: CartWithItems): Record<string, string> {
+    const raw = cart.vehicleChoice;
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+    return Object.fromEntries(
+      Object.entries(raw as Record<string, unknown>).filter(
+        (entry): entry is [string, string] => typeof entry[1] === "string",
+      ),
+    );
+  }
+
+  /** Худалдан авагч нийлүүлэгч тус бүрт гарах машинаа өөрөө сонгоно */
+  async setVehicle(owner: CartOwner, supplierId: string, vehicleId: string) {
+    if (!vehicleById(vehicleId)) {
+      throw new BadRequestException("Ийм хүргэлтийн машин алга");
+    }
+    const cart = await this.getOrCreate(owner);
+    const next = {
+      ...CartsService.vehicleChoice(cart),
+      [supplierId]: vehicleId,
+    };
+    await this.prisma.cart.update({
+      where: { id: cart.id },
+      data: { vehicleChoice: next },
+    });
+    return this.view({ ...cart, vehicleChoice: next });
+  }
+
   /** Сагсыг нийлүүлэгчээр бүлэглэж, дүнг тооцсон хэлбэрээр буцаана */
   view(cart: CartWithItems) {
     const lines = cart.items.map((item) => {
@@ -158,6 +198,10 @@ export class CartsService {
           .filter(Boolean)
           .join(" "),
         art: item.offer.product.art,
+        // Бодит гэрэл зураг байвал вектор дүрслэлийн оронд харагдана
+        image: item.offer.product.images[0]
+          ? this.storage.publicUrl(item.offer.product.images[0].key)
+          : null,
         supplierId: item.offer.supplierId,
         supplierName: item.offer.supplier.name,
         basePrice: item.offer.price,
@@ -220,11 +264,20 @@ export class CartsService {
 
     // Нийлүүлэгч бүр өөрийн ачаагаа тусад нь хүргэдэг тул машиныг
     // бүлэг тутамд сонгоно
+    const choice = CartsService.vehicleChoice(cart);
     const groups = [...groupMap.values()].map((group) => {
-      const shipment = planShipment(group.weightKg, group.weightEstimated);
+      const shipment = planShipment(
+        group.weightKg,
+        group.weightEstimated,
+        vehicleById(choice[group.supplierId]),
+      );
+      // Хүргэлтийн үнэ = гарах машины тариф + нийлүүлэгчийн нэмэлт төлбөр.
+      // Ингэснээр «ямар машин сонгосон бэ» гэдэг нь дүнд шууд тусна.
+      const deliveryPrice = group.deliveryPrice + shipment.price;
       return {
         ...group,
-        total: group.goodsTotal + group.deliveryPrice,
+        deliveryPrice,
+        total: group.goodsTotal + deliveryPrice,
         shipment: { ...shipment, label: formatWeight(shipment.totalKg) },
       };
     });
@@ -245,6 +298,9 @@ export class CartsService {
       total: goodsTotal + deliveryTotal,
       weightKg,
       weightLabel: formatWeight(weightKg),
+      // Худалдан авагч машинаа өөрөө сонгож болохын тулд бүх ангиллыг
+      // даацынх нь хамт өгнө. Тохирох нь `shipment.vehicle`.
+      vehicles: VEHICLES,
     };
   }
 

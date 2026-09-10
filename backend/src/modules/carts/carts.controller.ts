@@ -63,6 +63,20 @@ export class CartsController {
     return this.carts.removeItem(this.owner(user, sessionId), offerId);
   }
 
+  /** Нийлүүлэгч тус бүрт гарах хүргэлтийн машиныг сонгоно */
+  @Patch("vehicle")
+  setVehicle(
+    @CurrentUser() user: AuthUser,
+    @Headers("x-session-id") sessionId: string,
+    @Body() body: { supplierId: string; vehicleId: string },
+  ) {
+    return this.carts.setVehicle(
+      this.owner(user, sessionId),
+      body.supplierId,
+      body.vehicleId,
+    );
+  }
+
   @Delete()
   clear(@CurrentUser() user: AuthUser, @Headers("x-session-id") sessionId: string) {
     return this.carts.clear(this.owner(user, sessionId));

@@ -34,6 +34,10 @@ export interface SupplierGroup {
   lines: CartLine[];
   goodsTotal: number;
   total: number;
+  /** Бүлгийн нийт жин (кг) */
+  weightKg: number;
+  /** Аль нэг мөрийн жин таамагласан бол */
+  weightEstimated: boolean;
 }
 
 export const groupBySupplier = (lines: CartLine[]): SupplierGroup[] => {
@@ -52,11 +56,15 @@ export const groupBySupplier = (lines: CartLine[]): SupplierGroup[] => {
         lines: [],
         goodsTotal: 0,
         total: 0,
+        weightKg: 0,
+        weightEstimated: false,
       };
       map.set(key, group);
     }
     group.lines.push(line);
     group.goodsTotal += lineTotal(line);
+    group.weightKg += line.lineWeightKg ?? 0;
+    if (line.weightEstimated) group.weightEstimated = true;
     // Нэг нийлүүлэгчээс нэг удаа хүргэнэ: хамгийн өндөр хүргэлтийн үнийг авна
     group.deliveryPrice = Math.max(group.deliveryPrice, line.deliveryPrice ?? 0);
     group.deliveryDays = Math.max(group.deliveryDays ?? 0, line.deliveryDays ?? 0);
@@ -66,6 +74,7 @@ export const groupBySupplier = (lines: CartLine[]): SupplierGroup[] => {
     ...group,
     deliveryDays: group.deliveryDays || undefined,
     total: group.goodsTotal + group.deliveryPrice,
+    weightKg: Math.round(group.weightKg * 10) / 10,
   }));
 };
 
@@ -76,6 +85,7 @@ interface ApiCartLine {
   productSlug: string;
   productName: string;
   art: string;
+  image: string | null;
   supplierId: string;
   supplierName: string;
   basePrice: number;
@@ -89,6 +99,18 @@ interface ApiCartLine {
   deliveryDays: number | null;
   location: string | null;
   stock: number;
+  unitWeightKg: number;
+  lineWeightKg: number;
+  weightEstimated: boolean;
+}
+
+/** Хүргэлтийн машины ангилал (common/logistics-ийн VEHICLES) */
+export interface Vehicle {
+  id: string;
+  name: string;
+  capacityKg: number;
+  /** Улаанбаатар доторх нэг ачилтын тариф (₮) */
+  price: number;
 }
 
 /** Хүргэлтийн төлөвлөгөө — серверт тооцогдоно (common/logistics) */
@@ -98,7 +120,11 @@ export interface Shipment {
   trips: number;
   /** Жин нь таамагласан эсэх (нийлүүлэгч оруулаагүй) */
   estimated: boolean;
-  vehicle: { id: string; name: string; capacityKg: number } | null;
+  vehicle: Vehicle | null;
+  /** Тээврийн үнэ: машины тариф × ачилтын тоо */
+  price: number;
+  /** Худалдан авагч машинаа өөрөө сонгосон эсэх */
+  chosen: boolean;
 }
 
 interface ApiCart {
@@ -111,6 +137,7 @@ interface ApiCart {
   count: number;
   weightKg: number;
   weightLabel: string;
+  vehicles: Vehicle[];
 }
 
 const toLine = (line: ApiCartLine): CartLine => ({
@@ -125,12 +152,16 @@ const toLine = (line: ApiCartLine): CartLine => ({
   qty: line.qty,
   unit: line.unit,
   art: line.art as ArtKey,
+  image: line.image ?? undefined,
   bulkPrice: line.bulkPrice ?? undefined,
   bulkMinQty: line.bulkMinQty ?? undefined,
   deliveryPrice: line.deliveryPrice,
   deliveryDays: line.deliveryDays ?? undefined,
   location: line.location ?? undefined,
   stock: line.stock,
+  unitWeightKg: line.unitWeightKg,
+  lineWeightKg: line.lineWeightKg,
+  weightEstimated: line.weightEstimated,
 });
 
 interface CartContextValue {
@@ -142,6 +173,12 @@ interface CartContextValue {
   total: number;
   /** Нийлүүлэгч тус бүрийн хүргэлтийн төлөвлөгөө */
   shipments: Record<string, Shipment>;
+  /** Сонгож болох бүх машины ангилал, даацаар нь эрэмбэлсэн */
+  vehicles: Vehicle[];
+  /** Тухайн нийлүүлэгчийн ачаанд одоо сонгогдоод байгаа машин */
+  vehicleFor: (supplierId: string) => Vehicle | null;
+  /** Худалдан авагч машинаа өөрөө солино (зөвхөн багтах машин) */
+  setVehicle: (supplierId: string, vehicleId: string) => Promise<void>;
   /** Сагсны нийт жин */
   weightKg: number;
   weightLabel: string;
@@ -162,6 +199,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // Машины сонголтыг сервер тооцдог тул логикийг энд давхардуулахгүй.
   // Сагс өөрчлөгдөх бүрд хариунаас шинэчлэгдэнэ.
   const [shipments, setShipments] = useState<Record<string, Shipment>>({});
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [weight, setWeight] = useState({ kg: 0, label: "" });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -173,6 +211,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         (cart.groups ?? []).map((group) => [group.supplierId, group.shipment]),
       ),
     );
+    setVehicles(cart.vehicles ?? []);
     setWeight({ kg: cart.weightKg ?? 0, label: cart.weightLabel ?? "" });
     setError(null);
   }, []);
@@ -244,8 +283,41 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [apply]);
 
+  /**
+   * Машины сонголт хүргэлтийн үнийг тодорхойлдог тул серверт хадгална —
+   * захиалга үүсэхэд мөн адил дүн гарна. Хариунд шинэчилсэн сагс ирнэ.
+   */
+  const setVehicle = useCallback(
+    async (supplierId: string, vehicleId: string) => {
+      try {
+        apply(
+          await apiPatch<ApiCart>("/carts/vehicle", { supplierId, vehicleId }),
+        );
+      } catch (cause) {
+        setError((cause as Error).message);
+      }
+    },
+    [apply],
+  );
+
+  /** Тухайн нийлүүлэгчийн ачаанд одоо гарах машин (сервер шийднэ) */
+  const vehicleFor = useCallback(
+    (supplierId: string): Vehicle | null => shipments[supplierId]?.vehicle ?? null,
+    [shipments],
+  );
+
   const value = useMemo<CartContextValue>(() => {
-    const groups = groupBySupplier(lines);
+    // Хүргэлтийн үнэ = нийлүүлэгчийн нэмэлт + гарах машины тариф.
+    // Тарифыг сервер бодож `shipment.price`-аар өгнө (common/logistics).
+    const groups = groupBySupplier(lines).map((group) => {
+      const deliveryPrice =
+        group.deliveryPrice + (shipments[group.supplierId]?.price ?? 0);
+      return {
+        ...group,
+        deliveryPrice,
+        total: group.goodsTotal + deliveryPrice,
+      };
+    });
     const goodsTotal = groups.reduce((sum, group) => sum + group.goodsTotal, 0);
     const deliveryTotal = groups.reduce((sum, group) => sum + group.deliveryPrice, 0);
     return {
@@ -256,6 +328,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
       deliveryTotal,
       total: goodsTotal + deliveryTotal,
       shipments,
+      vehicles,
+      vehicleFor,
+      setVehicle,
       weightKg: weight.kg,
       weightLabel: weight.label,
       loading,
@@ -275,7 +350,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
     reload,
     removeLine,
     setQty,
+    setVehicle,
     shipments,
+    vehicleFor,
+    vehicles,
     weight,
   ]);
 

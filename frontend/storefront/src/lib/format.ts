@@ -18,3 +18,15 @@ export const formatDateTime = (value: string | Date): string => {
     minute: "2-digit",
   }).format(date)}`;
 };
+
+/**
+ * Ачааны жин: 36 -> "36 кг", 2400 -> "2.4 т".
+ * Серверийн `common/logistics/formatWeight`-тай ижил дүрэм.
+ */
+export const formatWeight = (kg: number): string => {
+  if (kg >= 1000) {
+    const tonnes = kg / 1000;
+    return `${tonnes >= 10 ? Math.round(tonnes) : Number(tonnes.toFixed(1))} т`;
+  }
+  return `${Math.round(kg * 10) / 10} кг`;
+};

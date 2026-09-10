@@ -2,7 +2,9 @@ import {
   defaultUnitWeight,
   formatWeight,
   planShipment,
+  shipmentPrice,
   unitWeight,
+  vehicleById,
   VEHICLES,
 } from "./logistics";
 
@@ -56,6 +58,8 @@ describe("logistics", () => {
         vehicle: null,
         trips: 0,
         estimated: false,
+        price: 0,
+        chosen: false,
       });
     });
 
@@ -87,6 +91,63 @@ describe("logistics", () => {
       expect(formatWeight(950)).toBe("950 кг");
       expect(formatWeight(24_000)).toBe("24 т");
       expect(formatWeight(3.55)).toBe("3.6 кг");
+    });
+  });
+
+  describe("хүргэлтийн үнэ", () => {
+    const porter = vehicleById("porter")!;
+    const truck5 = vehicleById("truck-5")!;
+
+    it("сонгосон машины тарифаар үнэ гарна", () => {
+      expect(shipmentPrice(240, porter)).toBe(porter.price);
+      expect(shipmentPrice(240, truck5)).toBe(truck5.price);
+    });
+
+    it("даацаас хэтэрсэн ачаанд ачилтын тоогоор үржинэ", () => {
+      // 2.5 т ачаа 1 тонны Портероор 3 удаа явна
+      expect(shipmentPrice(2500, porter)).toBe(porter.price * 3);
+    });
+
+    it("сонгосон машин багтвал түүгээр, эс бөгөөс санал болгосноор", () => {
+      const chosen = planShipment(240, false, truck5);
+      expect(chosen.vehicle?.id).toBe("truck-5");
+      expect(chosen.price).toBe(truck5.price);
+      expect(chosen.chosen).toBe(true);
+
+      // 2.5 т ачаа Портерт багтахгүй тул санал болгосон машин руу буцна
+      const tooSmall = planShipment(2500, false, porter);
+      expect(tooSmall.vehicle?.id).toBe("truck-3");
+      expect(tooSmall.chosen).toBe(false);
+    });
+
+    it("хоосон ачаанд үнэ 0", () => {
+      expect(planShipment(0).price).toBe(0);
+    });
+
+    it("vehicleById танихгүй id-д null өгнө", () => {
+      expect(vehicleById("nope")).toBeNull();
+      expect(vehicleById(null)).toBeNull();
+    });
+
+    it("санал болгосон машин нь багтах машинуудаас хамгийн хямд нь", () => {
+      // 1.1 т ачаанд Портер 2 ачилт (50,000₮) хийхээс 3 тонны машинаар
+      // нэг удаа (45,000₮) явуулах нь хямд. Санал болгох нь үргэлж
+      // хамгийн хямд сонголт байх ёстой.
+      for (const kg of [50, 900, 1100, 2500, 3200, 4800, 9000, 12_000]) {
+        const plan = planShipment(kg);
+        const cheapestThatFits = Math.min(
+          ...VEHICLES.filter((v) => v.capacityKg >= kg).map((v) => v.price),
+        );
+        if (Number.isFinite(cheapestThatFits)) {
+          expect(plan.price).toBe(cheapestThatFits);
+        }
+      }
+    });
+
+    it("бүх машин тарифтай, даацаар нь өсөж эрэмбэлэгдсэн", () => {
+      expect(VEHICLES.every((v) => v.price > 0)).toBe(true);
+      const prices = VEHICLES.map((v) => v.price);
+      expect([...prices].sort((a, b) => a - b)).toEqual(prices);
     });
   });
 });

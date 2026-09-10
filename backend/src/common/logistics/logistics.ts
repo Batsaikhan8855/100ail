@@ -16,15 +16,35 @@ export interface Vehicle {
   id: string;
   name: string;
   capacityKg: number;
+  /**
+   * Улаанбаатар хот доторх нэг ачилтын үнэ (₮).
+   *
+   * Эдгээр нь зах зээлийн ойролцоо тариф — тээврийн хамтрагчтай гэрээ
+   * байгуулсны дараа энэ хүснэгтийг солино. Хотоос гадуур явах, кран
+   * хэрэгтэй зэрэг нэмэлт нөхцөлийг одоогоор тооцоогүй.
+   */
+  price: number;
 }
 
 export const VEHICLES: Vehicle[] = [
-  { id: "porter", name: "Портер", capacityKg: 1000 },
-  { id: "truck-3", name: "3 тонны ачааны машин", capacityKg: 3000 },
-  { id: "truck-5", name: "5 тонны ачааны машин", capacityKg: 5000 },
-  { id: "truck-10", name: "10 тонны ачааны машин", capacityKg: 10_000 },
-  { id: "truck-20", name: "20 тонны чиргүүл", capacityKg: 20_000 },
+  { id: "porter", name: "Портер", capacityKg: 1000, price: 25_000 },
+  { id: "truck-3", name: "3 тонны ачааны машин", capacityKg: 3000, price: 45_000 },
+  { id: "truck-5", name: "5 тонны ачааны машин", capacityKg: 5000, price: 70_000 },
+  { id: "truck-10", name: "10 тонны ачааны машин", capacityKg: 10_000, price: 120_000 },
+  { id: "truck-20", name: "20 тонны чиргүүл", capacityKg: 20_000, price: 200_000 },
 ];
+
+/** Сонгосон машинаар хэдэн ачилт хийхийг бодно */
+export const tripsFor = (totalKg: number, vehicle: Vehicle): number =>
+  totalKg <= 0 ? 0 : Math.max(1, Math.ceil(totalKg / vehicle.capacityKg));
+
+/** Тухайн машинаар ачааг хүргэх нийт үнэ */
+export const shipmentPrice = (totalKg: number, vehicle: Vehicle): number =>
+  vehicle.price * tripsFor(totalKg, vehicle);
+
+/** id-гаар машиныг олно */
+export const vehicleById = (id: string | null | undefined): Vehicle | null =>
+  VEHICLES.find((vehicle) => vehicle.id === id) ?? null;
 
 /**
  * Нэгж тутмын анхдагч жин (кг).
@@ -121,26 +141,49 @@ export interface ShipmentPlan {
   trips: number;
   /** Жин нь нийлүүлэгчийн оруулсан утгад бүрэн тулгуурласан эсэх */
   estimated: boolean;
+  /** Тээврийн үнэ: машины тариф × ачилтын тоо */
+  price: number;
+  /** Худалдан авагч машинаа өөрөө сонгосон эсэх */
+  chosen: boolean;
 }
 
 /**
  * Нийт жингээс хүргэлтийн төлөвлөгөө гаргана: багтах хамгийн жижиг
  * машиныг сонгож, хамгийн том машинаас хэтэрвэл ачилтын тоог бодно.
  */
-export function planShipment(totalKg: number, estimated = false): ShipmentPlan {
+export function planShipment(
+  totalKg: number,
+  estimated = false,
+  /** Худалдан авагчийн сонгосон машин — багтахгүй бол үл тоомсорлоно */
+  preferred?: Vehicle | null,
+): ShipmentPlan {
   const kg = Math.max(0, Math.round(totalKg * 10) / 10);
-  if (kg <= 0) return { totalKg: 0, vehicle: null, trips: 0, estimated };
+  if (kg <= 0)
+    return {
+      totalKg: 0,
+      vehicle: null,
+      trips: 0,
+      estimated,
+      price: 0,
+      chosen: false,
+    };
 
+  // Багтах хамгийн жижиг машин — санал болгох хувилбар
   const fit = VEHICLES.find((vehicle) => kg <= vehicle.capacityKg);
-  if (fit) return { totalKg: kg, vehicle: fit, trips: 1, estimated };
+  const fallback = fit ?? VEHICLES[VEHICLES.length - 1];
 
-  // Хамгийн том машинаас хэтэрвэл олон удаа зөөнө
-  const largest = VEHICLES[VEHICLES.length - 1];
+  // Сонгосон машин ачаанд багтаж байвал л хүндэтгэнэ. Багтахгүй машин
+  // сонгосон хэвээр үлдвэл хүргэлт биелэхгүй үнэ харагдана.
+  const chosen = preferred && preferred.capacityKg >= kg ? preferred : null;
+  const vehicle = chosen ?? fallback;
+
   return {
     totalKg: kg,
-    vehicle: largest,
-    trips: Math.ceil(kg / largest.capacityKg),
+    vehicle,
+    trips: tripsFor(kg, vehicle),
     estimated,
+    price: shipmentPrice(kg, vehicle),
+    chosen: chosen !== null,
   };
 }
 

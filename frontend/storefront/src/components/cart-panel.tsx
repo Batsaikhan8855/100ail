@@ -15,7 +15,7 @@ import {
   TRUST_ICONS,
 } from "./icons";
 import { Panel, PanelHeader } from "./ui";
-import { ProductArt } from "./product-art";
+import { ProductThumb } from "./product-art";
 
 /**
  * Ачааны жин ба гарах машин.
@@ -26,18 +26,20 @@ import { ProductArt } from "./product-art";
  * сонгогдоно; энд нийт дүнг харуулна.
  */
 function ShipmentSummary() {
-  const { weightKg, weightLabel, shipments } = useCart();
+  const { weightKg, weightLabel, shipments, vehicleFor } = useCart();
   if (weightKg <= 0) return null;
 
-  const plans = Object.values(shipments).filter((plan) => plan.vehicle);
-  if (plans.length === 0) return null;
+  const entries = Object.entries(shipments).filter(([, plan]) => plan.vehicle);
+  if (entries.length === 0) return null;
 
+  const plans = entries.map(([, plan]) => plan);
   const estimated = plans.some((plan) => plan.estimated);
   const trips = plans.reduce((sum, plan) => sum + plan.trips, 0);
+  // Сагсны хуудсанд өөр машин сонгосон бол түүнийг нь харуулна
   const vehicles =
-    plans.length === 1
-      ? (plans[0].vehicle?.name ?? "")
-      : `${plans.length} машин`;
+    entries.length === 1
+      ? (vehicleFor(entries[0][0])?.name ?? "")
+      : `${entries.length} машин`;
 
   return (
     <div className="mb-3 flex items-start gap-2.5 rounded-md border border-ink-700 bg-ink-900 px-3 py-2.5">
@@ -49,6 +51,12 @@ function ShipmentSummary() {
           {" — "}
           <span className="font-semibold text-brand">{vehicles}</span>
           {trips > plans.length ? ` (${trips} ачилт)` : ""}
+        </p>
+        <p className="mt-0.5 text-[#c6ccd4]">
+          Хүргэлт{" "}
+          <span className="font-semibold text-white">
+            {formatPrice(plans.reduce((sum, plan) => sum + plan.price, 0))}
+          </span>
         </p>
         {estimated ? (
           <p className="mt-0.5 text-[11px] text-mute-dim">
@@ -87,7 +95,11 @@ export function CartPanel({
               className="flex items-center gap-3 px-4 py-3"
             >
               <div className="h-11 w-11 shrink-0 overflow-hidden rounded bg-ink-900 p-0.5">
-                <ProductArt art={line.art} />
+                <ProductThumb
+                  image={line.image}
+                  art={line.art}
+                  name={line.productName}
+                />
               </div>
 
               <div className="min-w-0 flex-1">

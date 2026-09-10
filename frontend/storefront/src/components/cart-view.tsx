@@ -1,8 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { formatNumber, formatPrice } from "@/lib/format";
-import { lineTotal, lineUnitPrice, useCart } from "./cart-context";
+import { formatNumber, formatPrice, formatWeight } from "@/lib/format";
+import {
+  lineTotal,
+  lineUnitPrice,
+  useCart,
+  type SupplierGroup,
+} from "./cart-context";
 import {
   ArrowRightIcon,
   CartIcon,
@@ -13,9 +18,11 @@ import {
   PinIcon,
   PlusIcon,
   TruckIcon,
+  WeightIcon,
 } from "./icons";
-import { ProductArt } from "./product-art";
+import { ProductThumb } from "./product-art";
 import { SiteHeader } from "./site-header";
+import { VehicleArt } from "./vehicle-art";
 import { Panel, PanelHeader } from "./ui";
 
 export function CartView() {
@@ -27,6 +34,8 @@ export function CartView() {
     total,
     setQty,
     removeLine,
+    weightKg,
+    weightLabel,
   } = useCart();
 
   return (
@@ -82,14 +91,26 @@ export function CartView() {
                     <span className="flex items-center gap-1.5">
                       <TruckIcon className="h-3.5 w-3.5" />
                       Хүргэлт{" "}
-                      {group.deliveryPrice === 0
-                        ? "үнэгүй"
-                        : formatPrice(group.deliveryPrice)}
+                      <span className="font-semibold text-[#c6ccd4]">
+                        {group.deliveryPrice === 0
+                          ? "үнэгүй"
+                          : formatPrice(group.deliveryPrice)}
+                      </span>
                     </span>
                     {group.deliveryDays ? (
                       <span className="flex items-center gap-1.5">
                         <ClockIcon className="h-3.5 w-3.5" />
                         {group.deliveryDays} хоногт
+                      </span>
+                    ) : null}
+                    {group.weightKg > 0 ? (
+                      <span className="flex items-center gap-1.5">
+                        <WeightIcon className="h-3.5 w-3.5" />
+                        Ачааны жин{" "}
+                        <span className="font-semibold text-[#c6ccd4]">
+                          {group.weightEstimated ? "~" : ""}
+                          {formatWeight(group.weightKg)}
+                        </span>
                       </span>
                     ) : null}
                   </div>
@@ -107,7 +128,11 @@ export function CartView() {
                             href={`/product/${line.productId}`}
                             className="h-14 w-14 shrink-0 overflow-hidden rounded bg-ink-900 p-1"
                           >
-                            <ProductArt art={line.art} />
+                            <ProductThumb
+                              image={line.image}
+                              art={line.art}
+                              name={line.productName}
+                            />
                           </Link>
 
                           <div className="min-w-[160px] flex-1">
@@ -125,6 +150,25 @@ export function CartView() {
                                 </span>
                               ) : null}
                             </p>
+                            {line.lineWeightKg ? (
+                              <p
+                                className="mt-0.5 flex items-center gap-1.5 text-[11.5px] text-mute-dim"
+                                title={
+                                  line.weightEstimated
+                                    ? "Жин нь ангиллаар таамагласан ойролцоо утга"
+                                    : "Нийлүүлэгчийн оруулсан жин"
+                                }
+                              >
+                                <WeightIcon className="h-3.5 w-3.5" />
+                                {line.weightEstimated ? "~" : ""}
+                                {formatWeight(line.unitWeightKg ?? 0)} /{" "}
+                                {line.unit} × {line.qty} ={" "}
+                                <span className="font-semibold text-[#c6ccd4]">
+                                  {line.weightEstimated ? "~" : ""}
+                                  {formatWeight(line.lineWeightKg)}
+                                </span>
+                              </p>
+                            ) : null}
                           </div>
 
                           <div className="flex items-center overflow-hidden rounded-md border border-ink-700 bg-ink-900">
@@ -173,6 +217,8 @@ export function CartView() {
                     })}
                   </ul>
 
+                  <VehiclePicker group={group} />
+
                   <div className="flex items-baseline justify-between border-t border-ink-700 px-4 py-3 text-[13px]">
                     <span className="text-mute">
                       {group.supplierName} дэд дүн
@@ -201,7 +247,7 @@ export function CartView() {
                     </div>
                     <div className="flex items-baseline justify-between">
                       <dt className="text-mute">
-                        Хүргэлт ({groups.length} нийлүүлэгч)
+                        Хүргэлт ({groups.length} машин)
                       </dt>
                       <dd className="font-medium text-white">
                         {deliveryTotal === 0
@@ -209,6 +255,14 @@ export function CartView() {
                           : formatPrice(deliveryTotal)}
                       </dd>
                     </div>
+                    {weightKg > 0 ? (
+                      <div className="flex items-baseline justify-between">
+                        <dt className="text-mute">Ачааны жин</dt>
+                        <dd className="font-medium text-white">
+                          {weightLabel}
+                        </dd>
+                      </div>
+                    ) : null}
                     <div className="mt-1 flex items-baseline justify-between border-t border-ink-700 pt-3">
                       <dt className="text-[13px] text-[#c2c7cf]">Нийт дүн:</dt>
                       <dd className="text-[22px] font-bold text-brand">
@@ -243,5 +297,147 @@ export function CartView() {
         )}
       </main>
     </div>
+  );
+}
+
+/**
+ * Хүргэлтийн машины сонголт.
+ *
+ * Сервер ачааны жингээр багтах хамгийн жижиг машиныг санал болгодог
+ * (`common/logistics`). Гэхдээ хашааны хаалга нарийн, кран хэрэгтэй гэх
+ * мэт шалтгаанаар худалдан авагч өөр машин авах хэрэгцээ гардаг тул
+ * багтах бүх машинаас сонгох боломжийг энд өгнө. Багтахгүй машиныг
+ * сонгуулахгүй ч даац нь хүрэхгүйг нь харуулна.
+ */
+function VehiclePicker({ group }: { group: SupplierGroup }) {
+  const { vehicles, vehicleFor, setVehicle, shipments } = useCart();
+  const plan = shipments[group.supplierId];
+  const selected = vehicleFor(group.supplierId);
+
+  if (group.weightKg <= 0 || vehicles.length === 0) return null;
+
+  const recommended = plan?.vehicle ?? null;
+
+  return (
+    <section className="border-t border-ink-700 px-4 py-3.5">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h3 className="text-[12.5px] font-semibold text-white">
+          Хүргэлтийн машин
+        </h3>
+        <p className="text-[11.5px] text-mute-dim">
+          {group.weightEstimated ? "~" : ""}
+          {formatWeight(group.weightKg)} ачаанд тохирохыг сонгоно уу
+        </p>
+      </div>
+
+      <ul
+        role="radiogroup"
+        aria-label={`${group.supplierName} — хүргэлтийн машин`}
+        className="mt-2.5 grid gap-2 sm:grid-cols-3 xl:grid-cols-5"
+      >
+        {vehicles.map((vehicle) => {
+          const fits = vehicle.capacityKg >= group.weightKg;
+          const isRecommended = vehicle.id === recommended?.id;
+          const active = selected?.id === vehicle.id;
+          // Ачилтын тоо нь зөвхөн хамгийн том машинд ч багтахгүй ачаанд
+          // утгатай. Багтахгүй жижиг машиныг олон дахин явуулах нь илүү
+          // үнэтэй тусдаг тул (1.1 т ачаанд Портер 2×25,000 = 50,000₮ нь
+          // 3 тонны 45,000₮-өөс үнэтэй) тэднийг үнэтэй нь харуулахгүй.
+          const trips = isRecommended
+            ? (plan?.trips ?? 1)
+            : Math.ceil(group.weightKg / vehicle.capacityKg);
+          const price = fits || isRecommended ? vehicle.price * trips : null;
+
+          return (
+            <li key={vehicle.id}>
+              <button
+                type="button"
+                role="radio"
+                aria-checked={active}
+                // Багтахгүй машиныг сонгуулахгүй. Ачаа хамгийн том машинаас
+                // ч хэтэрсэн үед санал болгосон нь өөрөө багтахгүй тул
+                // түүнийг үлдээнэ
+                disabled={!fits && !isRecommended}
+                onClick={() => setVehicle(group.supplierId, vehicle.id)}
+                className={`flex w-full flex-col items-stretch gap-1.5 rounded-md border p-2 text-left transition-colors ${
+                  active
+                    ? "border-brand bg-brand/10"
+                    : fits
+                      ? "border-ink-700 bg-ink-900 hover:border-mute-dim"
+                      : "border-ink-800 bg-ink-900 opacity-45"
+                }`}
+              >
+                <span className="block h-20 w-full overflow-hidden rounded">
+                  <VehicleArt id={vehicle.id} name={vehicle.name} />
+                </span>
+                <span
+                  className={`text-[12px] font-semibold ${
+                    active ? "text-brand" : "text-white"
+                  }`}
+                >
+                  {vehicle.name}
+                </span>
+                <span className="text-[11px] text-mute-dim">
+                  Даац {formatWeight(vehicle.capacityKg)}
+                </span>
+                <span
+                  className={`text-[12px] font-bold ${
+                    price === null
+                      ? "text-mute-dim"
+                      : active
+                        ? "text-brand"
+                        : "text-[#c6ccd4]"
+                  }`}
+                >
+                  {price === null ? "Даац хүрэхгүй" : formatPrice(price)}
+                  {price !== null && trips > 1 ? (
+                    <span className="ml-1 text-[10px] font-normal text-mute-dim">
+                      ({trips} ачилт)
+                    </span>
+                  ) : null}
+                </span>
+                {isRecommended ? (
+                  <span className="text-[10.5px] font-semibold uppercase tracking-wide text-ok">
+                    Санал болгов
+                  </span>
+                ) : fits ? (
+                  <span className="text-[10.5px] text-mute-dim">Багтана</span>
+                ) : (
+                  <span className="text-[10.5px] text-mute-dim">
+                    Ачаа багтахгүй
+                  </span>
+                )}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+
+      {selected ? (
+        <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2 rounded-md border border-ink-700 bg-ink-900 px-3 py-2">
+          <span className="flex items-center gap-1.5 text-[11.5px] text-mute">
+            <TruckIcon className="h-3.5 w-3.5 text-brand" />
+            {plan?.chosen ? "Таны сонгосон" : "Санал болгож буй"}:{" "}
+            <span className="font-semibold text-[#c6ccd4]">
+              {selected.name}
+            </span>
+            {plan && plan.trips > 1 ? ` · ${plan.trips} ачилт` : ""}
+          </span>
+          <span className="text-[12.5px] text-mute">
+            Хүргэлт{" "}
+            <span className="text-[14px] font-bold text-brand">
+              {formatPrice(plan?.price ?? 0)}
+            </span>
+          </span>
+        </div>
+      ) : null}
+
+      {group.weightEstimated ? (
+        <p className="mt-1.5 text-[11px] text-mute-dim">
+          Жин нь ангиллаар таамагласан ойролцоо утга — нийлүүлэгч жингээ
+          оруулмагц машин ба үнэ нь тодорно.
+        </p>
+      ) : null}
+    </section>
   );
 }
