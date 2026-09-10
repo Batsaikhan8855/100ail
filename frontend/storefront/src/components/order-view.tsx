@@ -12,7 +12,7 @@ import {
   TruckIcon,
 } from "./icons";
 import { SiteHeader } from "./site-header";
-import { Panel, PanelHeader } from "./ui";
+import { CopyButton, Panel, PanelHeader } from "./ui";
 
 interface OrderItem {
   id: string;
@@ -169,9 +169,15 @@ export function OrderView({ code }: { code: string }) {
                   <CheckIcon className="h-7 w-7" />
                 )}
               </span>
-              <h1 className="mt-4 text-[22px] font-bold text-white">
-                Захиалга {order.code}
-              </h1>
+              <div className="mt-4 flex flex-wrap items-center justify-center gap-2.5">
+                <h1 className="text-[22px] font-bold text-white">
+                  Захиалга {order.code}
+                </h1>
+                <CopyButton
+                  value={order.code}
+                  label="Захиалгын дугаар хуулах"
+                />
+              </div>
               <p className="mt-1.5 text-[13.5px] text-mute">
                 {ORDER_STATUS[order.status] ?? order.status} ·{" "}
                 {order.supplierOrders.length} нийлүүлэгч ·{" "}
@@ -283,13 +289,19 @@ export function OrderView({ code }: { code: string }) {
                       </span>
                       <span>{supplierOrder.code}</span>
                       {supplierOrder.delivery ? (
-                        <Link
-                          href={`/track?code=${supplierOrder.delivery.trackingCode}`}
-                          className="flex items-center gap-1.5 text-brand hover:underline"
-                        >
-                          <TruckIcon className="h-3.5 w-3.5" />
-                          {supplierOrder.delivery.trackingCode}
-                        </Link>
+                        <span className="flex items-center gap-2">
+                          <Link
+                            href={`/track?code=${supplierOrder.delivery.trackingCode}`}
+                            className="flex items-center gap-1.5 text-brand hover:underline"
+                          >
+                            <TruckIcon className="h-3.5 w-3.5" />
+                            {supplierOrder.delivery.trackingCode}
+                          </Link>
+                          <CopyButton
+                            value={supplierOrder.delivery.trackingCode}
+                            label="Хянах код хуулах"
+                          />
+                        </span>
                       ) : null}
                     </p>
                   </li>

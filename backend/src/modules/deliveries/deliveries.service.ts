@@ -12,19 +12,51 @@ export class DeliveriesService {
     private readonly notifications: NotificationsService,
   ) {}
 
-  /** Хүргэлт хянах — код мэдэж байвал нэвтрэхгүйгээр харна */
-  async track(trackingCode: string) {
-    const delivery = await this.prisma.delivery.findUnique({
-      where: { trackingCode },
+  /**
+   * Хүргэлт хянах — код мэдэж байвал нэвтрэхгүйгээр харна.
+   *
+   * Хэрэглэгч ихэвчлэн захиалгын хуудсан дээрх дугаараа хуулж тавьдаг тул
+   * хянах кодоос гадна захиалгын (`100A-XXXXXX`) болон дэд захиалгын
+   * (`100A-XXXXXX-1`) дугаарыг ч хүлээж авна. Нэг захиалгад хэд хэдэн
+   * нийлүүлэгч байж болох тул жагсаалт буцаана.
+   */
+  async track(code: string) {
+    const value = code.trim();
+    if (!value) throw new NotFoundException("Хүргэлт олдсонгүй");
+
+    // Кодыг том жижиг үсэг ялгалгүй харьцуулна
+    const insensitive = { equals: value, mode: "insensitive" as const };
+    const deliveries = await this.prisma.delivery.findMany({
+      where: {
+        OR: [
+          { trackingCode: insensitive },
+          { supplierOrder: { code: insensitive } },
+          { supplierOrder: { order: { code: insensitive } } },
+        ],
+      },
       include: {
         supplierOrder: {
           include: { supplier: true, items: true, order: true },
         },
       },
+      orderBy: { supplierOrder: { code: "asc" } },
     });
-    if (!delivery) throw new NotFoundException("Хүргэлт олдсонгүй");
 
-    return {
+    if (deliveries.length === 0) {
+      // Захиалга нь байгаа ч хүргэлт үүсээгүй бол шалтгааныг нь хэлнэ
+      const order = await this.prisma.order.findFirst({
+        where: {
+          OR: [{ code: insensitive }, { supplierOrders: { some: { code: insensitive } } }],
+        },
+      });
+      throw new NotFoundException(
+        order
+          ? "Захиалга олдлоо ч хүргэлт хараахан бүртгэгдээгүй байна"
+          : "Хүргэлт олдсонгүй",
+      );
+    }
+
+    return deliveries.map((delivery) => ({
       trackingCode: delivery.trackingCode,
       status: delivery.status,
       city: delivery.city,
@@ -44,7 +76,7 @@ export class DeliveriesService {
         qty: item.qty,
         unit: item.unit,
       })),
-    };
+    }));
   }
 
   async forSupplier(user: AuthUser) {

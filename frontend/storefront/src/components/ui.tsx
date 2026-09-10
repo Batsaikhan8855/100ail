@@ -1,7 +1,7 @@
 "use client";
 
-import type { ReactNode } from "react";
-import { CheckIcon, ChevronDownIcon } from "./icons";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { CheckIcon, ChevronDownIcon, CopyIcon } from "./icons";
 
 export function Panel({
   children,
@@ -155,6 +155,73 @@ export function IconButton({
       }`}
     >
       {children}
+    </button>
+  );
+}
+
+/**
+ * Захиалгын дугаар мэтийг нэг товшилтоор хуулна.
+ *
+ * `navigator.clipboard` нь зөвхөн найдвартай (https/localhost) орчинд
+ * ажилладаг тул бусад тохиолдолд түр талбар үүсгэж хуулна.
+ */
+export function CopyButton({
+  value,
+  label = "Хуулах",
+}: {
+  value: string;
+  label?: string;
+}) {
+  const [copied, setCopied] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(
+    () => () => {
+      if (timer.current) clearTimeout(timer.current);
+    },
+    [],
+  );
+
+  const copy = async () => {
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(value);
+      } else {
+        const field = document.createElement("textarea");
+        field.value = value;
+        field.style.position = "fixed";
+        field.style.opacity = "0";
+        document.body.appendChild(field);
+        field.select();
+        document.execCommand("copy");
+        field.remove();
+      }
+      setCopied(true);
+      if (timer.current) clearTimeout(timer.current);
+      timer.current = setTimeout(() => setCopied(false), 1500);
+    } catch {
+      setCopied(false);
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={copy}
+      aria-label={`${label}: ${value}`}
+      title={label}
+      className={`flex shrink-0 items-center gap-1.5 rounded-md border px-2 py-1 text-[11.5px] transition-colors ${
+        copied
+          ? "border-ok/50 bg-ok/10 text-ok"
+          : "border-ink-600 bg-ink-900 text-mute hover:text-white"
+      }`}
+    >
+      {copied ? (
+        <CheckIcon className="h-3.5 w-3.5" />
+      ) : (
+        <CopyIcon className="h-3.5 w-3.5" />
+      )}
+      {copied ? "Хуулсан" : "Хуулах"}
     </button>
   );
 }

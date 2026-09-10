@@ -307,3 +307,17 @@ export const ImageIcon = (p: IconProps) => (
     <path d="m4 17 5-5 4 4 3-3 4 4" />
   </svg>
 );
+
+export const CopyIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <rect x="9" y="9" width="11" height="11" rx="2" />
+    <path d="M5 15V5a2 2 0 0 1 2-2h8" />
+  </svg>
+);
+
+export const WeightIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M6.5 8h11l2.2 11.4a1.5 1.5 0 0 1-1.5 1.6H5.8a1.5 1.5 0 0 1-1.5-1.6z" />
+    <circle cx="12" cy="5.5" r="2.5" />
+  </svg>
+);

@@ -5,7 +5,7 @@ import { formatPrice } from "@/lib/format";
 import { useResource } from "@/lib/use-resource";
 import { useSession } from "./session";
 import { SiteHeader } from "./site-header";
-import { Panel, PanelHeader } from "./ui";
+import { CopyButton, Panel, PanelHeader } from "./ui";
 import { ArrowRightIcon } from "./icons";
 
 interface OrderRow {
@@ -74,12 +74,14 @@ export function AccountOrders() {
             ) : (
               <ul className="divide-y divide-ink-700">
                 {(orders.data ?? []).map((order) => (
-                  <li key={order.code}>
-                    <Link
-                      href={`/orders/${order.code}`}
-                      className="flex flex-wrap items-center justify-between gap-3 px-4 py-3.5 transition-colors hover:bg-ink-800"
-                    >
-                      <span className="min-w-0">
+                  <li
+                    key={order.code}
+                    className="flex flex-wrap items-center justify-between gap-3 px-4 py-3.5 transition-colors hover:bg-ink-800"
+                  >
+                    {/* Хуулах товч холбоос дотор байвал дарахад хуудас
+                        солигдчихдог тул тусад нь байрлуулав */}
+                    <span className="flex min-w-0 flex-1 items-center gap-2">
+                      <Link href={`/orders/${order.code}`} className="min-w-0">
                         <span className="block text-[13.5px] font-semibold text-white">
                           {order.code}
                         </span>
@@ -89,14 +91,21 @@ export function AccountOrders() {
                             .map((item) => item.supplier.name)
                             .join(", ")}
                         </span>
+                      </Link>
+                      <CopyButton
+                        value={order.code}
+                        label="Захиалгын дугаар хуулах"
+                      />
+                    </span>
+                    <Link
+                      href={`/orders/${order.code}`}
+                      className="flex items-center gap-3"
+                    >
+                      <span className="rounded-full border border-ink-600 px-2 py-0.5 text-[11.5px] text-[#c2c7cf]">
+                        {STATUS[order.status] ?? order.status}
                       </span>
-                      <span className="flex items-center gap-3">
-                        <span className="rounded-full border border-ink-600 px-2 py-0.5 text-[11.5px] text-[#c2c7cf]">
-                          {STATUS[order.status] ?? order.status}
-                        </span>
-                        <span className="text-[13.5px] font-bold text-brand">
-                          {formatPrice(order.total)}
-                        </span>
+                      <span className="text-[13.5px] font-bold text-brand">
+                        {formatPrice(order.total)}
                       </span>
                     </Link>
                   </li>
