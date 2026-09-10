@@ -36,7 +36,9 @@ export function Storefront() {
   );
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
-  const [sortId, setSortId] = useState("price");
+  // Анхдагчаар үнээр эрэмбэлэхэд эх сайтын бодит бус хямд зар нүүрэнд
+  // түрүүлж гардаг байв — зурагтай, тодорхой бүртгэлийг эхэнд харуулна
+  const [sortId, setSortId] = useState("recommended");
   const [view, setView] = useState<"grid" | "list">("grid");
   const [page, setPage] = useState(1);
   const [selected, setSelected] =

@@ -105,6 +105,8 @@ export interface CartLine {
   qty: number;
   unit: string;
   art: ArtKey;
+  /** Бодит гэрэл зураг байвал вектор дүрслэлийн оронд харагдана */
+  image?: string;
   /** Бөөний үнэ ба түүнийг идэвхжүүлэх доод тоо хэмжээ */
   bulkPrice?: number;
   bulkMinQty?: number;
@@ -114,6 +116,11 @@ export interface CartLine {
   location?: string;
   /** Агуулахад байгаа боломжит үлдэгдэл */
   stock?: number;
+  /** Нэгжийн жин (кг) ба мөрийн нийт жин — серверт тооцогдоно */
+  unitWeightKg?: number;
+  lineWeightKg?: number;
+  /** Жин нь ангиллаар таамагласан утга эсэх */
+  weightEstimated?: boolean;
 }
 
 export interface FilterOption {
@@ -177,6 +184,7 @@ export const NAV_LINKS = [
 export const PRICE_RANGE = { min: 0, max: 1_000_000 };
 
 export const SORT_OPTIONS = [
+  { id: "recommended", label: "Санал болгох" },
   { id: "price", label: "Үнээр" },
   { id: "popular", label: "Эрэлттэй" },
   { id: "new", label: "Шинэ" },

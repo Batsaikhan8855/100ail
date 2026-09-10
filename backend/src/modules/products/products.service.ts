@@ -30,6 +30,33 @@ type ProductWithRelations = Prisma.ProductGetPayload<{
  * Гулсуурын дээд хязгаар: эрэмбэлэгдсэн үнийн 99 хувийн цэгийг мянгад
  * дугуйрсан утга. Бүх үнэ ойролцоо бол жинхэнэ дээд утга буцна.
  */
+/**
+ * Каталогийн бүртгэлийн бүрэн гүйцэд байдлын оноо (анхдагч эрэмбэ).
+ *
+ * Худалдан авагч нүүрэн дээр «ямар бараа, хэдэн төгрөг» гэдгийг шууд
+ * ойлгох ёстой. Бодит гэрэл зураг, ойлгомжтой нэр, тайлбар, бодитой
+ * үнэ — эдгээр нь тэр ойлголтыг өгдөг гурван зүйл тул оноогоор нь
+ * эрэмбэлнэ.
+ */
+function catalogScore(product: {
+  name: string;
+  summary: string | null;
+  images: unknown[];
+  minPrice: number | null;
+}): number {
+  let score = 0;
+  if (product.images.length > 0) score += 4;
+  if (product.summary) score += 2;
+  // Барилгын материалын бодит үнэ ихэвчлэн мянгатаас эхэлж, зуун саяар
+  // дуусдаг. Хоёр талд нь эх сайтын «утсаар лавлана» зар үлддэг тул
+  // энэ хүрээнд байгааг нь дээгүүр тавина
+  const price = product.minPrice ?? 0;
+  if (price >= 1000 && price <= 100_000_000) score += 2;
+  // «Аппв», «LG & Royal» мэтийн богино, ойлгомжгүй нэрийг доогуур
+  if (product.name.trim().length >= 12) score += 1;
+  return score;
+}
+
 function percentileMax(sorted: number[]): number {
   if (sorted.length === 0) return 1_000_000;
   const top = sorted[sorted.length - 1];
@@ -221,6 +248,9 @@ export class ProductsService {
 
     // Хамгийн боломжийн саналын үнээр эрэмбэлэх тул JS талд эрэмбэлнэ
     switch (query.sort) {
+      case "price":
+        mapped.sort((a, b) => (a.minPrice ?? 0) - (b.minPrice ?? 0));
+        break;
       case "popular":
         mapped.sort((a, b) => b.totalStock - a.totalStock);
         break;
@@ -235,7 +265,25 @@ export class ProductsService {
         mapped.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
         break;
       default:
-        mapped.sort((a, b) => (a.minPrice ?? 0) - (b.minPrice ?? 0));
+        // Анхдагч эрэмбэ — бүрэн гүйцэд бүртгэлийг эхэнд.
+        //
+        // Эх сайтын каталогт нэр нь ойлгомжгүй («Аппв», «LG & Royal»),
+        // зураггүй, эсвэл үнэ нь бодит бус бага зар цөөнгүй байдаг.
+        // Үнээр өсөхөөр эрэмбэлбэл яг тэд нүүрэнд хамгийн түрүүнд гарч
+        // ирдэг байв — тиймээс анхдагчаар «хэдэн төгрөгийн ямар бараа»
+        // нь тодорхой, зурагтай бүртгэлийг дээгүүр тавина.
+        // Ижил оноотой үед шинэ бүртгэл эхэнд. Үнээр тэнцүүлбэл нэг тал
+        // руугаа хазайж, хамгийн үнэтэй (эсвэл хямд) зар нүүрийг эзэлнэ.
+        {
+          const added = new Map(
+            products.map((row) => [row.id, row.createdAt.getTime()]),
+          );
+          mapped.sort(
+            (a, b) =>
+              catalogScore(b) - catalogScore(a) ||
+              (added.get(b.id) ?? 0) - (added.get(a.id) ?? 0),
+          );
+        }
     }
 
     const start = (page - 1) * limit;
