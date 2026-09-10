@@ -45,11 +45,21 @@ export interface VehicleSpec {
   rearOverhangM: number;
 }
 
+/**
+ * Их биений хэлбэр — хэмжээсийн зургийг үүгээр зурна.
+ *
+ * `pickup` задгай тэвштэй бага оврын машин, `box` битүү тэвштэй ачааны
+ * машин, `semi` чирэгч ба чиргүүл.
+ */
+export type VehicleShape = "pickup" | "box" | "semi";
+
 /** Хүргэлтийн машины ангилал, даацаар нь эрэмбэлсэн */
 export interface Vehicle {
   id: string;
   name: string;
   capacityKg: number;
+  /** Хэмжээсийн зургийн их биений хэлбэр */
+  shape: VehicleShape;
   /**
    * Тэвшний дотор хэмжээ. Хөнгөн ч овор ихтэй ачаа (дулаалгын хавтан,
    * хоолой) даацаас өмнө тэвшинд багтахаа болих тул машиныг зөвхөн
@@ -79,6 +89,7 @@ const vehicle = (
   name: string,
   capacityKg: number,
   price: number,
+  shape: VehicleShape,
   bed: VehicleBed,
   spec: VehicleSpec,
 ): Vehicle => ({
@@ -86,6 +97,7 @@ const vehicle = (
   name,
   capacityKg,
   price,
+  shape,
   bed,
   spec,
   volumeM3: bedVolume(bed),
@@ -101,6 +113,7 @@ export const VEHICLES: Vehicle[] = [
     "Портер",
     1000,
     25_000,
+    "pickup",
     { lengthM: 2.5, widthM: 1.6, heightM: 1.0 },
     {
       lengthM: 4.85,
@@ -116,6 +129,7 @@ export const VEHICLES: Vehicle[] = [
     "3 тонны ачааны машин",
     3000,
     45_000,
+    "box",
     { lengthM: 4.3, widthM: 2.0, heightM: 2.0 },
     {
       lengthM: 6.6,
@@ -131,6 +145,7 @@ export const VEHICLES: Vehicle[] = [
     "5 тонны ачааны машин",
     5000,
     70_000,
+    "box",
     { lengthM: 5.5, widthM: 2.2, heightM: 2.2 },
     {
       lengthM: 8.0,
@@ -146,6 +161,7 @@ export const VEHICLES: Vehicle[] = [
     "10 тонны ачааны машин",
     10_000,
     120_000,
+    "box",
     { lengthM: 7.5, widthM: 2.4, heightM: 2.5 },
     {
       lengthM: 10.2,
@@ -163,6 +179,7 @@ export const VEHICLES: Vehicle[] = [
     "20 тонны чиргүүл",
     20_000,
     200_000,
+    "semi",
     { lengthM: 13.6, widthM: 2.45, heightM: 2.7 },
     {
       lengthM: 16.5,

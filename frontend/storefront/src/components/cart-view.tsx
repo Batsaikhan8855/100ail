@@ -29,8 +29,8 @@ import {
 } from "./icons";
 import { ProductThumb } from "./product-art";
 import { SiteHeader } from "./site-header";
-import { useImageExists, VehicleArt } from "./vehicle-art";
-import { VehicleDrawing, dimensionsSrc } from "./vehicle-blueprint";
+import { VehicleArt } from "./vehicle-art";
+import { useDimensionsImage, VehicleDrawing } from "./vehicle-blueprint";
 import { Panel, PanelHeader } from "./ui";
 
 export function CartView() {
@@ -718,9 +718,8 @@ function SpecRow({ label, value }: { label: string; value: string }) {
  * бүтнээрээ харагддаг тул тусад нь нээх утгагүй.
  */
 function DimensionsLink({ vehicleId, name }: { vehicleId: string; name: string }) {
-  const src = dimensionsSrc(vehicleId);
-  const exists = useImageExists(src);
-  if (!exists) return null;
+  const src = useDimensionsImage(vehicleId);
+  if (!src) return null;
 
   return (
     <a

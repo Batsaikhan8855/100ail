@@ -123,7 +123,12 @@ export interface Vehicle {
   volumeM3: number;
   /** Гадна габарит. Сервер өгөөгүй бол тэг — хэмжээсийн зураг гарахгүй */
   spec: VehicleSpec;
+  /** Хэмжээсийн зургийн их биений хэлбэр */
+  shape: VehicleShape;
 }
+
+/** Их биений хэлбэр — задгай тэвш, битүү тэвш, чиргүүл */
+export type VehicleShape = "pickup" | "box" | "semi";
 
 /** Машины гадна габарит ба гүүрний байрлал, метрээр */
 export interface VehicleSpec {
@@ -143,10 +148,12 @@ export interface VehicleBed {
 }
 
 /** Овор, габаритын талбарууд нь хуучин серверээс ирэхгүй байж болно */
-interface ApiVehicle extends Omit<Vehicle, "bed" | "volumeM3" | "spec"> {
+interface ApiVehicle
+  extends Omit<Vehicle, "bed" | "volumeM3" | "spec" | "shape"> {
   bed?: VehicleBed | null;
   volumeM3?: number | null;
   spec?: VehicleSpec | null;
+  shape?: VehicleShape | null;
 }
 
 const ZERO_BED: VehicleBed = { lengthM: 0, widthM: 0, heightM: 0 };
@@ -170,6 +177,7 @@ const toVehicle = (vehicle: ApiVehicle): Vehicle => {
     ...vehicle,
     bed,
     spec: vehicle.spec ?? ZERO_SPEC,
+    shape: vehicle.shape ?? "box",
     volumeM3:
       vehicle.volumeM3 ??
       Math.round(bed.lengthM * bed.widthM * bed.heightM * 10) / 10,
