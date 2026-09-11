@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { NAV_LINKS } from "@/data/catalog";
@@ -24,11 +24,18 @@ export function SiteHeader({
   activeNav,
   activeCategory = "",
   onCategoryChange,
+  onHomeReset,
 }: {
   activeNav: string;
   /** Ангиллын мөр зөвхөн каталогтой хуудсанд идэвхтэй байна */
   activeCategory?: string;
   onCategoryChange?: (id: string) => void;
+  /**
+   * «Нүүр» дарахад каталогийг цэвэрлэнэ. Ангилал, шүүлтүүр нь URL-д биш
+   * зөвхөн state-д хадгалагддаг тул `/` рүү заасан Link нь аль хэдийн
+   * тэр хуудсан дээр байхад юу ч хийдэггүй — шүүлт хэвээр үлддэг байв.
+   */
+  onHomeReset?: () => void;
 }) {
   const { count: cartCount, reload: reloadCart } = useCart();
   const { user, logout } = useSession();
@@ -44,6 +51,31 @@ export function SiteHeader({
       ? `/login?next=${encodeURIComponent(pathname)}`
       : "/login";
 
+  /**
+   * Дэд ангиллын мөрийг гадуур дарах эсвэл Esc дарахад хаана. Өмнө нь
+   * зөвхөн тухайн ангиллыг дахин дарах, эсвэл дэд ангилал сонгох хоёр
+   * замаар л хаагддаг байсан тул хуудсын өөр хэсэгт дарахад нээлттэй
+   * хэвээр үлдэж байв.
+   */
+  const headerRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (!openCategory) return;
+    const onPointerDown = (event: PointerEvent) => {
+      if (!headerRef.current?.contains(event.target as Node)) {
+        setOpenCategory("");
+      }
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpenCategory("");
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [openCategory]);
+
   const rows = categories.data ?? [];
   // Дэд ангилал нь зөвхөн каталогийн хуудсанд утгатай (шүүлтүүр солино)
   const openRow = onCategoryChange
@@ -53,13 +85,13 @@ export function SiteHeader({
   const OpenIcon = openRow ? CATEGORY_ICONS[toCategory(openRow).icon] : null;
 
   return (
-    <header className="sticky top-0 z-30 border-b border-ink-700 bg-ink-900/95 backdrop-blur">
+    <header ref={headerRef} className="sticky top-0 z-30 border-b border-ink-700 bg-ink-900/95 backdrop-blur">
       <div className="mx-auto flex h-[72px] max-w-[1660px] items-center gap-6 px-4 xl:px-6">
         <Link href="/" className="flex shrink-0 items-center gap-2.5">
           <LogoMark />
           <span className="leading-none">
             <span className="block text-[26px] font-extrabold tracking-tight text-white">
-              100 АЙЛ
+              barilgaHUB
             </span>
             <span className="mt-1 block text-[8.5px] font-medium uppercase tracking-[0.14em] text-mute-dim">
               Барилгын материалын маркетплейс
@@ -74,6 +106,10 @@ export function SiteHeader({
               <Link
                 key={link.id}
                 href={link.href}
+                onClick={() => {
+                  setOpenCategory("");
+                  if (link.id === "home") onHomeReset?.();
+                }}
                 aria-current={active ? "page" : undefined}
                 className={`relative px-3.5 py-6 text-[13px] font-semibold uppercase tracking-wide transition-colors ${
                   active ? "text-brand" : "text-[#c2c7cf] hover:text-white"

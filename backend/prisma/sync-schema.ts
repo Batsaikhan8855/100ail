@@ -27,6 +27,7 @@ import * as crypto from "crypto";
 import * as fs from "fs";
 import * as path from "path";
 import { PrismaClient } from "@prisma/client";
+import { envProblems, stripEmptyEnv } from "../src/common/env";
 
 const prisma = new PrismaClient();
 
@@ -81,6 +82,16 @@ async function rememberHash(hash: string): Promise<void> {
 }
 
 async function main(): Promise<void> {
+  // Prisma-гийн "the URL must start with the protocol" алдаа нь шалтгааныг
+  // хэлдэггүй тул эндээс тодорхой мессеж өгнө.
+  stripEmptyEnv();
+  const problems = envProblems();
+  if (problems.length > 0) {
+    console.error("[env] Тохиргооны алдаа:");
+    for (const problem of problems) console.error(`  • ${problem}`);
+    process.exit(1);
+  }
+
   const file = schemaPath();
   const hash = crypto
     .createHash("sha256")

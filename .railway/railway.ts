@@ -87,11 +87,11 @@ export default defineRailway(() => {
       //
       //   JWT_SECRET      — санамсаргүй урт мөр
       //   CORS_ORIGINS    — Vercel-ийн домэйнууд, таслалаар,
-      //                     жишээ нь `https://barilgahub.vercel.app,https://*.vercel.app`
+      //                     жишээ нь `https://100ail.vercel.app,https://*.vercel.app`
       //   PUBLIC_API_URL  — энэ сервисийн нийтийн хаяг
       //   PUBLIC_WEB_URL  — storefront-ын хаяг
       //   S3_PUBLIC_URL   — барааны зургийн суурь, жишээ нь
-      //                     `https://barilgahub.vercel.app/media`
+      //                     `https://100ail.vercel.app/media`
       JWT_SECRET: preserve(),
       CORS_ORIGINS: preserve(),
       PUBLIC_API_URL: preserve(),
