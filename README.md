@@ -1,4 +1,4 @@
-# barilgaHUB
+# BarilgaHUB
 
 Барилгын материалын олон нийлүүлэгчтэй marketplace. Архитектурын дэлгэрэнгүй
 тайлбарыг [`100-ail-ecommerce-architecture copy.md`](./100-ail-ecommerce-architecture%20copy.md)

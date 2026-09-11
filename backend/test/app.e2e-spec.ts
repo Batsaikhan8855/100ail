@@ -9,7 +9,7 @@ import { PrismaService } from "../src/common/prisma.service";
  *   npm run db:push && npm run db:seed && npm run test:e2e
  * Тест өөрийн үүсгэсэн захиалга, сагс, нөөцлөлтөө буцаан цэвэрлэнэ.
  */
-describe("barilgaHUB API (e2e)", () => {
+describe("BarilgaHUB API (e2e)", () => {
   let app: INestApplication;
   let prisma: PrismaService;
 

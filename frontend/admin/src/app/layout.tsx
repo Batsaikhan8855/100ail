@@ -4,7 +4,7 @@ import { Shell } from "@/components/shell";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "barilgaHUB — Админ панел",
+  title: "BarilgaHUB — Админ панел",
   description:
     "Нийлүүлэгч батлах, захиалга, төлбөр, шимтгэл, маргаан, тайлангийн удирдлага.",
 };

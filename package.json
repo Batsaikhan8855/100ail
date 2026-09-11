@@ -2,7 +2,7 @@
   "name": "barilgahub",
   "version": "0.1.0",
   "private": true,
-  "description": "barilgaHUB — барилгын материалын e-commerce платформ (modular monolith)",
+  "description": "BarilgaHUB — барилгын материалын e-commerce платформ (modular monolith)",
   "scripts": {
     "dev:backend": "npm --prefix backend run start:dev",
     "dev:storefront": "npm --prefix frontend/storefront run dev",

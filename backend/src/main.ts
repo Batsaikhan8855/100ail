@@ -64,7 +64,7 @@ async function bootstrap(): Promise<void> {
   );
 
   const config = new DocumentBuilder()
-    .setTitle("barilgaHUB API")
+    .setTitle("BarilgaHUB API")
     .setDescription("Барилгын материалын marketplace-ийн modular monolith API")
     .setVersion("0.1.0")
     .addBearerAuth()
@@ -75,7 +75,7 @@ async function bootstrap(): Promise<void> {
   // `0.0.0.0` — контейнерын гаднаас хандах боломжтой байх ёстой.
   // Railway/Docker дээр localhost дээр сонсвол хүсэлт огт хүрэхгүй.
   await app.listen(port, "0.0.0.0");
-  console.log(`barilgaHUB API: http://localhost:${port}/api (docs: /api/docs)`);
+  console.log(`BarilgaHUB API: http://localhost:${port}/api (docs: /api/docs)`);
 }
 
 void bootstrap();
