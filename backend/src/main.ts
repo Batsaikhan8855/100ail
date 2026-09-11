@@ -5,6 +5,7 @@ import { json, urlencoded } from "express";
 import * as path from "path";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { AppModule } from "./app.module";
+import { validateEnv } from "./common/env";
 
 /**
  * `CORS_ORIGINS` дэх зөвшөөрөгдсөн эх сурвалжууд. Vercel-ийн preview
@@ -37,6 +38,9 @@ function corsOrigin(
 }
 
 async function bootstrap(): Promise<void> {
+  // Модуль ачаалахаас өмнө: буруу тохиргоог хүсэлт ирэх хүртэл нуухгүй
+  validateEnv();
+
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   app.setGlobalPrefix("api");

@@ -91,11 +91,11 @@ CDN дээр байгааг мэднэ.
 Railway дээр дараах хувьсагчийг тавина:
 
 ```
-S3_PUBLIC_URL=https://barilgahub.vercel.app/media
+S3_PUBLIC_URL=https://100ail.vercel.app/media
 ```
 
 `StorageService.publicUrl` нь `barilga/<хэш>.webp` түлхүүрийг үүнтэй
-залгаж `https://barilgahub.vercel.app/media/barilga/<хэш>.webp` болгоно.
+залгаж `https://100ail.vercel.app/media/barilga/<хэш>.webp` болгоно.
 Файлын нэр нь агуулгын хэш тул `next.config.ts` дотор нэг жилийн
 `immutable` кэш тавьсан.
 
