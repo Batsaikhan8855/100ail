@@ -106,7 +106,7 @@ export default defineRailway(() => {
   // Railway дээрх төслийн нэр. `plan` нь энэ нэрийг бодит төслийнхтэй
   // тулгадаг тул самбар дээрх нэртэй яг тааруулж бичнэ — эс бөгөөс
   // дахин нэрлэх өөрчлөлт санал болгоно.
-  return project("barilgaHUB", {
+  return project("BarilgaHUB", {
     resources: [db, media, api],
   });
 });

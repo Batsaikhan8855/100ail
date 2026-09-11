@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { TrackView } from "@/components/track-view";
 
 export const metadata: Metadata = {
-  title: "Хүргэлт хянах — barilgaHUB",
+  title: "Хүргэлт хянах — BarilgaHUB",
   description: "Хянах кодоор хүргэлтийн явцыг шалгана.",
 };
 

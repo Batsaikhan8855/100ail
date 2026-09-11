@@ -1,4 +1,4 @@
-# barilgaHUB — Storefront
+# BarilgaHUB — Storefront
 
 Барилгын материалын marketplace-ийн худалдан авагчийн веб (архитектурын
 баримтын `frontend/storefront`). Next.js App Router + TypeScript + Tailwind CSS v4.

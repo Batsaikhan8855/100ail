@@ -1,4 +1,4 @@
-# barilgaHUB — бүрэн орчин: өгөгдлийн сан, cache, хайлт, API, гурван веб.
+# BarilgaHUB — бүрэн орчин: өгөгдлийн сан, cache, хайлт, API, гурван веб.
 # Хөгжүүлэлтэд: docker compose up -d db redis meilisearch
 # Бүтнээр:      docker compose up -d --build
 
@@ -71,7 +71,7 @@ services:
       NOMINATIM_URL: ${NOMINATIM_URL:-https://nominatim.openstreetmap.org}
       MAIL_WEBHOOK_URL: ${MAIL_WEBHOOK_URL:-}
       MAIL_WEBHOOK_TOKEN: ${MAIL_WEBHOOK_TOKEN:-}
-      MAIL_FROM: ${MAIL_FROM:-barilgaHUB <no-reply@barilgahub.mn>}
+      MAIL_FROM: ${MAIL_FROM:-BarilgaHUB <no-reply@barilgahub.mn>}
       SMS_GATEWAY_URL: ${SMS_GATEWAY_URL:-}
       SMS_GATEWAY_TOKEN: ${SMS_GATEWAY_TOKEN:-}
       PUBLIC_WEB_URL: ${PUBLIC_WEB_URL:-http://localhost:3100}
