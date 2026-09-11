@@ -5,7 +5,7 @@
  *
  * `@theme inline` нь Tailwind-ийн ангиллуудыг тогтмол утга биш, CSS
  * хувьсагч руу заалгадаг. Ингэснээр `bg-ink-900`, `text-mute` зэрэг
- * 500 гаруй хэрэглээг хөндөхгүйгээр theme солигдоно — зөвхөн доорх
+ * олон зуун хэрэглээг хөндөхгүйгээр theme солигдоно — зөвхөн доорх
  * хувьсагчид өөрчлөгдөнө.
  *
  * Нэрийг нь хэвээр үлдээсэн (`ink-*`) — утга нь семантик болсон:
@@ -14,6 +14,8 @@
  *
  * Light theme дээр эдгээрийн харьцаа урвуу болно (panel нь хуудаснаас
  * цайвар) — энэ нь гарын авлагын 7-р хэсгийн зориулалт.
+ *
+ * Гурван апп ижил блок ашиглана — зөрүү гарвал брэнд салангид болно.
  */
 @theme inline {
   --color-ink-950: var(--c-page);
@@ -41,6 +43,9 @@
   --color-danger: var(--c-danger);
   --color-danger-bg: var(--c-danger-bg);
   --color-danger-border: var(--c-danger-border);
+  --color-info: var(--c-info);
+  --color-info-bg: var(--c-info-bg);
+  --color-info-border: var(--c-info-border);
 
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
@@ -69,6 +74,9 @@
   --c-danger: #f08585;
   --c-danger-bg: #2c1717;
   --c-danger-border: #7a3030;
+  --c-info: #7fb7ef;
+  --c-info-bg: #16283a;
+  --c-info-border: #2f5d8a;
 
   color-scheme: dark;
 }
@@ -96,6 +104,9 @@
   --c-danger: #c91521;
   --c-danger-bg: #f9ecec;
   --c-danger-border: #e8c2c2;
+  --c-info: #1b5e9e;
+  --c-info-bg: #eaf2fa;
+  --c-info-border: #bcd6ee;
 
   color-scheme: light;
 }

@@ -161,7 +161,7 @@ export default function SuppliersPage() {
                 ) : (
                   <>
                     <Cell>
-                      <div className="text-white">{supplier.name}</div>
+                      <div className="text-fg">{supplier.name}</div>
                       <div className="text-[12px] text-mute-dim">
                         {supplier.description ?? supplier.slug}
                       </div>
@@ -169,7 +169,7 @@ export default function SuppliersPage() {
                     <Cell align="right">{formatNumber(supplier.offerCount)}</Cell>
                     <Cell align="right">{supplier.warehouseCount}</Cell>
                     <Cell align="right">
-                      <span className="tabular-nums text-white">
+                      <span className="tabular-nums text-fg">
                         {supplier.rating.toFixed(1)}
                       </span>
                       <div className="text-[11.5px] text-mute-dim">

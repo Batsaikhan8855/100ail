@@ -137,7 +137,7 @@ export default function BannersPage() {
                       />
                     ) : null}
                     <div className="min-w-0">
-                      <div className="truncate text-white">{banner.title}</div>
+                      <div className="truncate text-fg">{banner.title}</div>
                       {banner.subtitle ? (
                         <div className="max-w-xs truncate text-[12px] text-mute-dim">
                           {banner.subtitle}
@@ -339,7 +339,7 @@ function CreateBannerPanel({ onDone }: { onDone: () => void }) {
               type="file"
               accept="image/*"
               onChange={upload}
-              className="block cursor-pointer rounded-md border border-ink-600 bg-ink-900 px-3 py-2 text-[12.5px] text-mute file:mr-3 file:rounded file:border-0 file:bg-ink-800 file:px-3 file:py-1.5 file:text-[12px] file:text-white"
+              className="block cursor-pointer rounded-md border border-ink-600 bg-ink-900 px-3 py-2 text-[12.5px] text-mute file:mr-3 file:rounded file:border-0 file:bg-ink-800 file:px-3 file:py-1.5 file:text-[12px] file:text-fg"
             />
             {image ? (
               // eslint-disable-next-line @next/next/no-img-element

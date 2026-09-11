@@ -137,7 +137,7 @@ export default function CategoriesPage() {
                     className={`flex w-full items-center justify-between gap-2 rounded-md px-3 py-2 text-left text-[13px] transition-colors ${
                       selected?.id === category.id
                         ? "bg-brand/12 text-brand"
-                        : "text-[#c2c7cf] hover:bg-ink-800 hover:text-white"
+                        : "text-mute hover:bg-ink-800 hover:text-fg"
                     }`}
                   >
                     <span>{category.name}</span>
@@ -158,7 +158,7 @@ export default function CategoriesPage() {
                       className={`flex w-full items-center gap-2 rounded-md py-1.5 pl-7 pr-3 text-left text-[12.5px] transition-colors ${
                         selected?.id === child.id
                           ? "text-brand"
-                          : "text-mute hover:text-white"
+                          : "text-mute hover:text-fg"
                       }`}
                     >
                       {child.name}
@@ -196,7 +196,7 @@ export default function CategoriesPage() {
                       </span>
                     </Cell>
                     <Cell>
-                      <span className="text-white">{attribute.label}</span>
+                      <span className="text-fg">{attribute.label}</span>
                     </Cell>
                     <Cell>{attribute.unit ?? "—"}</Cell>
                     <Cell>{ATTRIBUTE_TYPE[attribute.type] ?? attribute.type}</Cell>

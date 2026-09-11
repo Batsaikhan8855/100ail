@@ -179,9 +179,9 @@ export function LocationPicker({
                   setResults(null);
                   setNote(`Сонгосон: ${place.name}`);
                 }}
-                className="w-full px-3 py-2 text-left text-[12.5px] text-[#c2c7cf] hover:bg-ink-800 hover:text-white"
+                className="w-full px-3 py-2 text-left text-[12.5px] text-mute hover:bg-ink-800 hover:text-fg"
               >
-                <span className="block text-white">{place.name}</span>
+                <span className="block text-fg">{place.name}</span>
                 <span className="block truncate text-[11.5px] text-mute-dim">
                   {place.address}
                 </span>

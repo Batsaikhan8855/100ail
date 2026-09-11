@@ -108,12 +108,12 @@ export default function PromotionsPage() {
             {rows.map((promotion) => (
               <Row key={promotion.id}>
                 <Cell>
-                  <span className="font-mono text-[12.5px] text-white">
+                  <span className="font-mono text-[12.5px] text-fg">
                     {promotion.code}
                   </span>
                 </Cell>
                 <Cell>
-                  <div className="text-white">{promotion.title}</div>
+                  <div className="text-fg">{promotion.title}</div>
                   {promotion.description ? (
                     <div className="max-w-xs text-[12px] text-mute-dim">
                       {promotion.description}

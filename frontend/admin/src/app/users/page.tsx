@@ -125,7 +125,7 @@ export default function UsersPage() {
             {rows.map((user) => (
               <Row key={user.id}>
                 <Cell>
-                  <div className="text-white">{user.name}</div>
+                  <div className="text-fg">{user.name}</div>
                   <div className="text-[12px] text-mute-dim">{user.email}</div>
                 </Cell>
                 <Cell>

@@ -92,12 +92,12 @@ export default function DeliveriesPage() {
             {rows.map((delivery) => (
               <Row key={delivery.id}>
                 <Cell>
-                  <span className="font-mono text-[12.5px] text-white">
+                  <span className="font-mono text-[12.5px] text-fg">
                     {delivery.trackingCode}
                   </span>
                 </Cell>
                 <Cell>
-                  <div className="text-white">{delivery.orderCode}</div>
+                  <div className="text-fg">{delivery.orderCode}</div>
                   <div className="text-[12px] text-mute-dim">
                     {delivery.buyerName} · {delivery.phone}
                   </div>
@@ -128,7 +128,7 @@ export default function DeliveriesPage() {
                     </div>
                   ) : delivery.driverName ? (
                     <>
-                      <div className="text-white">{delivery.driverName}</div>
+                      <div className="text-fg">{delivery.driverName}</div>
                       <div className="text-[12px] text-mute-dim">
                         {delivery.driverPhone ?? "—"}
                       </div>

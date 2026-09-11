@@ -164,7 +164,7 @@ export default function AdminOrdersPage() {
                   <button
                     type="button"
                     onClick={() => setOpen(open === order.id ? null : order.id)}
-                    className="text-left text-white hover:text-brand"
+                    className="text-left text-fg hover:text-brand"
                   >
                     {order.code}
                   </button>
@@ -190,7 +190,7 @@ export default function AdminOrdersPage() {
                           className="border-t border-ink-700 pt-2"
                         >
                           <div className="flex items-center justify-between gap-2">
-                            <span className="text-white">
+                            <span className="text-fg">
                               {supplierOrder.supplier.name}
                             </span>
                             <StatusBadge
@@ -201,7 +201,7 @@ export default function AdminOrdersPage() {
                           {supplierOrder.items.map((item) => (
                             <div
                               key={item.id}
-                              className="flex justify-between gap-3 py-0.5 text-[#c2c7cf]"
+                              className="flex justify-between gap-3 py-0.5 text-mute"
                             >
                               <span>
                                 {item.productName} × {formatNumber(item.qty)}{" "}
@@ -233,7 +233,7 @@ export default function AdminOrdersPage() {
                   ) : null}
                 </Cell>
                 <Cell>
-                  <div className="text-white">{order.buyerName}</div>
+                  <div className="text-fg">{order.buyerName}</div>
                   <div className="text-[12px] text-mute-dim">{order.phone}</div>
                 </Cell>
                 <Cell>

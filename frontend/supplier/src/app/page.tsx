@@ -97,10 +97,10 @@ export default function DashboardPage() {
                 key={row.status}
                 className="flex items-center justify-between text-[13px]"
               >
-                <span className="text-[#c2c7cf]">
+                <span className="text-mute">
                   {SUPPLIER_ORDER_STATUS[row.status]?.label ?? row.status}
                 </span>
-                <span className="tabular-nums text-white">{row.count}</span>
+                <span className="tabular-nums text-fg">{row.count}</span>
               </div>
             ))}
           </div>

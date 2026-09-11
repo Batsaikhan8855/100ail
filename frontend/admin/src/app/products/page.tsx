@@ -123,7 +123,7 @@ export default function AdminProductsPage() {
       ) : null}
 
       {notice ? (
-        <p className="mb-4 rounded-md border border-[#2b6b45] bg-[#14291d] px-3 py-2 text-[12.5px] text-ok">
+        <p className="mb-4 rounded-md border border-ok-border bg-ok-bg px-3 py-2 text-[12.5px] text-ok">
           {notice}
         </p>
       ) : null}
@@ -181,7 +181,7 @@ export default function AdminProductsPage() {
             {rows.map((product) => (
               <Row key={product.id}>
                 <Cell>
-                  <div className="text-white">{product.name}</div>
+                  <div className="text-fg">{product.name}</div>
                   <div className="text-[12px] text-mute-dim">
                     {product.manufacturer ?? product.slug}
                   </div>
@@ -207,7 +207,7 @@ export default function AdminProductsPage() {
                   {product.totalStock === 0 ? (
                     <Badge tone="bad">Дууссан</Badge>
                   ) : (
-                    <span className="tabular-nums text-white">
+                    <span className="tabular-nums text-fg">
                       {formatNumber(product.totalStock)}
                     </span>
                   )}
@@ -217,7 +217,7 @@ export default function AdminProductsPage() {
                     <span className="text-mute-dim">—</span>
                   ) : (
                     <>
-                      <span className="text-white">{product.rating.toFixed(1)}</span>
+                      <span className="text-fg">{product.rating.toFixed(1)}</span>
                       <div className="text-[11.5px] text-mute-dim">
                         {product.reviewCount} сэтгэгдэл
                       </div>
@@ -323,7 +323,7 @@ function ProductImages({
               type="button"
               onClick={() => remove(image.id)}
               aria-label="Зураг устгах"
-              className="absolute -right-1.5 -top-1.5 h-5 w-5 rounded-full border border-ink-600 bg-ink-950 text-[11px] text-[#f08585]"
+              className="absolute -right-1.5 -top-1.5 h-5 w-5 rounded-full border border-ink-600 bg-ink-950 text-[11px] text-danger"
             >
               ×
             </button>
@@ -340,7 +340,7 @@ function ProductImages({
         accept="image/*"
         onChange={upload}
         disabled={busy}
-        className="mt-2 w-full text-[11.5px] text-mute file:mr-2 file:rounded file:border-0 file:bg-ink-700 file:px-2 file:py-1 file:text-[11.5px] file:text-white"
+        className="mt-2 w-full text-[11.5px] text-mute file:mr-2 file:rounded file:border-0 file:bg-ink-700 file:px-2 file:py-1 file:text-[11.5px] file:text-fg"
       />
       {busy ? (
         <p className="mt-1 text-[11.5px] text-mute">Байршуулж байна…</p>

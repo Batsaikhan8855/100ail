@@ -219,7 +219,7 @@ export default function WarehousesPage() {
             {rows.map((warehouse) => (
               <Row key={warehouse.id}>
                 <Cell>
-                  <span className="text-white">{warehouse.name}</span>
+                  <span className="text-fg">{warehouse.name}</span>
                 </Cell>
                 <Cell>{warehouse.city}</Cell>
                 <Cell>
@@ -241,7 +241,7 @@ export default function WarehousesPage() {
                 </Cell>
                 <Cell align="right">{warehouse.skuCount}</Cell>
                 <Cell align="right">
-                  <span className="tabular-nums text-white">
+                  <span className="tabular-nums text-fg">
                     {formatNumber(warehouse.totalQuantity)}
                   </span>
                 </Cell>

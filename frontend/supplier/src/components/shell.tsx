@@ -16,6 +16,7 @@ import {
 } from "./icons";
 import { NotificationBell } from "./notifications";
 import { useSession } from "./session";
+import { ThemeToggle } from "./theme-toggle";
 import { Button, ErrorNote, Field, Input, Panel } from "./ui";
 
 const NAV = [
@@ -48,7 +49,7 @@ export function Shell({ children }: { children: ReactNode }) {
         <div className="flex items-center gap-2.5 border-b border-ink-700 px-4 py-4">
           <LogoMark className="h-7 w-7" />
           <div>
-            <div className="text-[14px] font-semibold text-white">BarilgaHUB</div>
+            <div className="text-[14px] font-semibold text-fg">BarilgaHUB</div>
             <div className="text-[11.5px] text-mute-dim">Нийлүүлэгчийн систем</div>
           </div>
         </div>
@@ -64,7 +65,7 @@ export function Shell({ children }: { children: ReactNode }) {
                 className={`flex items-center gap-2.5 rounded-md px-3 py-2 text-[13px] transition-colors ${
                   active
                     ? "bg-brand/12 text-brand"
-                    : "text-[#c2c7cf] hover:bg-ink-800 hover:text-white"
+                    : "text-mute hover:bg-ink-800 hover:text-fg"
                 }`}
               >
                 <Icon className="h-[18px] w-[18px]" />
@@ -75,7 +76,10 @@ export function Shell({ children }: { children: ReactNode }) {
         </nav>
 
         <div className="border-t border-ink-700 p-3">
-          <div className="truncate text-[13px] text-white">{user.name}</div>
+          <div className="mb-1 flex items-center justify-end">
+            <ThemeToggle className="h-8 w-8" />
+          </div>
+          <div className="truncate text-[13px] text-fg">{user.name}</div>
           <div className="truncate text-[11.5px] text-mute-dim">
             {user.supplier?.name ?? user.email}
           </div>
@@ -90,11 +94,12 @@ export function Shell({ children }: { children: ReactNode }) {
         <header className="flex items-center justify-between gap-3 border-b border-ink-700 bg-ink-900 px-4 py-3 md:hidden">
           <div className="flex items-center gap-2">
             <LogoMark className="h-6 w-6" />
-            <span className="text-[14px] font-semibold text-white">
+            <span className="text-[14px] font-semibold text-fg">
               Нийлүүлэгчийн систем
             </span>
           </div>
           <div className="flex items-center gap-2">
+            <ThemeToggle className="h-8 w-8" />
             <NotificationBell />
             <Button size="sm" onClick={logout}>
               Гарах
@@ -111,7 +116,7 @@ export function Shell({ children }: { children: ReactNode }) {
                 key={href}
                 href={href}
                 className={`whitespace-nowrap rounded-md px-3 py-1.5 text-[12.5px] ${
-                  active ? "bg-brand/12 text-brand" : "text-[#c2c7cf]"
+                  active ? "bg-brand/12 text-brand" : "text-mute"
                 }`}
               >
                 {label}
@@ -157,7 +162,7 @@ function LoginView() {
         <div className="mb-5 flex items-center gap-2.5">
           <LogoMark className="h-8 w-8" />
           <div>
-            <div className="text-[15px] font-semibold text-white">BarilgaHUB</div>
+            <div className="text-[15px] font-semibold text-fg">BarilgaHUB</div>
             <div className="text-[12px] text-mute-dim">Нийлүүлэгчийн систем</div>
           </div>
         </div>

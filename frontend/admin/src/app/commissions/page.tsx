@@ -153,7 +153,7 @@ export default function AdminCommissionsPage() {
               {(ledger.data ?? []).map((row) => (
                 <Row key={row.id}>
                   <Cell>
-                    <span className="text-white">{row.orderCode}</span>
+                    <span className="text-fg">{row.orderCode}</span>
                   </Cell>
                   <Cell>{row.supplier.name}</Cell>
                   <Cell>
