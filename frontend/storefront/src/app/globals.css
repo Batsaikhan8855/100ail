@@ -1,27 +1,109 @@
 @import "tailwindcss";
 
-@theme {
-  --color-ink-950: #0b0c0f;
-  --color-ink-900: #101216;
-  --color-ink-850: #15171c;
-  --color-ink-800: #191c22;
-  --color-ink-700: #22252d;
-  --color-ink-600: #2c3038;
-  --color-mute: #8b929e;
-  --color-mute-dim: #6b7280;
-  --color-brand: #f5911e;
-  --color-brand-hi: #ffa733;
-  --color-brand-lo: #d97a0c;
-  --color-ok: #37b96a;
+/*
+ * Өнгөний систем — BarilgaHUB-ын брэндийн гарын авлагын 3, 6, 7-р хэсэг.
+ *
+ * `@theme inline` нь Tailwind-ийн ангиллуудыг тогтмол утга биш, CSS
+ * хувьсагч руу заалгадаг. Ингэснээр `bg-ink-900`, `text-mute` зэрэг
+ * 500 гаруй хэрэглээг хөндөхгүйгээр theme солигдоно — зөвхөн доорх
+ * хувьсагчид өөрчлөгдөнө.
+ *
+ * Нэрийг нь хэвээр үлдээсэн (`ink-*`) — утга нь семантик болсон:
+ *   ink-950 хуудасны суурь · ink-900 panel · ink-850 карт
+ *   ink-800 input · ink-700 хүрээ · ink-600 тод хүрээ
+ *
+ * Light theme дээр эдгээрийн харьцаа урвуу болно (panel нь хуудаснаас
+ * цайвар) — энэ нь гарын авлагын 7-р хэсгийн зориулалт.
+ */
+@theme inline {
+  --color-ink-950: var(--c-page);
+  --color-ink-900: var(--c-panel);
+  --color-ink-850: var(--c-card);
+  --color-ink-800: var(--c-input);
+  --color-ink-700: var(--c-border);
+  --color-ink-600: var(--c-border-hi);
+
+  --color-fg: var(--c-text-1);
+  --color-mute: var(--c-text-2);
+  --color-mute-dim: var(--c-text-3);
+
+  --color-brand: var(--c-red);
+  --color-brand-hi: var(--c-red-hi);
+  --color-brand-lo: var(--c-red-lo);
+  /* Signal Red дээрх текст, icon хоёр theme-д хоёуланд нь цагаан.
+     Гарын авлага: «Хар текстийг Signal Red товчин дээр ашиглахгүй». */
+  --color-on-brand: #ffffff;
+  --color-brass: #cfa33b;
+
+  --color-ok: var(--c-ok);
+  --color-ok-bg: var(--c-ok-bg);
+  --color-ok-border: var(--c-ok-border);
+  --color-danger: var(--c-danger);
+  --color-danger-bg: var(--c-danger-bg);
+  --color-danger-border: var(--c-danger-border);
 
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
 }
 
+/* Dark — анхдагч. Гарын авлагын 6-р хэсэг. */
+:root {
+  --c-page: #0b0d0f;
+  --c-panel: #171a1d;
+  --c-card: #1d2023;
+  --c-input: #101215;
+  --c-border: #303338;
+  --c-border-hi: #3f444a;
+
+  --c-text-1: #f3f0e8;
+  --c-text-2: #c9c9c5;
+  --c-text-3: #92979c;
+
+  --c-red: #c91521;
+  --c-red-hi: #e02231;
+  --c-red-lo: #a30f19;
+
+  --c-ok: #4cc47d;
+  --c-ok-bg: #14291d;
+  --c-ok-border: #2b6b45;
+  --c-danger: #f08585;
+  --c-danger-bg: #2c1717;
+  --c-danger-border: #7a3030;
+
+  color-scheme: dark;
+}
+
+/* Light — гарын авлагын 7-р хэсэг. */
+[data-theme="light"] {
+  --c-page: #f3f0e8;
+  --c-panel: #ffffff;
+  --c-card: #ffffff;
+  --c-input: #fafaf8;
+  --c-border: #d8d8d2;
+  --c-border-hi: #c9c9c5;
+
+  --c-text-1: #111315;
+  --c-text-2: #565a5d;
+  --c-text-3: #7c8185;
+
+  --c-red: #c91521;
+  --c-red-hi: #a30f19;
+  --c-red-lo: #e02231;
+
+  --c-ok: #1f7a45;
+  --c-ok-bg: #eaf5ee;
+  --c-ok-border: #b7ddc6;
+  --c-danger: #c91521;
+  --c-danger-bg: #f9ecec;
+  --c-danger-border: #e8c2c2;
+
+  color-scheme: light;
+}
+
 html,
 body {
-  background: var(--color-ink-950);
-  color: #e8eaee;
+  background: var(--c-page);
+  color: var(--c-text-1);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
@@ -60,7 +142,7 @@ input[type="range"]::-webkit-slider-thumb {
   margin-top: -6px;
   border-radius: 9999px;
   background: var(--color-brand);
-  border: 2px solid var(--color-ink-900);
+  border: 2px solid var(--c-panel);
   cursor: pointer;
 }
 input[type="range"]::-moz-range-thumb {
@@ -69,7 +151,7 @@ input[type="range"]::-moz-range-thumb {
   width: 16px;
   border-radius: 9999px;
   background: var(--color-brand);
-  border: 2px solid var(--color-ink-900);
+  border: 2px solid var(--c-panel);
   cursor: pointer;
 }
 

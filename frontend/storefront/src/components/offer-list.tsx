@@ -26,7 +26,7 @@ export function Rating({ value, count }: { value?: number; count?: number }) {
   return (
     <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-[12.5px]">
       <StarIcon className="h-3.5 w-3.5 text-brand" fill="currentColor" />
-      <span className="font-semibold text-white">{value.toFixed(1)}</span>
+      <span className="font-semibold text-fg">{value.toFixed(1)}</span>
       {typeof count === "number" ? (
         <span className="text-mute-dim">({count})</span>
       ) : null}
@@ -90,7 +90,7 @@ export function OfferList({
                         }`}
                       />
                       <span className="min-w-0">
-                        <span className="block truncate text-[13px] font-semibold text-white">
+                        <span className="block truncate text-[13px] font-semibold text-fg">
                           {offer.supplier.name}
                         </span>
                         <span className="mt-1 flex flex-wrap items-center gap-1.5">
@@ -112,7 +112,7 @@ export function OfferList({
                   <td className="px-3 py-3 whitespace-nowrap text-[13px]">
                     {offer.bulkPrice ? (
                       <>
-                        <span className="font-semibold text-white">
+                        <span className="font-semibold text-fg">
                           {formatPrice(offer.bulkPrice)}
                         </span>
                         {offer.bulkMinQty ? (
@@ -126,11 +126,11 @@ export function OfferList({
                     )}
                   </td>
 
-                  <td className="px-3 py-3 whitespace-nowrap text-[12.5px] text-[#c6ccd4]">
+                  <td className="px-3 py-3 whitespace-nowrap text-[12.5px] text-mute">
                     {formatNumber(offer.stock)} {offer.unit}
                   </td>
 
-                  <td className="px-3 py-3 whitespace-nowrap text-[12.5px] text-[#c6ccd4]">
+                  <td className="px-3 py-3 whitespace-nowrap text-[12.5px] text-mute">
                     <span className="flex items-center gap-1.5">
                       <PinIcon className="h-3.5 w-3.5 text-brand" />
                       {offer.location}
@@ -138,7 +138,7 @@ export function OfferList({
                   </td>
 
                   <td className="px-3 py-3 whitespace-nowrap text-[12.5px]">
-                    <span className="flex items-center gap-1.5 text-[#c6ccd4]">
+                    <span className="flex items-center gap-1.5 text-mute">
                       <TruckIcon className="h-3.5 w-3.5 text-mute" />
                       {deliveryLabel(offer)}
                     </span>
@@ -158,8 +158,8 @@ export function OfferList({
                     <span
                       className={`inline-flex items-center justify-center rounded-md px-3.5 py-2 text-[12px] font-bold whitespace-nowrap uppercase tracking-wide transition-colors ${
                         active
-                          ? "bg-brand text-ink-950"
-                          : "border border-ink-600 text-[#c2c7cf]"
+                          ? "bg-brand text-on-brand"
+                          : "border border-ink-600 text-mute"
                       }`}
                     >
                       {active ? "Сонгосон" : "Сонгох"}

@@ -124,7 +124,7 @@ export function AuthView() {
             />
 
             {error ? (
-              <p className="rounded-md border border-[#7a3030] bg-[#2c1717] px-3 py-2 text-[12.5px] text-[#f08585]">
+              <p className="rounded-md border border-danger-border bg-danger-bg px-3 py-2 text-[12.5px] text-danger">
                 {error}
               </p>
             ) : null}
@@ -132,7 +132,7 @@ export function AuthView() {
             <button
               type="submit"
               disabled={busy}
-              className="mt-1 rounded-md bg-brand px-4 py-3 text-[13px] font-bold uppercase tracking-wide text-ink-950 transition-colors hover:bg-brand-hi disabled:opacity-60"
+              className="mt-1 rounded-md bg-brand px-4 py-3 text-[13px] font-bold uppercase tracking-wide text-on-brand transition-colors hover:bg-brand-hi disabled:opacity-60"
             >
               {busy
                 ? "Түр хүлээнэ үү…"
@@ -147,7 +147,7 @@ export function AuthView() {
                 setMode(mode === "login" ? "register" : "login");
                 setError(null);
               }}
-              className="text-[12.5px] text-mute transition-colors hover:text-white"
+              className="text-[12.5px] text-mute transition-colors hover:text-fg"
             >
               {mode === "login"
                 ? "Шинэ хэрэглэгч? Бүртгүүлэх"
@@ -202,7 +202,7 @@ function Field({
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
         required={required}
-        className="h-10 rounded-md border border-ink-700 bg-ink-900 px-3 text-[13.5px] text-white outline-none placeholder:text-mute-dim focus:border-ink-600"
+        className="h-10 rounded-md border border-ink-700 bg-ink-900 px-3 text-[13.5px] text-fg outline-none placeholder:text-mute-dim focus:border-ink-600"
       />
     </label>
   );

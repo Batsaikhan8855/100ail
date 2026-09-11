@@ -30,7 +30,7 @@ export function PanelHeader({
 }) {
   return (
     <header className="flex items-center justify-between gap-3 border-b border-ink-700 px-4 py-3.5">
-      <h2 className="flex items-center gap-2.5 text-[15px] font-semibold text-white">
+      <h2 className="flex items-center gap-2.5 text-[15px] font-semibold text-fg">
         <span className="h-4 w-[3px] rounded-full bg-brand" aria-hidden />
         {title}
       </h2>
@@ -79,12 +79,12 @@ export function Checkbox({
         />
         <CheckIcon
           aria-hidden
-          className="relative h-2.5 w-2.5 text-ink-950 opacity-0 transition-opacity peer-checked:opacity-100"
+          className="relative h-2.5 w-2.5 text-on-brand opacity-0 transition-opacity peer-checked:opacity-100"
         />
       </span>
       <span
         className={`transition-colors ${compact ? "whitespace-nowrap" : "truncate"} ${
-          checked ? "text-white" : "text-[#c2c7cf] group-hover:text-white"
+          checked ? "text-fg" : "text-mute group-hover:text-fg"
         }`}
       >
         {label}
@@ -119,7 +119,7 @@ export function Collapsible({
         aria-expanded={open}
         className="flex w-full items-center justify-between text-left"
       >
-        <span className="text-[13px] font-semibold text-white">{title}</span>
+        <span className="text-[13px] font-semibold text-fg">{title}</span>
         <ChevronDownIcon
           className={`h-4 w-4 text-mute transition-transform ${
             open ? "" : "-rotate-90"
@@ -151,7 +151,7 @@ export function IconButton({
       className={`flex h-9 w-9 items-center justify-center rounded-md border transition-colors ${
         active
           ? "border-brand bg-brand/15 text-brand"
-          : "border-ink-700 bg-ink-900 text-mute hover:text-white"
+          : "border-ink-700 bg-ink-900 text-mute hover:text-fg"
       }`}
     >
       {children}
@@ -213,7 +213,7 @@ export function CopyButton({
       className={`flex shrink-0 items-center gap-1.5 rounded-md border px-2 py-1 text-[11.5px] transition-colors ${
         copied
           ? "border-ok/50 bg-ok/10 text-ok"
-          : "border-ink-600 bg-ink-900 text-mute hover:text-white"
+          : "border-ink-600 bg-ink-900 text-mute hover:text-fg"
       }`}
     >
       {copied ? (

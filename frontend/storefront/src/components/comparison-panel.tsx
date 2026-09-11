@@ -85,7 +85,7 @@ export function ComparisonPanel({
                   </div>
 
                   <div className="border-t border-ink-700 p-3">
-                    <h3 className="text-[12px] font-semibold leading-tight text-white transition-colors group-hover:text-brand">
+                    <h3 className="text-[12px] font-semibold leading-tight text-fg transition-colors group-hover:text-brand">
                       {[product.name, product.variant]
                         .filter(Boolean)
                         .join(" ")}
@@ -103,14 +103,14 @@ export function ComparisonPanel({
                         </span>
                       ) : null}
                     </p>
-                    <p className="mt-2.5 flex items-center gap-1.5 text-[11px] text-[#9aa1ab]">
+                    <p className="mt-2.5 flex items-center gap-1.5 text-[11px] text-mute-dim">
                       <BoxIcon className="h-3.5 w-3.5 text-ok" />
                       Бэлэн
-                      <span className="text-[#c6ccd4]">
+                      <span className="text-mute">
                         {formatNumber(offer.stock)} {offer.unit}
                       </span>
                     </p>
-                    <p className="mt-1.5 flex items-center gap-1.5 text-[11px] text-[#9aa1ab]">
+                    <p className="mt-1.5 flex items-center gap-1.5 text-[11px] text-mute-dim">
                       <PinIcon className="h-3.5 w-3.5 text-brand" />
                       {offer.location}
                     </p>
@@ -138,14 +138,14 @@ export function ComparisonPanel({
                     className="flex h-[15px] w-[15px] items-center justify-center rounded-[3px] border border-ink-600 bg-ink-950/80 transition-colors peer-checked:border-brand peer-checked:bg-brand"
                   >
                     <CheckIcon
-                      className={`h-2.5 w-2.5 text-ink-950 ${
+                      className={`h-2.5 w-2.5 text-on-brand ${
                         checked ? "opacity-100" : "opacity-0"
                       }`}
                     />
                   </span>
                   <span
                     className={`text-[10.5px] font-semibold transition-colors ${
-                      checked ? "text-brand" : "text-[#c2c7cf]"
+                      checked ? "text-brand" : "text-mute"
                     }`}
                   >
                     Харьцуулах

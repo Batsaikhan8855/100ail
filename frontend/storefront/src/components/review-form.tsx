@@ -65,7 +65,7 @@ export function ReviewForm({ slug }: { slug: string }) {
 
   if (done || state?.alreadyReviewed) {
     return (
-      <p className="mt-4 flex items-center gap-2 rounded-md border border-[#2b6b45] bg-[#14291d] px-3.5 py-3 text-[12.5px] text-ok">
+      <p className="mt-4 flex items-center gap-2 rounded-md border border-ok-border bg-ok-bg px-3.5 py-3 text-[12.5px] text-ok">
         <CheckIcon className="h-4 w-4" />
         Таны сэтгэгдэл бүртгэгдсэн. Баярлалаа.
       </p>
@@ -106,11 +106,11 @@ export function ReviewForm({ slug }: { slug: string }) {
       className="mt-4 rounded-md border border-ink-700 bg-ink-900 p-3.5"
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <span className="text-[13px] font-semibold text-white">
+        <span className="text-[13px] font-semibold text-fg">
           Сэтгэгдэл үлдээх
         </span>
         {state?.verifiedPurchase ? (
-          <span className="rounded-full border border-[#2b6b45] bg-[#14291d] px-2.5 py-[3px] text-[11.5px] text-ok">
+          <span className="rounded-full border border-ok-border bg-ok-bg px-2.5 py-[3px] text-[11.5px] text-ok">
             Худалдан авалт баталгаажсан
             {state.supplierName ? ` · ${state.supplierName}` : ""}
           </span>
@@ -145,17 +145,17 @@ export function ReviewForm({ slug }: { slug: string }) {
         rows={3}
         maxLength={800}
         placeholder="Чанар, хүргэлт, савлагааны талаар бичнэ үү"
-        className="mt-2.5 w-full rounded-md border border-ink-600 bg-ink-950 px-3 py-2 text-[13px] text-white placeholder:text-mute-dim outline-none transition-colors focus:border-brand"
+        className="mt-2.5 w-full rounded-md border border-ink-600 bg-ink-950 px-3 py-2 text-[13px] text-fg placeholder:text-mute-dim outline-none transition-colors focus:border-brand"
       />
 
       {error ? (
-        <p className="mt-2 text-[12px] text-[#f08585]">{error}</p>
+        <p className="mt-2 text-[12px] text-danger">{error}</p>
       ) : null}
 
       <button
         type="submit"
         disabled={busy}
-        className="mt-2.5 rounded-md bg-brand px-4 py-2 text-[12.5px] font-bold uppercase tracking-wide text-ink-950 transition-colors hover:bg-brand-hi disabled:opacity-50"
+        className="mt-2.5 rounded-md bg-brand px-4 py-2 text-[12.5px] font-bold uppercase tracking-wide text-on-brand transition-colors hover:bg-brand-hi disabled:opacity-50"
       >
         {busy ? "Илгээж байна…" : "Илгээх"}
       </button>

@@ -93,7 +93,7 @@ export function FavoritesView() {
               </p>
               <Link
                 href="/"
-                className="mt-4 inline-block rounded-md bg-brand px-5 py-2.5 text-[13px] font-bold uppercase tracking-wide text-ink-950 transition-colors hover:bg-brand-hi"
+                className="mt-4 inline-block rounded-md bg-brand px-5 py-2.5 text-[13px] font-bold uppercase tracking-wide text-on-brand transition-colors hover:bg-brand-hi"
               >
                 Каталог руу
               </Link>

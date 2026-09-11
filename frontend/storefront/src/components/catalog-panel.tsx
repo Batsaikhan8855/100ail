@@ -76,7 +76,7 @@ export function CatalogPanel({
             value={query}
             onChange={(e) => onQueryChange(e.target.value)}
             placeholder="Бүтээгдэхүүн хайх..."
-            className="w-full bg-transparent text-[13.5px] text-white outline-none placeholder:text-mute-dim"
+            className="w-full bg-transparent text-[13.5px] text-fg outline-none placeholder:text-mute-dim"
           />
         </label>
 
@@ -102,7 +102,7 @@ export function CatalogPanel({
 
       <div className="p-4">
         {error ? (
-          <p className="py-16 text-center text-sm text-[#f08585]">{error}</p>
+          <p className="py-16 text-center text-sm text-danger">{error}</p>
         ) : loading && products.length === 0 ? (
           <p className="py-16 text-center text-sm text-mute">Ачаалж байна…</p>
         ) : products.length === 0 ? (
@@ -148,8 +148,8 @@ export function CatalogPanel({
               aria-current={n === page ? "page" : undefined}
               className={`h-9 w-9 rounded-md text-[13px] font-semibold transition-colors ${
                 n === page
-                  ? "bg-brand text-ink-950"
-                  : "border border-ink-700 bg-ink-900 text-[#c2c7cf] hover:border-ink-600 hover:text-white"
+                  ? "bg-brand text-on-brand"
+                  : "border border-ink-700 bg-ink-900 text-mute hover:border-ink-600 hover:text-fg"
               }`}
             >
               {n}
@@ -165,7 +165,7 @@ export function CatalogPanel({
             aria-label="Дараагийн хуудас"
             disabled={page >= pages}
             onClick={() => onPageChange(Math.min(page + 1, pages))}
-            className="flex h-9 w-9 items-center justify-center rounded-md border border-ink-700 bg-ink-900 text-[#c2c7cf] transition-colors hover:border-ink-600 hover:text-white"
+            className="flex h-9 w-9 items-center justify-center rounded-md border border-ink-700 bg-ink-900 text-mute transition-colors hover:border-ink-600 hover:text-fg"
           >
             <ChevronRightIcon className="h-4 w-4" />
           </button>
@@ -207,7 +207,7 @@ function SortDropdown({
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="listbox"
         aria-expanded={open}
-        className="flex items-center gap-2.5 rounded-md border border-ink-700 bg-ink-900 px-3.5 py-2.5 text-[12.5px] font-semibold uppercase tracking-wide text-[#c2c7cf] transition-colors hover:text-white"
+        className="flex items-center gap-2.5 rounded-md border border-ink-700 bg-ink-900 px-3.5 py-2.5 text-[12.5px] font-semibold uppercase tracking-wide text-mute transition-colors hover:text-fg"
       >
         <SortIcon className="h-[18px] w-[18px] text-mute" />
         {current.label}
@@ -234,7 +234,7 @@ function SortDropdown({
                   setOpen(false);
                 }}
                 className={`block w-full px-3.5 py-2 text-left text-[13px] transition-colors hover:bg-ink-700 ${
-                  option.id === value ? "text-brand" : "text-[#c2c7cf]"
+                  option.id === value ? "text-brand" : "text-mute"
                 }`}
               >
                 {option.label}

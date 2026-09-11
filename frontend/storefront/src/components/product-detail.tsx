@@ -72,7 +72,7 @@ export function ProductDetail({
       <div className="min-h-screen bg-ink-950">
         <SiteHeader activeNav="home" />
         <main className="mx-auto max-w-[820px] px-4 py-16 text-center">
-          <h1 className="text-[20px] font-bold text-white">{product.name}</h1>
+          <h1 className="text-[20px] font-bold text-fg">{product.name}</h1>
           <p className="mt-2 text-[13.5px] text-mute">
             Энэ бүтээгдэхүүнд одоогоор идэвхтэй санал алга байна.
           </p>
@@ -125,15 +125,15 @@ export function ProductDetail({
           aria-label="Замын мөр"
           className="flex flex-wrap items-center gap-1.5 pb-3.5 text-[12.5px] text-mute"
         >
-          <a href="/" className="transition-colors hover:text-white">
+          <a href="/" className="transition-colors hover:text-fg">
             Нүүр
           </a>
           <ChevronRightIcon className="h-3.5 w-3.5 text-mute-dim" />
-          <a href="/" className="transition-colors hover:text-white">
+          <a href="/" className="transition-colors hover:text-fg">
             {categoryName || "Бүтээгдэхүүн"}
           </a>
           <ChevronRightIcon className="h-3.5 w-3.5 text-mute-dim" />
-          <span className="text-white">{product.name}</span>
+          <span className="text-fg">{product.name}</span>
         </nav>
 
         <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px] xl:items-start">
@@ -160,7 +160,7 @@ export function ProductDetail({
                       className={`absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-ink-950/60 backdrop-blur transition-colors ${
                         favorite
                           ? "text-brand"
-                          : "text-[#c2c7cf] hover:text-white"
+                          : "text-mute hover:text-fg"
                       }`}
                     >
                       <HeartIcon
@@ -200,7 +200,7 @@ export function ProductDetail({
                 </div>
 
                 <div className="min-w-0">
-                  <h1 className="text-[22px] font-bold leading-tight text-white">
+                  <h1 className="text-[22px] font-bold leading-tight text-fg">
                     {product.name}
                     {product.variant ? (
                       <span className="text-mute"> {product.variant}</span>
@@ -213,14 +213,14 @@ export function ProductDetail({
                       {offers.length} нийлүүлэгчийн санал
                     </span>
                     {detail?.standard ? (
-                      <span className="rounded-full border border-ink-600 px-2 py-0.5 text-[11px] text-[#c2c7cf]">
+                      <span className="rounded-full border border-ink-600 px-2 py-0.5 text-[11px] text-mute">
                         {detail.standard}
                       </span>
                     ) : null}
                   </div>
 
                   {detail?.summary ? (
-                    <p className="mt-3.5 text-[13.5px] leading-relaxed text-[#c2c7cf]">
+                    <p className="mt-3.5 text-[13.5px] leading-relaxed text-mute">
                       {detail.summary}
                     </p>
                   ) : null}
@@ -278,7 +278,7 @@ export function ProductDetail({
                       className={`relative shrink-0 px-3.5 py-3.5 text-[13px] font-semibold whitespace-nowrap transition-colors ${
                         active
                           ? "text-brand"
-                          : "text-[#c2c7cf] hover:text-white"
+                          : "text-mute hover:text-fg"
                       }`}
                     >
                       {item.label}
@@ -304,7 +304,7 @@ export function ProductDetail({
                         <dt className="text-[12.5px] text-mute">
                           {attribute.label}
                         </dt>
-                        <dd className="text-right text-[13px] font-medium text-white">
+                        <dd className="text-right text-[13px] font-medium text-fg">
                           {attribute.value}
                         </dd>
                       </div>
@@ -317,7 +317,7 @@ export function ProductDetail({
                     {(detail?.usage ?? []).map((line) => (
                       <li
                         key={line}
-                        className="flex items-start gap-2.5 text-[13.5px] text-[#c2c7cf]"
+                        className="flex items-start gap-2.5 text-[13.5px] text-mute"
                       >
                         <CheckIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand" />
                         {line}
@@ -337,7 +337,7 @@ export function ProductDetail({
                         {reviews.map((review) => (
                           <li key={review.id} className="py-3.5 first:pt-0">
                             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                              <span className="text-[13px] font-semibold text-white">
+                              <span className="text-[13px] font-semibold text-fg">
                                 {review.author}
                               </span>
                               <span className="flex items-center gap-0.5">
@@ -357,12 +357,12 @@ export function ProductDetail({
                                 {review.supplierName} · {review.date}
                               </span>
                               {review.verified ? (
-                                <span className="rounded-full border border-[#2b6b45] bg-[#14291d] px-2 py-[2px] text-[10.5px] text-ok">
+                                <span className="rounded-full border border-ok-border bg-ok-bg px-2 py-[2px] text-[10.5px] text-ok">
                                   Худалдан авалт баталгаажсан
                                 </span>
                               ) : null}
                             </div>
-                            <p className="mt-1.5 text-[13px] leading-relaxed text-[#c2c7cf]">
+                            <p className="mt-1.5 text-[13px] leading-relaxed text-mute">
                               {review.text}
                             </p>
                           </li>
@@ -394,7 +394,7 @@ export function ProductDetail({
                 </p>
 
                 {offer.bulkPrice && offer.bulkMinQty ? (
-                  <p className="mt-2 text-[12px] text-[#c2c7cf]">
+                  <p className="mt-2 text-[12px] text-mute">
                     {bulkActive ? (
                       <span className="text-ok">
                         Бөөний үнэ идэвхжсэн ({formatNumber(offer.bulkMinQty)}{" "}
@@ -404,7 +404,7 @@ export function ProductDetail({
                       <>
                         {formatNumber(offer.bulkMinQty)} {offer.unit}-с дээш
                         авбал{" "}
-                        <span className="font-semibold text-white">
+                        <span className="font-semibold text-fg">
                           {formatPrice(offer.bulkPrice)}
                         </span>
                       </>
@@ -418,7 +418,7 @@ export function ProductDetail({
                       type="button"
                       aria-label="Тоо хэмжээ хасах"
                       onClick={() => setQuantity(qty - 1)}
-                      className="flex h-10 w-10 items-center justify-center text-mute transition-colors hover:text-white"
+                      className="flex h-10 w-10 items-center justify-center text-mute transition-colors hover:text-fg"
                     >
                       <MinusIcon className="h-4 w-4" />
                     </button>
@@ -429,13 +429,13 @@ export function ProductDetail({
                       max={offer.stock}
                       aria-label="Тоо хэмжээ"
                       onChange={(e) => setQuantity(Number(e.target.value))}
-                      className="h-10 w-16 border-x border-ink-700 bg-transparent text-center text-[14px] font-semibold text-white outline-none"
+                      className="h-10 w-16 border-x border-ink-700 bg-transparent text-center text-[14px] font-semibold text-fg outline-none"
                     />
                     <button
                       type="button"
                       aria-label="Тоо хэмжээ нэмэх"
                       onClick={() => setQuantity(qty + 1)}
-                      className="flex h-10 w-10 items-center justify-center text-mute transition-colors hover:text-white"
+                      className="flex h-10 w-10 items-center justify-center text-mute transition-colors hover:text-fg"
                     >
                       <PlusIcon className="h-4 w-4" />
                     </button>
@@ -456,7 +456,7 @@ export function ProductDetail({
                     }
                   />
                   <div className="mt-1 flex items-baseline justify-between border-t border-ink-700 pt-3">
-                    <dt className="text-[13px] text-[#c2c7cf]">Нийт дүн:</dt>
+                    <dt className="text-[13px] text-mute">Нийт дүн:</dt>
                     <dd className="text-[22px] font-bold text-brand">
                       {formatPrice(total)}
                     </dd>
@@ -466,7 +466,7 @@ export function ProductDetail({
                 <button
                   type="button"
                   onClick={addToCart}
-                  className="mt-3.5 flex w-full items-center justify-center gap-2.5 rounded-md bg-brand px-4 py-3.5 text-[14px] font-bold uppercase tracking-wide text-ink-950 transition-colors hover:bg-brand-hi"
+                  className="mt-3.5 flex w-full items-center justify-center gap-2.5 rounded-md bg-brand px-4 py-3.5 text-[14px] font-bold uppercase tracking-wide text-on-brand transition-colors hover:bg-brand-hi"
                 >
                   {added ? (
                     <CheckIcon className="h-5 w-5" />
@@ -478,7 +478,7 @@ export function ProductDetail({
 
                 <button
                   type="button"
-                  className="mt-2 w-full rounded-md border border-ink-600 px-4 py-3 text-[13px] font-semibold text-[#c2c7cf] transition-colors hover:border-brand hover:text-brand"
+                  className="mt-2 w-full rounded-md border border-ink-600 px-4 py-3 text-[13px] font-semibold text-mute transition-colors hover:border-brand hover:text-brand"
                 >
                   Шууд захиалах
                 </button>
@@ -500,7 +500,7 @@ export function ProductDetail({
                     <li key={item.id} className="flex items-center gap-2.5">
                       <Icon className="h-[22px] w-[22px] shrink-0 text-mute" />
                       <span className="min-w-0">
-                        <span className="block truncate text-[12.5px] font-medium text-white">
+                        <span className="block truncate text-[12.5px] font-medium text-fg">
                           {item.title}
                         </span>
                         <span className="block truncate text-[11px] text-mute-dim">
@@ -533,7 +533,7 @@ function Fact({
       <span className="shrink-0">{icon}</span>
       <span className="min-w-0">
         <dt className="text-[11px] text-mute-dim">{label}</dt>
-        <dd className="truncate text-[13px] font-medium text-white">{value}</dd>
+        <dd className="truncate text-[13px] font-medium text-fg">{value}</dd>
       </span>
     </div>
   );
@@ -543,7 +543,7 @@ function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-baseline justify-between">
       <dt className="text-mute">{label}</dt>
-      <dd className="font-medium text-white">{value}</dd>
+      <dd className="font-medium text-fg">{value}</dd>
     </div>
   );
 }
@@ -587,7 +587,7 @@ function WarehouseMapPanel({ offer }: { offer: Offer }) {
                   })}
                   target="_blank"
                   rel="noreferrer"
-                  className="block truncate text-white hover:text-brand"
+                  className="block truncate text-fg hover:text-brand"
                 >
                   {warehouse.name}
                 </a>

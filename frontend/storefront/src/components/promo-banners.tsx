@@ -66,18 +66,18 @@ export function PromoBanners() {
         ) : null}
 
         <div className="relative z-10 min-w-0 flex-1">
-          <h2 className="text-[17px] font-bold tracking-tight text-white sm:text-[20px]">
+          <h2 className="text-[17px] font-bold tracking-tight text-fg sm:text-[20px]">
             {banner.title}
           </h2>
           {banner.subtitle ? (
-            <p className="mt-1 max-w-2xl text-[12.5px] leading-relaxed text-[#c2c7cf] sm:text-[13.5px]">
+            <p className="mt-1 max-w-2xl text-[12.5px] leading-relaxed text-mute sm:text-[13.5px]">
               {banner.subtitle}
             </p>
           ) : null}
         </div>
 
         {banner.linkUrl ? (
-          <span className="relative z-10 ml-4 hidden shrink-0 items-center gap-1.5 rounded-md bg-brand px-4 py-2 text-[12.5px] font-bold uppercase tracking-wide text-ink-950 transition-colors group-hover:bg-brand-hi sm:flex">
+          <span className="relative z-10 ml-4 hidden shrink-0 items-center gap-1.5 rounded-md bg-brand px-4 py-2 text-[12.5px] font-bold uppercase tracking-wide text-on-brand transition-colors group-hover:bg-brand-hi sm:flex">
             Үзэх
             <ArrowRightIcon className="h-4 w-4" />
           </span>

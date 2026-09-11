@@ -144,10 +144,10 @@ export function OrderView({ code }: { code: string }) {
           </Panel>
         ) : error && !order ? (
           <Panel className="px-4 py-16 text-center">
-            <p className="text-[15px] font-semibold text-white">{error}</p>
+            <p className="text-[15px] font-semibold text-fg">{error}</p>
             <Link
               href="/"
-              className="mt-5 inline-flex items-center gap-2 rounded-md bg-brand px-5 py-3 text-[13px] font-bold uppercase tracking-wide text-ink-950"
+              className="mt-5 inline-flex items-center gap-2 rounded-md bg-brand px-5 py-3 text-[13px] font-bold uppercase tracking-wide text-on-brand"
             >
               Каталог руу буцах
               <ArrowRightIcon className="h-4 w-4" />
@@ -170,7 +170,7 @@ export function OrderView({ code }: { code: string }) {
                 )}
               </span>
               <div className="mt-4 flex flex-wrap items-center justify-center gap-2.5">
-                <h1 className="text-[22px] font-bold text-white">
+                <h1 className="text-[22px] font-bold text-fg">
                   Захиалга {order.code}
                 </h1>
                 <CopyButton
@@ -183,7 +183,7 @@ export function OrderView({ code }: { code: string }) {
                 {order.supplierOrders.length} нийлүүлэгч ·{" "}
                 {new Date(order.createdAt).toLocaleString("mn-MN")}
               </p>
-              <p className="mt-4 text-[15px] text-[#c2c7cf]">
+              <p className="mt-4 text-[15px] text-mute">
                 Нийт төлөх дүн:{" "}
                 <span className="text-[20px] font-bold text-brand">
                   {formatPrice(order.total)}
@@ -210,7 +210,7 @@ export function OrderView({ code }: { code: string }) {
                       className="h-48 w-48 rounded-md bg-white p-2"
                     />
                   ) : (
-                    <p className="break-all rounded-md border border-ink-700 bg-ink-900 px-3 py-2 text-center font-mono text-[12px] text-[#c2c7cf]">
+                    <p className="break-all rounded-md border border-ink-700 bg-ink-900 px-3 py-2 text-center font-mono text-[12px] text-mute">
                       {invoice.qrText}
                     </p>
                   )}
@@ -221,7 +221,7 @@ export function OrderView({ code }: { code: string }) {
                         <a
                           key={url.name}
                           href={url.link}
-                          className="rounded-md border border-ink-600 px-3 py-1.5 text-[12.5px] text-[#c2c7cf] transition-colors hover:text-white"
+                          className="rounded-md border border-ink-600 px-3 py-1.5 text-[12.5px] text-mute transition-colors hover:text-fg"
                         >
                           {url.name}
                         </a>
@@ -237,7 +237,7 @@ export function OrderView({ code }: { code: string }) {
                     <button
                       type="button"
                       onClick={confirmMock}
-                      className="rounded-md bg-brand px-5 py-2.5 text-[13px] font-bold uppercase tracking-wide text-ink-950 transition-colors hover:bg-brand-hi"
+                      className="rounded-md bg-brand px-5 py-2.5 text-[13px] font-bold uppercase tracking-wide text-on-brand transition-colors hover:bg-brand-hi"
                     >
                       Төлбөрийг баталгаажуулах (демо)
                     </button>
@@ -259,7 +259,7 @@ export function OrderView({ code }: { code: string }) {
                 {order.supplierOrders.map((supplierOrder) => (
                   <li key={supplierOrder.id} className="px-4 py-3.5">
                     <div className="flex flex-wrap items-baseline justify-between gap-2">
-                      <span className="text-[13.5px] font-semibold text-white">
+                      <span className="text-[13.5px] font-semibold text-fg">
                         {supplierOrder.supplier.name}
                       </span>
                       <span className="text-[13px] font-semibold text-brand">
@@ -276,7 +276,7 @@ export function OrderView({ code }: { code: string }) {
                           <span className="truncate">
                             {item.productName} × {item.qty} {item.unit}
                           </span>
-                          <span className="shrink-0 text-[#c6ccd4]">
+                          <span className="shrink-0 text-mute">
                             {formatPrice(item.lineTotal)}
                           </span>
                         </li>
@@ -284,7 +284,7 @@ export function OrderView({ code }: { code: string }) {
                     </ul>
 
                     <p className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11.5px] text-mute">
-                      <span className="rounded-full border border-ink-600 px-2 py-0.5 text-[#c2c7cf]">
+                      <span className="rounded-full border border-ink-600 px-2 py-0.5 text-mute">
                         {SUPPLIER_STATUS[supplierOrder.status] ?? supplierOrder.status}
                       </span>
                       <span>{supplierOrder.code}</span>

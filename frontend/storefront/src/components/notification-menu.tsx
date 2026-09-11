@@ -94,11 +94,11 @@ export function NotificationBell() {
         type="button"
         onClick={toggle}
         aria-label={`Мэдэгдэл${unread > 0 ? `, ${unread} шинэ` : ""}`}
-        className="relative flex h-10 w-10 items-center justify-center rounded-md text-[#c2c7cf] transition-colors hover:text-white"
+        className="relative flex h-10 w-10 items-center justify-center rounded-md text-mute transition-colors hover:text-fg"
       >
         <BellIcon className="h-6 w-6" />
         {unread > 0 ? (
-          <span className="absolute right-1 top-1 flex h-[17px] min-w-[17px] items-center justify-center rounded-full bg-brand px-1 text-[10px] font-bold text-ink-950">
+          <span className="absolute right-1 top-1 flex h-[17px] min-w-[17px] items-center justify-center rounded-full bg-brand px-1 text-[10px] font-bold text-on-brand">
             {unread > 9 ? "9+" : unread}
           </span>
         ) : null}
@@ -107,7 +107,7 @@ export function NotificationBell() {
       {open ? (
         <div className="absolute right-0 z-40 mt-2 w-[340px] overflow-hidden rounded-lg border border-ink-700 bg-ink-850 shadow-xl">
           <div className="flex items-center justify-between border-b border-ink-700 px-3.5 py-2.5">
-            <span className="text-[13px] font-semibold text-white">Мэдэгдэл</span>
+            <span className="text-[13px] font-semibold text-fg">Мэдэгдэл</span>
             {unread > 0 ? (
               <button
                 type="button"
@@ -147,7 +147,7 @@ export function NotificationBell() {
                           />
                         )}
                         <div className="min-w-0">
-                          <div className="truncate text-[13px] font-medium text-white">
+                          <div className="truncate text-[13px] font-medium text-fg">
                             {item.title}
                           </div>
                           <div className="mt-0.5 text-[12px] leading-relaxed text-mute">

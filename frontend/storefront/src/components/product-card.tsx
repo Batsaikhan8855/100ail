@@ -63,7 +63,7 @@ function AddToCartButton({
           ? "cursor-not-allowed bg-ink-700/60 text-mute-dim"
           : state === "done"
             ? "bg-ok/15 text-ok"
-            : "bg-brand/12 text-brand hover:bg-brand hover:text-ink-950"
+            : "bg-brand/12 text-brand hover:bg-brand hover:text-on-brand"
       }`}
     >
       {state === "done" ? (
@@ -79,14 +79,14 @@ function AddToCartButton({
 function StockBadges({ offer }: { offer: Offer }) {
   return (
     <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px]">
-      <span className="flex items-center gap-1.5 text-[#9aa1ab]">
+      <span className="flex items-center gap-1.5 text-mute-dim">
         <BoxIcon className="h-3.5 w-3.5 text-ok" />
         Бэлэн
-        <span className="text-[#c6ccd4]">
+        <span className="text-mute">
           {formatNumber(offer.stock)} {offer.unit}
         </span>
       </span>
-      <span className="flex items-center gap-1.5 text-[#9aa1ab]">
+      <span className="flex items-center gap-1.5 text-mute-dim">
         <PinIcon className="h-3.5 w-3.5 text-brand" />
         {offer.location}
       </span>
@@ -121,7 +121,7 @@ export function ProductCard({
       aria-label={favorite ? "Хадгалснаас хасах" : "Хадгалах"}
       aria-pressed={favorite}
       className={`absolute right-2.5 top-2.5 flex h-8 w-8 items-center justify-center rounded-full bg-ink-950/60 backdrop-blur transition-colors ${
-        favorite ? "text-brand" : "text-[#c2c7cf] hover:text-white"
+        favorite ? "text-brand" : "text-mute hover:text-fg"
       }`}
     >
       <HeartIcon
@@ -143,7 +143,7 @@ export function ProductCard({
             />
           </div>
           <div className="min-w-0 flex-1">
-            <h3 className="truncate text-sm font-semibold text-white">
+            <h3 className="truncate text-sm font-semibold text-fg">
               {product.name}
             </h3>
             <p className="mt-0.5 truncate text-[11.5px] text-mute">
@@ -158,7 +158,7 @@ export function ProductCard({
               aria-label={favorite ? "Хадгалснаас хасах" : "Хадгалах"}
               aria-pressed={favorite}
               className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors ${
-                favorite ? "text-brand" : "text-[#c2c7cf] hover:text-white"
+                favorite ? "text-brand" : "text-mute hover:text-fg"
               }`}
             >
               <HeartIcon
@@ -190,7 +190,7 @@ export function ProductCard({
           {favButton}
         </div>
         <div className="border-t border-ink-700 p-3">
-          <h3 className="line-clamp-2 min-h-[2.4em] text-[13px] font-semibold leading-tight text-white">
+          <h3 className="line-clamp-2 min-h-[2.4em] text-[13px] font-semibold leading-tight text-fg">
             {product.name}
           </h3>
           <p className="mt-0.5 truncate text-[11.5px] text-mute">

@@ -39,7 +39,7 @@ export function AccountOrders() {
           </Panel>
         ) : !user ? (
           <Panel className="px-4 py-16 text-center">
-            <p className="text-[15px] font-semibold text-white">
+            <p className="text-[15px] font-semibold text-fg">
               Захиалгын түүхээ харахын тулд нэвтэрнэ үү
             </p>
             <p className="mt-1 text-[13px] text-mute">
@@ -47,7 +47,7 @@ export function AccountOrders() {
             </p>
             <Link
               href="/login"
-              className="mt-5 inline-flex items-center gap-2 rounded-md bg-brand px-5 py-3 text-[13px] font-bold uppercase tracking-wide text-ink-950"
+              className="mt-5 inline-flex items-center gap-2 rounded-md bg-brand px-5 py-3 text-[13px] font-bold uppercase tracking-wide text-on-brand"
             >
               Нэвтрэх
               <ArrowRightIcon className="h-4 w-4" />
@@ -64,7 +64,7 @@ export function AccountOrders() {
                 Ачаалж байна…
               </p>
             ) : orders.error ? (
-              <p className="px-4 py-10 text-center text-[13px] text-[#f08585]">
+              <p className="px-4 py-10 text-center text-[13px] text-danger">
                 {orders.error}
               </p>
             ) : (orders.data ?? []).length === 0 ? (
@@ -82,7 +82,7 @@ export function AccountOrders() {
                         солигдчихдог тул тусад нь байрлуулав */}
                     <span className="flex min-w-0 flex-1 items-center gap-2">
                       <Link href={`/orders/${order.code}`} className="min-w-0">
-                        <span className="block text-[13.5px] font-semibold text-white">
+                        <span className="block text-[13.5px] font-semibold text-fg">
                           {order.code}
                         </span>
                         <span className="block text-[11.5px] text-mute">
@@ -101,7 +101,7 @@ export function AccountOrders() {
                       href={`/orders/${order.code}`}
                       className="flex items-center gap-3"
                     >
-                      <span className="rounded-full border border-ink-600 px-2 py-0.5 text-[11.5px] text-[#c2c7cf]">
+                      <span className="rounded-full border border-ink-600 px-2 py-0.5 text-[11.5px] text-mute">
                         {STATUS[order.status] ?? order.status}
                       </span>
                       <span className="text-[13.5px] font-bold text-brand">
