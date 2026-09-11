@@ -59,7 +59,7 @@ export function SiteHeader({
           <LogoMark />
           <span className="leading-none">
             <span className="block text-[26px] font-extrabold tracking-tight text-white">
-              100 АЙЛ
+              barilgaHUB
             </span>
             <span className="mt-1 block text-[8.5px] font-medium uppercase tracking-[0.14em] text-mute-dim">
               Барилгын материалын маркетплейс
