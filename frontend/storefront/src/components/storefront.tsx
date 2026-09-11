@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { PRICE_RANGE, type Offer, type Product } from "@/data/catalog";
 import {
@@ -65,6 +65,22 @@ export function Storefront() {
    * шүүлт чимээгүй үл тоомсорлогдож байв.
    */
   const [bounds, setBounds] = useState(PRICE_RANGE);
+
+  /**
+   * «Нүүр» дарахад каталогийг анхны байдалд буцаана. Ангилал, шүүлтүүр,
+   * эрэмбэ нь URL-д тусгагддаггүй тул `/` рүү шилжих нь тэдгээрийг
+   * цэвэрлэдэггүй — хэрэглэгч нүүр рүү буцсан ч өмнөх шүүлт хэвээр
+   * үлдэж, бүх бараа харагдахгүй байв.
+   */
+  const resetCatalog = useCallback(() => {
+    setActiveCategory("");
+    setQuery("");
+    setDebouncedQuery("");
+    setSortId("recommended");
+    setSelected(emptySelection());
+    setPrice(null);
+    setPage(1);
+  }, []);
 
   const path = useMemo(() => {
     const search = buildProductQuery({
@@ -144,6 +160,7 @@ export function Storefront() {
         activeNav="home"
         activeCategory={activeCategory}
         onCategoryChange={setActiveCategory}
+        onHomeReset={resetCatalog}
       />
 
       <main className="mx-auto max-w-[1660px] px-4 py-4 xl:px-6">
