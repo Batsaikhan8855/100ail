@@ -8,6 +8,7 @@ import { toCategory, type ApiCategory } from "@/lib/catalog-api";
 import { formatNumber } from "@/lib/format";
 import { useResource } from "@/lib/use-resource";
 import { useCart } from "./cart-context";
+import { ThemeToggle } from "./theme-toggle";
 import { useFavorites } from "./favorites-context";
 import { NotificationBell } from "./notification-menu";
 import { useSession } from "./session";
@@ -90,7 +91,7 @@ export function SiteHeader({
         <Link href="/" className="flex shrink-0 items-center gap-2.5">
           <LogoMark />
           <span className="leading-none">
-            <span className="block text-[26px] font-extrabold tracking-tight text-white">
+            <span className="block text-[26px] font-extrabold tracking-tight text-fg">
               BarilgaHUB
             </span>
             <span className="mt-1 block text-[8.5px] font-medium uppercase tracking-[0.14em] text-mute-dim">
@@ -112,7 +113,7 @@ export function SiteHeader({
                 }}
                 aria-current={active ? "page" : undefined}
                 className={`relative px-3.5 py-6 text-[13px] font-semibold uppercase tracking-wide transition-colors ${
-                  active ? "text-brand" : "text-[#c2c7cf] hover:text-white"
+                  active ? "text-brand" : "text-mute hover:text-fg"
                 }`}
               >
                 {link.label}
@@ -128,14 +129,15 @@ export function SiteHeader({
         </nav>
 
         <div className="ml-auto flex shrink-0 items-center gap-3 lg:ml-0 lg:gap-5">
+          <ThemeToggle />
           <Link
             href="/cart"
-            className="relative flex h-10 w-10 items-center justify-center rounded-md text-[#c2c7cf] transition-colors hover:text-white"
+            className="relative flex h-10 w-10 items-center justify-center rounded-md text-mute transition-colors hover:text-fg"
             aria-label={`Сагс, ${cartCount} бараа`}
           >
             <CartIcon className="h-6 w-6" />
             {cartCount > 0 ? (
-              <span className="absolute right-1 top-1 flex h-[17px] min-w-[17px] items-center justify-center rounded-full bg-brand px-1 text-[10px] font-bold text-ink-950">
+              <span className="absolute right-1 top-1 flex h-[17px] min-w-[17px] items-center justify-center rounded-full bg-brand px-1 text-[10px] font-bold text-on-brand">
                 {cartCount}
               </span>
             ) : null}
@@ -143,12 +145,12 @@ export function SiteHeader({
 
           <Link
             href="/favorites"
-            className="relative flex h-10 w-10 items-center justify-center rounded-md text-[#c2c7cf] transition-colors hover:text-white"
+            className="relative flex h-10 w-10 items-center justify-center rounded-md text-mute transition-colors hover:text-fg"
             aria-label={`Хадгалсан бараа, ${favoriteCount}`}
           >
             <HeartIcon className="h-[22px] w-[22px]" />
             {favoriteCount > 0 ? (
-              <span className="absolute right-1 top-1 flex h-[17px] min-w-[17px] items-center justify-center rounded-full bg-brand px-1 text-[10px] font-bold text-ink-950">
+              <span className="absolute right-1 top-1 flex h-[17px] min-w-[17px] items-center justify-center rounded-full bg-brand px-1 text-[10px] font-bold text-on-brand">
                 {favoriteCount}
               </span>
             ) : null}
@@ -162,7 +164,7 @@ export function SiteHeader({
             <>
               <Link
                 href="/account/orders"
-                className="hidden items-center gap-2 text-[13px] font-semibold text-[#c2c7cf] transition-colors hover:text-white sm:flex"
+                className="hidden items-center gap-2 text-[13px] font-semibold text-mute transition-colors hover:text-fg sm:flex"
               >
                 <UserIcon className="h-5 w-5" />
                 {user.name}
@@ -174,7 +176,7 @@ export function SiteHeader({
                   void reloadCart();
                   void reloadFavorites();
                 }}
-                className="rounded-md border border-ink-600 px-4 py-2.5 text-[13px] font-bold uppercase tracking-wide text-[#c2c7cf] transition-colors hover:text-white"
+                className="rounded-md border border-ink-600 px-4 py-2.5 text-[13px] font-bold uppercase tracking-wide text-mute transition-colors hover:text-fg"
               >
                 Гарах
               </button>
@@ -183,14 +185,14 @@ export function SiteHeader({
             <>
               <Link
                 href={loginHref}
-                className="hidden items-center gap-2 text-[13px] font-semibold uppercase tracking-wide text-[#c2c7cf] transition-colors hover:text-white sm:flex"
+                className="hidden items-center gap-2 text-[13px] font-semibold uppercase tracking-wide text-mute transition-colors hover:text-fg sm:flex"
               >
                 <UserIcon className="h-5 w-5" />
                 Нэвтрэх
               </Link>
               <Link
                 href="/login?mode=register"
-                className="rounded-md bg-brand px-5 py-2.5 text-[13px] font-bold uppercase tracking-wide text-ink-950 transition-colors hover:bg-brand-hi"
+                className="rounded-md bg-brand px-5 py-2.5 text-[13px] font-bold uppercase tracking-wide text-on-brand transition-colors hover:bg-brand-hi"
               >
                 Бүртгүүлэх
               </Link>
@@ -231,7 +233,7 @@ export function SiteHeader({
               </>
             );
             const className = `relative flex shrink-0 items-center gap-2.5 px-4 py-3.5 text-[13px] font-medium whitespace-nowrap transition-colors ${
-              active ? "text-brand" : "text-[#aeb4bd] hover:text-white"
+              active ? "text-brand" : "text-mute hover:text-fg"
             }`;
 
             // Каталогийн хуудсанд шүүлтүүр солино, бусад хуудсанд нүүр рүү шилжинэ
@@ -279,7 +281,7 @@ export function SiteHeader({
               className={`flex h-[104px] w-[104px] shrink-0 flex-col items-center justify-center rounded-md border px-2 text-center text-[11px] font-bold uppercase leading-tight tracking-wide transition-colors ${
                 activeCategory === openRow.slug
                   ? "border-brand bg-brand/10 text-brand"
-                  : "border-ink-700 bg-ink-850 text-[#aeb4bd] hover:border-ink-600 hover:text-white"
+                  : "border-ink-700 bg-ink-850 text-mute hover:border-ink-600 hover:text-fg"
               }`}
             >
               Бүгдийг
@@ -325,7 +327,7 @@ export function SiteHeader({
                     className={`flex flex-1 items-center justify-center px-1.5 text-center text-[10px] font-bold uppercase leading-[1.15] tracking-wide transition-colors ${
                       chosen
                         ? "text-brand"
-                        : "text-[#aeb4bd] group-hover/tile:text-white"
+                        : "text-mute group-hover/tile:text-fg"
                     }`}
                   >
                     <span className="line-clamp-2">{child.name}</span>

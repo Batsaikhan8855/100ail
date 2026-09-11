@@ -96,20 +96,20 @@ export function TrackView() {
                 value={code}
                 onChange={(event) => setCode(event.target.value)}
                 placeholder="Жишээ: 100A-XXXXXX эсвэл 100A-XXXXXX-1-D"
-                className="w-full bg-transparent text-[13.5px] text-white outline-none placeholder:text-mute-dim"
+                className="w-full bg-transparent text-[13.5px] text-fg outline-none placeholder:text-mute-dim"
               />
             </label>
             <button
               type="submit"
               disabled={busy}
-              className="rounded-md bg-brand px-5 py-2.5 text-[13px] font-bold uppercase tracking-wide text-ink-950 transition-colors hover:bg-brand-hi disabled:opacity-60"
+              className="rounded-md bg-brand px-5 py-2.5 text-[13px] font-bold uppercase tracking-wide text-on-brand transition-colors hover:bg-brand-hi disabled:opacity-60"
             >
               {busy ? "Хайж байна…" : "Хайх"}
             </button>
           </form>
 
           {error ? (
-            <p className="border-t border-ink-700 px-4 py-4 text-[13px] text-[#f08585]">
+            <p className="border-t border-ink-700 px-4 py-4 text-[13px] text-danger">
               {error}
             </p>
           ) : null}
@@ -141,13 +141,13 @@ function DeliveryPanel({ result }: { result: Tracking }) {
             <li key={step.id} className="flex items-center gap-2">
               <span
                 className={`flex h-7 w-7 items-center justify-center rounded-full text-[12px] font-semibold ${
-                  done ? "bg-brand text-ink-950" : "bg-ink-800 text-mute"
+                  done ? "bg-brand text-on-brand" : "bg-ink-800 text-mute"
                 }`}
               >
                 {index + 1}
               </span>
               <span
-                className={`text-[12.5px] ${done ? "text-white" : "text-mute"}`}
+                className={`text-[12.5px] ${done ? "text-fg" : "text-mute"}`}
               >
                 {step.label}
               </span>
@@ -159,7 +159,7 @@ function DeliveryPanel({ result }: { result: Tracking }) {
       {result.position ? (
         <div className="border-t border-ink-700 px-4 py-4">
           <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2">
-            <span className="text-[12.5px] font-semibold text-white">
+            <span className="text-[12.5px] font-semibold text-fg">
               Ачаа хаана явж байна
             </span>
             <span className="text-[11.5px] text-mute-dim">
@@ -211,7 +211,7 @@ function DeliveryPanel({ result }: { result: Tracking }) {
       ) : null}
 
       <div className="border-t border-ink-700 px-4 py-3.5 text-[12.5px] text-mute">
-        <p className="flex items-center gap-1.5 text-[#c2c7cf]">
+        <p className="flex items-center gap-1.5 text-mute">
           <TruckIcon className="h-4 w-4 text-brand" />
           {result.city}, {result.address}
         </p>
@@ -238,7 +238,7 @@ function DeliveryPanel({ result }: { result: Tracking }) {
         {result.items.map((item) => (
           <li
             key={item.productName}
-            className="flex justify-between gap-3 py-0.5 text-[12.5px] text-[#c2c7cf]"
+            className="flex justify-between gap-3 py-0.5 text-[12.5px] text-mute"
           >
             <span>{item.productName}</span>
             <span className="text-mute">

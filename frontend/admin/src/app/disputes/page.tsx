@@ -88,14 +88,14 @@ export default function DisputesPage() {
             {rows.map((dispute) => (
               <Row key={dispute.id}>
                 <Cell>
-                  <div className="text-white">{dispute.order.code}</div>
+                  <div className="text-fg">{dispute.order.code}</div>
                   <div className="text-[12px] text-mute-dim">
                     {dispute.order.buyerName}
                     {dispute.supplierOrder ? ` · ${dispute.supplierOrder.code}` : ""}
                   </div>
                 </Cell>
                 <Cell>
-                  <div className="text-white">{dispute.reason}</div>
+                  <div className="text-fg">{dispute.reason}</div>
                   {dispute.detail ? (
                     <div className="max-w-xs text-[12px] text-mute">
                       {dispute.detail}
@@ -108,7 +108,7 @@ export default function DisputesPage() {
                   </span>
                 </Cell>
                 <Cell align="right">
-                  <span className="tabular-nums text-white">
+                  <span className="tabular-nums text-fg">
                     {formatPrice(dispute.order.total)}
                   </span>
                 </Cell>

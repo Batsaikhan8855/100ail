@@ -45,16 +45,16 @@ function ShipmentSummary() {
     <div className="mb-3 flex items-start gap-2.5 rounded-md border border-ink-700 bg-ink-900 px-3 py-2.5">
       <TruckIcon className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
       <div className="min-w-0 text-[12px] leading-relaxed">
-        <p className="text-[#c6ccd4]">
+        <p className="text-mute">
           Нийт жин{" "}
-          <span className="font-semibold text-white">{weightLabel}</span>
+          <span className="font-semibold text-fg">{weightLabel}</span>
           {" — "}
           <span className="font-semibold text-brand">{vehicles}</span>
           {trips > plans.length ? ` (${trips} ачилт)` : ""}
         </p>
-        <p className="mt-0.5 text-[#c6ccd4]">
+        <p className="mt-0.5 text-mute">
           Хүргэлт{" "}
-          <span className="font-semibold text-white">
+          <span className="font-semibold text-fg">
             {formatPrice(plans.reduce((sum, plan) => sum + plan.price, 0))}
           </span>
         </p>
@@ -103,7 +103,7 @@ export function CartPanel({
               </div>
 
               <div className="min-w-0 flex-1">
-                <p className="truncate text-[13px] font-medium text-white">
+                <p className="truncate text-[13px] font-medium text-fg">
                   {line.productName}
                 </p>
                 <p className="truncate text-[11px] text-mute">
@@ -111,7 +111,7 @@ export function CartPanel({
                 </p>
               </div>
 
-              <span className="hidden w-[62px] shrink-0 text-right text-[13px] text-[#c6ccd4] sm:block">
+              <span className="hidden w-[62px] shrink-0 text-right text-[13px] text-mute sm:block">
                 {formatPrice(lineUnitPrice(line))}
               </span>
 
@@ -120,7 +120,7 @@ export function CartPanel({
                   type="button"
                   aria-label="Тоо хэмжээ хасах"
                   onClick={() => onQtyChange(line.offerId, line.qty - 1)}
-                  className="flex h-7 w-7 items-center justify-center text-mute transition-colors hover:text-white"
+                  className="flex h-7 w-7 items-center justify-center text-mute transition-colors hover:text-fg"
                 >
                   <MinusIcon className="h-3.5 w-3.5" />
                 </button>
@@ -132,19 +132,19 @@ export function CartPanel({
                   onChange={(e) =>
                     onQtyChange(line.offerId, Number(e.target.value))
                   }
-                  className="h-7 w-9 border-x border-ink-700 bg-transparent text-center text-[12.5px] text-white outline-none"
+                  className="h-7 w-9 border-x border-ink-700 bg-transparent text-center text-[12.5px] text-fg outline-none"
                 />
                 <button
                   type="button"
                   aria-label="Тоо хэмжээ нэмэх"
                   onClick={() => onQtyChange(line.offerId, line.qty + 1)}
-                  className="flex h-7 w-7 items-center justify-center text-mute transition-colors hover:text-white"
+                  className="flex h-7 w-7 items-center justify-center text-mute transition-colors hover:text-fg"
                 >
                   <PlusIcon className="h-3.5 w-3.5" />
                 </button>
               </div>
 
-              <span className="w-[74px] shrink-0 text-right text-[13px] font-semibold text-white">
+              <span className="w-[74px] shrink-0 text-right text-[13px] font-semibold text-fg">
                 {formatPrice(line.unitPrice * line.qty)}
               </span>
 
@@ -152,7 +152,7 @@ export function CartPanel({
                 type="button"
                 aria-label={`${line.productName} устгах`}
                 onClick={() => onRemove(line.offerId)}
-                className="shrink-0 text-mute-dim transition-colors hover:text-white"
+                className="shrink-0 text-mute-dim transition-colors hover:text-fg"
               >
                 <CloseIcon className="h-4 w-4" />
               </button>
@@ -165,14 +165,14 @@ export function CartPanel({
         <ShipmentSummary />
 
         <div className="flex items-baseline justify-between">
-          <span className="text-[13px] text-[#c2c7cf]">Нийт дүн:</span>
+          <span className="text-[13px] text-mute">Нийт дүн:</span>
           <span className="text-[22px] font-bold text-brand">
             {formatPrice(total)}
           </span>
         </div>
 
         {lines.length === 0 ? (
-          <span className="mt-3 flex w-full items-center justify-center gap-3 rounded-md bg-brand px-4 py-3.5 text-[14px] font-bold uppercase tracking-wide text-ink-950 opacity-40">
+          <span className="mt-3 flex w-full items-center justify-center gap-3 rounded-md bg-brand px-4 py-3.5 text-[14px] font-bold uppercase tracking-wide text-on-brand opacity-40">
             <CartIcon className="h-5 w-5" />
             Захиалга баталгаажуулах
             <ArrowRightIcon className="h-5 w-5" />
@@ -180,7 +180,7 @@ export function CartPanel({
         ) : (
           <Link
             href="/cart"
-            className="mt-3 flex w-full items-center justify-center gap-3 rounded-md bg-brand px-4 py-3.5 text-[14px] font-bold uppercase tracking-wide text-ink-950 transition-colors hover:bg-brand-hi"
+            className="mt-3 flex w-full items-center justify-center gap-3 rounded-md bg-brand px-4 py-3.5 text-[14px] font-bold uppercase tracking-wide text-on-brand transition-colors hover:bg-brand-hi"
           >
             <CartIcon className="h-5 w-5" />
             Захиалга баталгаажуулах
@@ -195,7 +195,7 @@ export function CartPanel({
               <li key={item.id} className="flex items-center gap-2.5">
                 <Icon className="h-[22px] w-[22px] shrink-0 text-mute" />
                 <span className="min-w-0">
-                  <span className="block truncate text-[12.5px] font-medium text-white">
+                  <span className="block truncate text-[12.5px] font-medium text-fg">
                     {item.title}
                   </span>
                   <span className="block truncate text-[11px] text-mute-dim">

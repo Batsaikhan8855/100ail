@@ -124,7 +124,7 @@ export default function CommissionsPage() {
             {rows.map((row) => (
               <Row key={row.id}>
                 <Cell>
-                  <span className="text-white">{row.orderCode}</span>
+                  <span className="text-fg">{row.orderCode}</span>
                 </Cell>
                 <Cell>
                   <span className="text-[12px] text-mute">
@@ -278,9 +278,9 @@ function PayoutSection({
           </form>
         ) : (
           <div className="rounded-md border border-ink-700 bg-ink-900 px-3.5 py-3 text-[13px]">
-            <span className="text-white">{data.account?.bankName}</span>
+            <span className="text-fg">{data.account?.bankName}</span>
             <span className="mx-2 text-mute-dim">·</span>
-            <span className="tabular-nums text-white">{data.account?.accountNo}</span>
+            <span className="tabular-nums text-fg">{data.account?.accountNo}</span>
             <span className="mx-2 text-mute-dim">·</span>
             <span className="text-mute">{data.account?.accountName}</span>
           </div>

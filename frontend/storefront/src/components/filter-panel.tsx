@@ -239,7 +239,7 @@ function PriceInput({
             e.currentTarget.blur();
           }
         }}
-        className="w-full min-w-0 bg-transparent text-[13px] text-white outline-none"
+        className="w-full min-w-0 bg-transparent text-[13px] text-fg outline-none"
       />
     </label>
   );

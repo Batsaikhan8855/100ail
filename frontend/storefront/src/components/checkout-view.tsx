@@ -100,20 +100,20 @@ export function CheckoutView() {
           aria-label="Замын мөр"
           className="flex items-center gap-1.5 pb-3.5 text-[12.5px] text-mute"
         >
-          <Link href="/" className="transition-colors hover:text-white">
+          <Link href="/" className="transition-colors hover:text-fg">
             Нүүр
           </Link>
           <ChevronRightIcon className="h-3.5 w-3.5 text-mute-dim" />
-          <Link href="/cart" className="transition-colors hover:text-white">
+          <Link href="/cart" className="transition-colors hover:text-fg">
             Сагс
           </Link>
           <ChevronRightIcon className="h-3.5 w-3.5 text-mute-dim" />
-          <span className="text-white">Төлбөр</span>
+          <span className="text-fg">Төлбөр</span>
         </nav>
 
         {lines.length === 0 ? (
           <Panel className="px-4 py-16 text-center">
-            <p className="text-[15px] font-semibold text-white">
+            <p className="text-[15px] font-semibold text-fg">
               Сагс хоосон байна
             </p>
             <p className="mt-1 text-[13px] text-mute">
@@ -121,7 +121,7 @@ export function CheckoutView() {
             </p>
             <Link
               href="/"
-              className="mt-5 inline-flex items-center gap-2 rounded-md bg-brand px-5 py-3 text-[13px] font-bold uppercase tracking-wide text-ink-950 transition-colors hover:bg-brand-hi"
+              className="mt-5 inline-flex items-center gap-2 rounded-md bg-brand px-5 py-3 text-[13px] font-bold uppercase tracking-wide text-on-brand transition-colors hover:bg-brand-hi"
             >
               Каталог руу буцах
               <ArrowRightIcon className="h-4 w-4" />
@@ -149,7 +149,7 @@ export function CheckoutView() {
                     <select
                       name="city"
                       defaultValue={CITIES[0]}
-                      className="h-10 rounded-md border border-ink-700 bg-ink-900 px-3 text-[13.5px] text-white outline-none focus:border-ink-600"
+                      className="h-10 rounded-md border border-ink-700 bg-ink-900 px-3 text-[13.5px] text-fg outline-none focus:border-ink-600"
                     >
                       {CITIES.map((city) => (
                         <option key={city} value={city}>
@@ -213,7 +213,7 @@ export function CheckoutView() {
                     />
                   ))}
 
-                  <label className="mt-1.5 flex cursor-pointer items-center gap-2.5 border-t border-ink-700 pt-3.5 text-[13px] text-[#c2c7cf]">
+                  <label className="mt-1.5 flex cursor-pointer items-center gap-2.5 border-t border-ink-700 pt-3.5 text-[13px] text-mute">
                     <input
                       type="checkbox"
                       checked={isCompany}
@@ -249,10 +249,10 @@ export function CheckoutView() {
                   {groups.map((group) => (
                     <li key={group.supplierId} className="px-4 py-3">
                       <div className="flex items-baseline justify-between gap-3">
-                        <span className="text-[13px] font-semibold text-white">
+                        <span className="text-[13px] font-semibold text-fg">
                           {group.supplierName}
                         </span>
-                        <span className="text-[13px] font-semibold text-white">
+                        <span className="text-[13px] font-semibold text-fg">
                           {formatPrice(
                             group.goodsTotal +
                               (pickup ? 0 : group.deliveryPrice),
@@ -268,14 +268,14 @@ export function CheckoutView() {
                             <span className="truncate">
                               {line.productName} × {line.qty} {line.unit}
                             </span>
-                            <span className="shrink-0 text-[#c6ccd4]">
+                            <span className="shrink-0 text-mute">
                               {formatPrice(lineTotal(line))}
                             </span>
                           </li>
                         ))}
                         <li className="flex items-baseline justify-between gap-3 text-[11.5px] text-mute">
                           <span>Хүргэлт</span>
-                          <span className="text-[#c6ccd4]">
+                          <span className="text-mute">
                             {pickup || group.deliveryPrice === 0
                               ? "Үнэгүй"
                               : formatPrice(group.deliveryPrice)}
@@ -290,18 +290,18 @@ export function CheckoutView() {
                   <dl className="flex flex-col gap-2 text-[13px]">
                     <div className="flex items-baseline justify-between">
                       <dt className="text-mute">Барааны дүн</dt>
-                      <dd className="font-medium text-white">
+                      <dd className="font-medium text-fg">
                         {formatPrice(goodsTotal)}
                       </dd>
                     </div>
                     <div className="flex items-baseline justify-between">
                       <dt className="text-mute">Хүргэлт</dt>
-                      <dd className="font-medium text-white">
+                      <dd className="font-medium text-fg">
                         {delivery === 0 ? "Үнэгүй" : formatPrice(delivery)}
                       </dd>
                     </div>
                     <div className="mt-1 flex items-baseline justify-between border-t border-ink-700 pt-3">
-                      <dt className="text-[13px] text-[#c2c7cf]">Төлөх дүн:</dt>
+                      <dt className="text-[13px] text-mute">Төлөх дүн:</dt>
                       <dd className="text-[22px] font-bold text-brand">
                         {formatPrice(payable)}
                       </dd>
@@ -309,7 +309,7 @@ export function CheckoutView() {
                   </dl>
 
                   {error ? (
-                    <p className="mt-3 rounded-md border border-[#7a3030] bg-[#2c1717] px-3 py-2 text-[12.5px] text-[#f08585]">
+                    <p className="mt-3 rounded-md border border-danger-border bg-danger-bg px-3 py-2 text-[12.5px] text-danger">
                       {error}
                     </p>
                   ) : null}
@@ -317,7 +317,7 @@ export function CheckoutView() {
                   <button
                     type="submit"
                     disabled={busy}
-                    className="mt-3.5 flex w-full items-center justify-center gap-3 rounded-md bg-brand px-4 py-3.5 text-[14px] font-bold uppercase tracking-wide text-ink-950 transition-colors hover:bg-brand-hi disabled:cursor-not-allowed disabled:opacity-60"
+                    className="mt-3.5 flex w-full items-center justify-center gap-3 rounded-md bg-brand px-4 py-3.5 text-[14px] font-bold uppercase tracking-wide text-on-brand transition-colors hover:bg-brand-hi disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {busy ? "Илгээж байна…" : "Захиалга баталгаажуулах"}
                     <ArrowRightIcon className="h-5 w-5" />
@@ -361,7 +361,7 @@ function Field({
         name={name}
         placeholder={placeholder}
         required={required}
-        className="h-10 rounded-md border border-ink-700 bg-ink-900 px-3 text-[13.5px] text-white outline-none placeholder:text-mute-dim focus:border-ink-600"
+        className="h-10 rounded-md border border-ink-700 bg-ink-900 px-3 text-[13.5px] text-fg outline-none placeholder:text-mute-dim focus:border-ink-600"
       />
     </label>
   );
@@ -399,7 +399,7 @@ function Choice({
       />
       <span className={checked ? "text-brand" : "text-mute"}>{icon}</span>
       <span className="min-w-0">
-        <span className="block text-[13.5px] font-semibold text-white">
+        <span className="block text-[13.5px] font-semibold text-fg">
           {title}
         </span>
         <span className="block text-[11.5px] text-mute">{note}</span>
@@ -460,7 +460,7 @@ function AddressField() {
         placeholder="Хороо, гудамж, байр, тоот"
         required
         autoComplete="off"
-        className="h-10 rounded-md border border-ink-700 bg-ink-900 px-3 text-[13.5px] text-white outline-none placeholder:text-mute-dim focus:border-ink-600"
+        className="h-10 rounded-md border border-ink-700 bg-ink-900 px-3 text-[13.5px] text-fg outline-none placeholder:text-mute-dim focus:border-ink-600"
       />
 
       {open && places.length > 0 ? (
@@ -476,9 +476,9 @@ function AddressField() {
                   setPlaces([]);
                   setOpen(false);
                 }}
-                className="w-full px-3 py-2 text-left text-[12.5px] text-[#c2c7cf] hover:bg-ink-800 hover:text-white"
+                className="w-full px-3 py-2 text-left text-[12.5px] text-mute hover:bg-ink-800 hover:text-fg"
               >
-                <span className="block text-white">{place.name}</span>
+                <span className="block text-fg">{place.name}</span>
                 <span className="block truncate text-[11.5px] text-mute-dim">
                   {place.address}
                 </span>

@@ -227,7 +227,7 @@ export default function OffersPage() {
               return (
                 <Row key={offer.id}>
                   <Cell>
-                    <div className="text-white">{offer.product.name}</div>
+                    <div className="text-fg">{offer.product.name}</div>
                     <div className="text-[12px] text-mute-dim">
                       {offer.product.variantLabel ?? offer.product.category}
                     </div>
@@ -354,7 +354,7 @@ export default function OffersPage() {
                         </div>
                       </Cell>
                       <Cell align="right">
-                        <span className="tabular-nums text-white">
+                        <span className="tabular-nums text-fg">
                           {formatNumber(offer.stock)}
                         </span>
                         <div className="text-[11.5px] text-mute-dim">
@@ -594,7 +594,7 @@ function BulkPricePanel({
       <div className="space-y-3 p-4">
         <p className="text-[12.5px] text-mute">
           Excel-ийн багануудыг{" "}
-          <span className="text-white">offerId, нэгж үнэ, бөөний үнэ</span>{" "}
+          <span className="text-fg">offerId, нэгж үнэ, бөөний үнэ</span>{" "}
           дарааллаар таслалаар тусгаарлан буулгана. Tab-ын ард бичсэн тайлбарыг
           тооцохгүй.
         </p>
@@ -734,7 +734,7 @@ function ImportPanel({ onDone }: { onDone: () => void }) {
       <div className="space-y-3 p-4">
         <p className="text-[12.5px] text-mute">
           Багануудын гарчиг:{" "}
-          <span className="text-white">
+          <span className="text-fg">
             бараа, үнэ, бөөний үнэ, бөөний доод тоо, нэгж, хүргэлтийн үнэ, хүргэх
             хоног, агуулах, үлдэгдэл
           </span>
@@ -745,7 +745,7 @@ function ImportPanel({ onDone }: { onDone: () => void }) {
           type="file"
           accept=".xlsx,.csv,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
           onChange={(event) => void pick(event.currentTarget)}
-          className="block w-full cursor-pointer rounded-md border border-ink-600 bg-ink-900 px-3 py-2 text-[12.5px] text-mute file:mr-3 file:rounded file:border-0 file:bg-ink-800 file:px-3 file:py-1.5 file:text-[12px] file:text-white"
+          className="block w-full cursor-pointer rounded-md border border-ink-600 bg-ink-900 px-3 py-2 text-[12.5px] text-mute file:mr-3 file:rounded file:border-0 file:bg-ink-800 file:px-3 file:py-1.5 file:text-[12px] file:text-fg"
         />
 
         {busy ? <div className="text-[12.5px] text-mute">Уншиж байна…</div> : null}
@@ -769,7 +769,7 @@ function ImportPanel({ onDone }: { onDone: () => void }) {
                   <Row key={row.row}>
                     <Cell>{row.row}</Cell>
                     <Cell>
-                      <span className="text-white">{row.product || "—"}</span>
+                      <span className="text-fg">{row.product || "—"}</span>
                     </Cell>
                     <Cell>
                       <Badge tone={ACTION_LABEL[row.action].tone}>

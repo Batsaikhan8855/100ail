@@ -158,7 +158,7 @@ export default function InventoryPage() {
             {visible.map((row) => (
               <Row key={row.id}>
                 <Cell>
-                  <div className="text-white">{row.offer.productName}</div>
+                  <div className="text-fg">{row.offer.productName}</div>
                   <div className="text-[12px] text-mute-dim">{row.offer.unit}</div>
                 </Cell>
                 <Cell>
@@ -177,7 +177,7 @@ export default function InventoryPage() {
                   ) : (
                     <span
                       className={`tabular-nums ${
-                        row.quantity <= LOW_STOCK ? "text-brand-hi" : "text-white"
+                        row.quantity <= LOW_STOCK ? "text-brand-hi" : "text-fg"
                       }`}
                     >
                       {formatNumber(row.quantity)}
@@ -193,7 +193,7 @@ export default function InventoryPage() {
                   {row.available <= 0 ? (
                     <Badge tone="bad">Дууссан</Badge>
                   ) : (
-                    <span className="tabular-nums text-white">
+                    <span className="tabular-nums text-fg">
                       {formatNumber(row.available)}
                     </span>
                   )}

@@ -142,7 +142,7 @@ export default function OrdersPage() {
                     <button
                       type="button"
                       onClick={() => setOpen(open === order.id ? null : order.id)}
-                      className="text-left text-white hover:text-brand"
+                      className="text-left text-fg hover:text-brand"
                     >
                       {order.code}
                     </button>
@@ -151,7 +151,7 @@ export default function OrdersPage() {
                     </div>
                     {open === order.id ? (
                       <div className="mt-2 space-y-1 rounded-md border border-ink-700 bg-ink-900 p-2.5 text-[12px]">
-                        <div className="text-white">{order.buyer.name}</div>
+                        <div className="text-fg">{order.buyer.name}</div>
                         <div className="text-mute">{order.buyer.phone}</div>
                         <div className="text-mute">
                           {order.buyer.city}, {order.buyer.address}
@@ -165,10 +165,10 @@ export default function OrdersPage() {
                               key={item.id}
                               className="flex justify-between gap-3 py-0.5"
                             >
-                              <span className="text-[#c2c7cf]">
+                              <span className="text-mute">
                                 {item.productName} × {formatNumber(item.qty)} {item.unit}
                               </span>
-                              <span className="tabular-nums text-white">
+                              <span className="tabular-nums text-fg">
                                 {formatPrice(item.lineTotal)}
                               </span>
                             </div>
@@ -183,7 +183,7 @@ export default function OrdersPage() {
                     ) : null}
                   </Cell>
                   <Cell>
-                    <div className="text-white">{order.buyer.name}</div>
+                    <div className="text-fg">{order.buyer.name}</div>
                     <div className="text-[12px] text-mute-dim">{order.buyer.city}</div>
                   </Cell>
                   <Cell>

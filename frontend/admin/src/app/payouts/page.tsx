@@ -139,7 +139,7 @@ export default function PayoutsPage() {
             {data.rows.map((payout) => (
               <Row key={payout.id}>
                 <Cell>
-                  <span className="text-white">{payout.supplier.name}</span>
+                  <span className="text-fg">{payout.supplier.name}</span>
                   {payout.note ? (
                     <div className="text-[11.5px] text-mute-dim">{payout.note}</div>
                   ) : null}
@@ -158,7 +158,7 @@ export default function PayoutsPage() {
                   <Money value={payout.amount} />
                 </Cell>
                 <Cell>
-                  <div className="text-[12px] text-white">{payout.bankName}</div>
+                  <div className="text-[12px] text-fg">{payout.bankName}</div>
                   <div className="text-[11.5px] tabular-nums text-mute">
                     {payout.accountNo}
                   </div>

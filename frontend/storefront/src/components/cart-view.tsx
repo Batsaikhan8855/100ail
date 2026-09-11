@@ -64,17 +64,17 @@ export function CartView() {
           aria-label="Замын мөр"
           className="flex items-center gap-1.5 pb-3.5 text-[12.5px] text-mute"
         >
-          <Link href="/" className="transition-colors hover:text-white">
+          <Link href="/" className="transition-colors hover:text-fg">
             Нүүр
           </Link>
           <ChevronRightIcon className="h-3.5 w-3.5 text-mute-dim" />
-          <span className="text-white">Сагс</span>
+          <span className="text-fg">Сагс</span>
         </nav>
 
         {lines.length === 0 ? (
           <Panel className="px-4 py-16 text-center">
             <CartIcon className="mx-auto h-10 w-10 text-mute-dim" />
-            <p className="mt-3 text-[15px] font-semibold text-white">
+            <p className="mt-3 text-[15px] font-semibold text-fg">
               Сагс хоосон байна
             </p>
             <p className="mt-1 text-[13px] text-mute">
@@ -82,7 +82,7 @@ export function CartView() {
             </p>
             <Link
               href="/"
-              className="mt-5 inline-flex items-center gap-2 rounded-md bg-brand px-5 py-3 text-[13px] font-bold uppercase tracking-wide text-ink-950 transition-colors hover:bg-brand-hi"
+              className="mt-5 inline-flex items-center gap-2 rounded-md bg-brand px-5 py-3 text-[13px] font-bold uppercase tracking-wide text-on-brand transition-colors hover:bg-brand-hi"
             >
               Каталог руу буцах
               <ArrowRightIcon className="h-4 w-4" />
@@ -108,7 +108,7 @@ export function CartView() {
                     <span className="flex items-center gap-1.5">
                       <TruckIcon className="h-3.5 w-3.5" />
                       Хүргэлт{" "}
-                      <span className="font-semibold text-[#c6ccd4]">
+                      <span className="font-semibold text-mute">
                         {group.deliveryPrice === 0
                           ? "үнэгүй"
                           : formatPrice(group.deliveryPrice)}
@@ -124,14 +124,14 @@ export function CartView() {
                       <span className="flex items-center gap-1.5">
                         <WeightIcon className="h-3.5 w-3.5" />
                         Ачаа{" "}
-                        <span className="font-semibold text-[#c6ccd4]">
+                        <span className="font-semibold text-mute">
                           {group.weightEstimated ? "~" : ""}
                           {formatWeight(group.weightKg)}
                         </span>
                         {group.volumeM3 > 0 ? (
                           <>
                             <span className="text-mute-dim">·</span>
-                            <span className="font-semibold text-[#c6ccd4]">
+                            <span className="font-semibold text-mute">
                               {group.weightEstimated ? "~" : ""}
                               {formatVolume(group.volumeM3)}
                             </span>
@@ -164,7 +164,7 @@ export function CartView() {
                           <div className="min-w-[160px] flex-1">
                             <Link
                               href={`/product/${line.productId}`}
-                              className="text-[13.5px] font-semibold text-white transition-colors hover:text-brand"
+                              className="text-[13.5px] font-semibold text-fg transition-colors hover:text-brand"
                             >
                               {line.productName}
                             </Link>
@@ -189,7 +189,7 @@ export function CartView() {
                                 {line.weightEstimated ? "~" : ""}
                                 {formatWeight(line.unitWeightKg ?? 0)} /{" "}
                                 {line.unit} × {line.qty} ={" "}
-                                <span className="font-semibold text-[#c6ccd4]">
+                                <span className="font-semibold text-mute">
                                   {line.weightEstimated ? "~" : ""}
                                   {formatWeight(line.lineWeightKg)}
                                 </span>
@@ -197,7 +197,7 @@ export function CartView() {
                                   <>
                                     <span className="text-mute-dim">·</span>
                                     овор{" "}
-                                    <span className="font-semibold text-[#c6ccd4]">
+                                    <span className="font-semibold text-mute">
                                       {line.weightEstimated ? "~" : ""}
                                       {formatVolume(line.lineVolumeM3)}
                                     </span>
@@ -213,7 +213,7 @@ export function CartView() {
                             onChange={(qty) => setQty(line.offerId, qty)}
                           />
 
-                          <span className="w-[104px] shrink-0 text-right text-[14px] font-bold text-white">
+                          <span className="w-[104px] shrink-0 text-right text-[14px] font-bold text-fg">
                             {formatPrice(lineTotal(line))}
                           </span>
 
@@ -221,7 +221,7 @@ export function CartView() {
                             type="button"
                             aria-label={`${line.productName} устгах`}
                             onClick={() => removeLine(line.offerId)}
-                            className="shrink-0 text-mute-dim transition-colors hover:text-white"
+                            className="shrink-0 text-mute-dim transition-colors hover:text-fg"
                           >
                             <CloseIcon className="h-4 w-4" />
                           </button>
@@ -236,7 +236,7 @@ export function CartView() {
                     <span className="text-mute">
                       {group.supplierName} дэд дүн
                     </span>
-                    <span className="font-semibold text-white">
+                    <span className="font-semibold text-fg">
                       {formatPrice(group.total)}
                     </span>
                   </div>
@@ -254,7 +254,7 @@ export function CartView() {
                   <dl className="flex flex-col gap-2 text-[13px]">
                     <div className="flex items-baseline justify-between">
                       <dt className="text-mute">Барааны дүн</dt>
-                      <dd className="font-medium text-white">
+                      <dd className="font-medium text-fg">
                         {formatPrice(goodsTotal)}
                       </dd>
                     </div>
@@ -262,7 +262,7 @@ export function CartView() {
                       <dt className="text-mute">
                         Хүргэлт ({groups.length} машин)
                       </dt>
-                      <dd className="font-medium text-white">
+                      <dd className="font-medium text-fg">
                         {deliveryTotal === 0
                           ? "Үнэгүй"
                           : formatPrice(deliveryTotal)}
@@ -272,14 +272,14 @@ export function CartView() {
                       <>
                         <div className="flex items-baseline justify-between">
                           <dt className="text-mute">Ачааны жин</dt>
-                          <dd className="font-medium text-white">
+                          <dd className="font-medium text-fg">
                             {weightLabel}
                           </dd>
                         </div>
                         {volumeM3 > 0 ? (
                           <div className="flex items-baseline justify-between">
                             <dt className="text-mute">Ачааны овор</dt>
-                            <dd className="font-medium text-white">
+                            <dd className="font-medium text-fg">
                               {volumeLabel || formatVolume(volumeM3)}
                             </dd>
                           </div>
@@ -287,7 +287,7 @@ export function CartView() {
                       </>
                     ) : null}
                     <div className="mt-1 flex items-baseline justify-between border-t border-ink-700 pt-3">
-                      <dt className="text-[13px] text-[#c2c7cf]">Нийт дүн:</dt>
+                      <dt className="text-[13px] text-mute">Нийт дүн:</dt>
                       <dd className="text-[22px] font-bold text-brand">
                         {formatPrice(total)}
                       </dd>
@@ -301,7 +301,7 @@ export function CartView() {
 
                   <Link
                     href="/checkout"
-                    className="mt-3.5 flex w-full items-center justify-center gap-3 rounded-md bg-brand px-4 py-3.5 text-[14px] font-bold uppercase tracking-wide text-ink-950 transition-colors hover:bg-brand-hi"
+                    className="mt-3.5 flex w-full items-center justify-center gap-3 rounded-md bg-brand px-4 py-3.5 text-[14px] font-bold uppercase tracking-wide text-on-brand transition-colors hover:bg-brand-hi"
                   >
                     Төлбөр рүү шилжих
                     <ArrowRightIcon className="h-5 w-5" />
@@ -309,7 +309,7 @@ export function CartView() {
 
                   <Link
                     href="/"
-                    className="mt-2 flex w-full items-center justify-center rounded-md border border-ink-600 px-4 py-3 text-[13px] font-semibold text-[#c2c7cf] transition-colors hover:border-brand hover:text-brand"
+                    className="mt-2 flex w-full items-center justify-center rounded-md border border-ink-600 px-4 py-3 text-[13px] font-semibold text-mute transition-colors hover:border-brand hover:text-brand"
                   >
                     Худалдан авалтаа үргэлжлүүлэх
                   </Link>
@@ -349,7 +349,7 @@ function VehiclePicker({ group }: { group: SupplierGroup }) {
   return (
     <section className="border-t border-ink-700 px-4 py-3.5">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h3 className="text-[12.5px] font-semibold text-white">
+        <h3 className="text-[12.5px] font-semibold text-fg">
           Хүргэлтийн машин
         </h3>
         <p className="text-[11.5px] text-mute-dim">
@@ -416,7 +416,7 @@ function VehiclePicker({ group }: { group: SupplierGroup }) {
                 </span>
                 <span
                   className={`text-[12px] font-semibold ${
-                    active ? "text-brand" : "text-white"
+                    active ? "text-brand" : "text-fg"
                   }`}
                 >
                   {vehicle.name}
@@ -437,7 +437,7 @@ function VehiclePicker({ group }: { group: SupplierGroup }) {
                       ? "text-mute-dim"
                       : active
                         ? "text-brand"
-                        : "text-[#c6ccd4]"
+                        : "text-mute"
                   }`}
                 >
                   {price === null
@@ -478,7 +478,7 @@ function VehiclePicker({ group }: { group: SupplierGroup }) {
             <span className="flex items-center gap-1.5 text-[11.5px] text-mute">
               <TruckIcon className="h-3.5 w-3.5 text-brand" />
               {plan?.chosen ? "Таны сонгосон" : "Санал болгож буй"}:{" "}
-              <span className="font-semibold text-[#c6ccd4]">
+              <span className="font-semibold text-mute">
                 {selected.name}
               </span>
               {plan && plan.trips > 1 ? ` · ${plan.trips} ачилт` : ""}
@@ -508,7 +508,7 @@ function VehiclePicker({ group }: { group: SupplierGroup }) {
                     className={`rounded border px-2 py-1 text-[11px] transition-colors ${
                       vehicle.id === shown.id
                         ? "border-brand bg-brand/10 font-semibold text-brand"
-                        : "border-ink-700 bg-ink-900 text-mute hover:border-mute-dim hover:text-white"
+                        : "border-ink-700 bg-ink-900 text-mute hover:border-mute-dim hover:text-fg"
                     }`}
                   >
                     {vehicle.name}
@@ -521,7 +521,7 @@ function VehiclePicker({ group }: { group: SupplierGroup }) {
                   <h4 className="flex items-center gap-2 border-b border-ink-700 px-3 py-2">
                     <TruckIcon className="h-4 w-4 shrink-0 text-brand" />
                     <span className="leading-tight">
-                      <span className="block text-[12.5px] font-semibold text-white">
+                      <span className="block text-[12.5px] font-semibold text-fg">
                         Машины хэмжээ
                       </span>
                       <span className="block text-[11px] text-mute-dim">
@@ -536,7 +536,7 @@ function VehiclePicker({ group }: { group: SupplierGroup }) {
 
                 <div className="flex flex-col gap-3">
                   <section className="rounded-md border border-ink-700 bg-ink-950/40">
-                    <h4 className="flex items-center gap-2 border-b border-ink-700 px-3 py-2 text-[12.5px] font-semibold text-white">
+                    <h4 className="flex items-center gap-2 border-b border-ink-700 px-3 py-2 text-[12.5px] font-semibold text-fg">
                       <BoxIcon className="h-4 w-4 shrink-0 text-brand" />
                       Техникийн үзүүлэлт
                     </h4>
@@ -582,7 +582,7 @@ function VehiclePicker({ group }: { group: SupplierGroup }) {
                   <section className="rounded-md border border-ink-700 bg-ink-950/40">
                     <h4 className="flex items-baseline gap-2 border-b border-ink-700 px-3 py-2">
                       <CubeIcon className="h-4 w-4 shrink-0 self-center text-brand" />
-                      <span className="text-[12.5px] font-semibold text-white">
+                      <span className="text-[12.5px] font-semibold text-fg">
                         Ачааны хэмжээс
                       </span>
                       <span className="text-[11px] text-mute-dim">
@@ -684,7 +684,7 @@ function FillBar({
     <div>
       <div className="flex items-baseline justify-between gap-2 text-[11.5px]">
         <span className="text-mute">{label}</span>
-        <span className="font-medium text-[#c6ccd4]">{text}</span>
+        <span className="font-medium text-mute">{text}</span>
       </div>
       <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-ink-800">
         <div
@@ -737,7 +737,7 @@ function QtyStepper({
         type="button"
         aria-label={`${label} тоо хэмжээ хасах`}
         onClick={() => onChange(qty - 1)}
-        className="flex h-9 w-9 items-center justify-center text-mute transition-colors hover:text-white"
+        className="flex h-9 w-9 items-center justify-center text-mute transition-colors hover:text-fg"
       >
         <MinusIcon className="h-4 w-4" />
       </button>
@@ -748,14 +748,14 @@ function QtyStepper({
         aria-label={`${label} тоо хэмжээ`}
         onChange={(event) => onChange(Number(event.target.value))}
         className={`h-9 w-14 border-x bg-transparent text-center text-[13px] font-semibold outline-none transition-colors duration-300 ${
-          bumped ? "border-brand text-brand" : "border-ink-700 text-white"
+          bumped ? "border-brand text-brand" : "border-ink-700 text-fg"
         }`}
       />
       <button
         type="button"
         aria-label={`${label} тоо хэмжээ нэмэх`}
         onClick={() => onChange(qty + 1)}
-        className="flex h-9 w-9 items-center justify-center text-mute transition-colors hover:text-white"
+        className="flex h-9 w-9 items-center justify-center text-mute transition-colors hover:text-fg"
       >
         <PlusIcon className="h-4 w-4" />
       </button>
@@ -779,7 +779,7 @@ function SpecRow({
         <span className="shrink-0 text-mute-dim">{icon}</span>
         {label}
       </dt>
-      <dd className="text-right text-[12.5px] font-semibold text-white">
+      <dd className="text-right text-[12.5px] font-semibold text-fg">
         {value}
       </dd>
     </div>
@@ -800,7 +800,7 @@ function CargoStat({
     <div className="flex items-center gap-2.5">
       <span className="shrink-0 text-mute-dim">{icon}</span>
       <span className="leading-tight">
-        <span className="block text-[13px] font-bold text-white">{value}</span>
+        <span className="block text-[13px] font-bold text-fg">{value}</span>
         <span className="block text-[10.5px] text-mute-dim">{label}</span>
       </span>
     </div>
@@ -822,7 +822,7 @@ function DimensionsLink({ vehicleId, name }: { vehicleId: string; name: string }
       href={src}
       target="_blank"
       rel="noreferrer"
-      className="flex items-center justify-between gap-2 border-t border-ink-700 px-3 py-2.5 text-[12px] text-mute transition-colors hover:text-white"
+      className="flex items-center justify-between gap-2 border-t border-ink-700 px-3 py-2.5 text-[12px] text-mute transition-colors hover:text-fg"
     >
       <span>{name} — дэлгэрэнгүй харах</span>
       <ArrowRightIcon className="h-4 w-4 shrink-0" />

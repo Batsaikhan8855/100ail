@@ -11,9 +11,22 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0b0c0f",
-  colorScheme: "dark",
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#0b0d0f" },
+    { media: "(prefers-color-scheme: light)", color: "#f3f0e8" },
+  ],
+  colorScheme: "dark light",
 };
+
+/**
+ * Theme-ийг зурахаас ӨМНӨ тогтооно.
+ *
+ * React hydration хүлээвэл эхлээд бараан хувилбар зурагдаад дараа нь
+ * цайвар руу үсэрч анивчина. Тиймээс энэ богино скрипт `<head>`-д
+ * синхроноор ажиллаж `data-theme`-ийг тавина. Хадгалсан сонголт байхгүй
+ * бол системийн тохиргоог дагана.
+ */
+const THEME_SCRIPT = `(function(){try{var t=localStorage.getItem("barilgahub.theme");if(t!=="light"&&t!=="dark"){t=window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"}document.documentElement.dataset.theme=t}catch(e){document.documentElement.dataset.theme="dark"}})()`;
 
 export default function RootLayout({
   children,
@@ -21,7 +34,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="mn">
+    <html lang="mn" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
       <body>
         <SessionProvider>
           <CartProvider>
