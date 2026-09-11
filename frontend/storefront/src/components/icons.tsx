@@ -252,17 +252,40 @@ export const ToolsIcon = (p: IconProps) => (
  * гэрэлтэлтийг `currentColor`-оор давтах боломжгүй. Дуудаж буй газрууд
  * `className`-аар хэмжээг нь өөрчилдөг тул өргөн, өндрийг CSS давхарлана.
  */
-export const LogoMark = ({ className }: { className?: string }) => (
-  // eslint-disable-next-line @next/next/no-img-element
-  <img
-    src="/logo.png"
-    alt=""
-    width={38}
-    height={38}
-    aria-hidden
-    className={`shrink-0 object-contain ${className ?? ""}`}
-  />
-);
+/**
+ * Брэндийн дөрвөн булант тэмдэг. Хоёр хувилбарыг хоёуланг нь гаргаад,
+ * аль нэгийг нь CSS-ээр нуудаг (`globals.css` дахь `.logo-light/.logo-dark`)
+ * — JavaScript-ээр сонговол сервер дээр аль theme болохыг мэдэхгүй тул
+ * эхний зурагт буруу хувилбар анивчих байсан.
+ *
+ * Одоогийн интерфейс бараан тул анхдагч нь бараан дэвсгэрийн хувилбар.
+ * Light theme нэмэгдэхэд `<html data-theme="light">` болгоход өөрөө солигдоно.
+ */
+export const LogoMark = ({ className }: { className?: string }) => {
+  const shared = `shrink-0 object-contain ${className ?? ""}`;
+  return (
+    <>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/brand/logo-dark.webp"
+        alt=""
+        width={38}
+        height={38}
+        aria-hidden
+        className={`logo-dark ${shared}`}
+      />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/brand/logo-light.webp"
+        alt=""
+        width={38}
+        height={38}
+        aria-hidden
+        className={`logo-light ${shared}`}
+      />
+    </>
+  );
+};
 
 export const CATEGORY_ICONS = {
   cement: CementIcon,

@@ -86,3 +86,17 @@ input[type="range"]::-moz-range-thumb {
   background: var(--color-ink-600);
   border-radius: 9999px;
 }
+
+/* Логоны theme хувилбар. Хоёр зураг DOM-д байж, CSS нэгийг нь нууна —
+   ингэснээр сервер талын дүрслэлд буруу хувилбар анивчихгүй.
+   Анхдагч нь бараан дэвсгэрийн лого (одоогийн интерфейс бараан).
+   Light theme нэмэгдэхэд `<html data-theme="light">` болгоно. */
+.logo-light {
+  display: none;
+}
+[data-theme="light"] .logo-dark {
+  display: none;
+}
+[data-theme="light"] .logo-light {
+  display: block;
+}
