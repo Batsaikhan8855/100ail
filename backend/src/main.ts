@@ -60,7 +60,7 @@ async function bootstrap(): Promise<void> {
   );
 
   const config = new DocumentBuilder()
-    .setTitle("100 Айл API")
+    .setTitle("barilgaHUB API")
     .setDescription("Барилгын материалын marketplace-ийн modular monolith API")
     .setVersion("0.1.0")
     .addBearerAuth()
@@ -68,8 +68,10 @@ async function bootstrap(): Promise<void> {
   SwaggerModule.setup("api/docs", app, SwaggerModule.createDocument(app, config));
 
   const port = Number(process.env.PORT ?? 4000);
-  await app.listen(port);
-  console.log(`100 Айл API: http://localhost:${port}/api (docs: /api/docs)`);
+  // `0.0.0.0` — контейнерын гаднаас хандах боломжтой байх ёстой.
+  // Railway/Docker дээр localhost дээр сонсвол хүсэлт огт хүрэхгүй.
+  await app.listen(port, "0.0.0.0");
+  console.log(`barilgaHUB API: http://localhost:${port}/api (docs: /api/docs)`);
 }
 
 void bootstrap();

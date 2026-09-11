@@ -55,7 +55,7 @@ export function Shell({ children }: { children: ReactNode }) {
         <div className="flex items-center gap-2.5 border-b border-ink-700 px-4 py-4">
           <LogoMark className="h-7 w-7" />
           <div>
-            <div className="text-[14px] font-semibold text-white">100 Айл</div>
+            <div className="text-[14px] font-semibold text-white">barilgaHUB</div>
             <div className="text-[11.5px] text-mute-dim">Админ панел</div>
           </div>
         </div>
@@ -164,7 +164,7 @@ function LoginView() {
         <div className="mb-5 flex items-center gap-2.5">
           <LogoMark className="h-8 w-8" />
           <div>
-            <div className="text-[15px] font-semibold text-white">100 Айл</div>
+            <div className="text-[15px] font-semibold text-white">barilgaHUB</div>
             <div className="text-[12px] text-mute-dim">Админ панел</div>
           </div>
         </div>
@@ -175,7 +175,7 @@ function LoginView() {
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              placeholder="admin@100ail.mn"
+              placeholder="admin@barilgahub.mn"
               autoComplete="username"
               required
             />

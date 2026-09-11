@@ -675,14 +675,14 @@ async function main() {
   });
 
   await prisma.user.create({
-    data: { email: "admin@100ail.mn", name: "Системийн админ", passwordHash, role: UserRole.ADMIN, phone: "99000000" },
+    data: { email: "admin@barilgahub.mn", name: "Системийн админ", passwordHash, role: UserRole.ADMIN, phone: "99000000" },
   });
   await prisma.user.create({
-    data: { email: "buyer@100ail.mn", name: "Б. Ганбаатар", passwordHash, role: UserRole.BUYER, phone: "99112233" },
+    data: { email: "buyer@barilgahub.mn", name: "Б. Ганбаатар", passwordHash, role: UserRole.BUYER, phone: "99112233" },
   });
   await prisma.user.create({
     data: {
-      email: "company@100ail.mn", name: "Д. Оюунаа", passwordHash, role: UserRole.BUYER,
+      email: "company@barilgahub.mn", name: "Д. Оюунаа", passwordHash, role: UserRole.BUYER,
       phone: "99223344", organizationId: organization.id,
     },
   });
@@ -695,7 +695,7 @@ async function main() {
     const supplier = SUPPLIERS.find((s) => s.slug === slug);
     await prisma.user.create({
       data: {
-        email: `${slug}@100ail.mn`,
+        email: `${slug}@barilgahub.mn`,
         name: `${supplier?.name} менежер`,
         passwordHash,
         role: UserRole.SUPPLIER,

@@ -5,7 +5,7 @@ import { PayoutsService } from "./payouts.service";
 
 const supplierUser = {
   id: "u1",
-  email: "s@100ail.mn",
+  email: "s@barilgahub.mn",
   role: "SUPPLIER" as const,
   supplierId: "sup-1",
   organizationId: null,

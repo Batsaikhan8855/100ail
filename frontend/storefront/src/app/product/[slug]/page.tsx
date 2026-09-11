@@ -16,11 +16,11 @@ type PageProps = { params: Promise<{ slug: string }> };
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const product = await serverGet<ApiProduct>(`/products/${slug}`);
-  if (!product) return { title: "Бүтээгдэхүүн олдсонгүй — 100 Айл" };
+  if (!product) return { title: "Бүтээгдэхүүн олдсонгүй — barilgaHUB" };
 
   const title = [product.name, product.variantLabel].filter(Boolean).join(" ");
   return {
-    title: `${title} — 100 Айл`,
+    title: `${title} — barilgaHUB`,
     description:
       product.summary ??
       `${title} — олон нийлүүлэгчийн үнэ, үлдэгдэл, хүргэлтийн харьцуулалт.`,

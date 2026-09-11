@@ -6,7 +6,7 @@ type PageProps = { params: Promise<{ code: string }> };
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { code } = await params;
   return {
-    title: `Захиалга ${code} — 100 Айл`,
+    title: `Захиалга ${code} — barilgaHUB`,
     description: "Захиалгын төлөв, төлбөр, хүргэлтийн явц.",
   };
 }

@@ -9,7 +9,7 @@ import { PrismaService } from "../src/common/prisma.service";
  *   npm run db:push && npm run db:seed && npm run test:e2e
  * Тест өөрийн үүсгэсэн захиалга, сагс, нөөцлөлтөө буцаан цэвэрлэнэ.
  */
-describe("100 Айл API (e2e)", () => {
+describe("barilgaHUB API (e2e)", () => {
   let app: INestApplication;
   let prisma: PrismaService;
 
@@ -52,8 +52,8 @@ describe("100 Айл API (e2e)", () => {
         .send({ email, password: "password123" });
       return response.body.accessToken as string;
     };
-    supplierToken = await login("montsement@100ail.mn");
-    adminToken = await login("admin@100ail.mn");
+    supplierToken = await login("montsement@barilgahub.mn");
+    adminToken = await login("admin@barilgahub.mn");
   });
 
   afterAll(async () => {
@@ -136,7 +136,7 @@ describe("100 Айл API (e2e)", () => {
     it("худалдан авагч админы тайлан үзэхийг хориглоно", async () => {
       const login = await request(app.getHttpServer())
         .post("/api/auth/login")
-        .send({ email: "buyer@100ail.mn", password: "password123" })
+        .send({ email: "buyer@barilgahub.mn", password: "password123" })
         .expect(201);
 
       await request(app.getHttpServer())
@@ -148,7 +148,7 @@ describe("100 Айл API (e2e)", () => {
     it("нийлүүлэгч зөвхөн өөрийн саналаа хардаг", async () => {
       const login = await request(app.getHttpServer())
         .post("/api/auth/login")
-        .send({ email: "montsement@100ail.mn", password: "password123" })
+        .send({ email: "montsement@barilgahub.mn", password: "password123" })
         .expect(201);
 
       const supplierId = login.body.user.supplier.id;
@@ -255,7 +255,7 @@ describe("100 Айл API (e2e)", () => {
     it("нийлүүлэгч захиалгын төлөвийг урагшлуулна", async () => {
       const login = await request(app.getHttpServer())
         .post("/api/auth/login")
-        .send({ email: "montsement@100ail.mn", password: "password123" });
+        .send({ email: "montsement@barilgahub.mn", password: "password123" });
 
       const orders = await request(app.getHttpServer())
         .get("/api/orders/supplier")
@@ -441,7 +441,7 @@ describe("100 Айл API (e2e)", () => {
     it("нэвтэрсэн хэрэглэгч сэтгэгдэл үлдээж, давхардуулахгүй", async () => {
       const login = await request(app.getHttpServer())
         .post("/api/auth/login")
-        .send({ email: "buyer@100ail.mn", password: "password123" });
+        .send({ email: "buyer@barilgahub.mn", password: "password123" });
       const token = login.body.accessToken;
 
       const eligibility = await request(app.getHttpServer())

@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { FavoritesView } from "@/components/favorites-view";
 
 export const metadata: Metadata = {
-  title: "Хадгалсан бараа — 100 Айл",
+  title: "Хадгалсан бараа — barilgaHUB",
   description: "Зүрхэлж хадгалсан барааныхаа үнэ, үлдэгдлийг хянана.",
 };
 

@@ -1,4 +1,4 @@
-# 100 Айл — Барилгын материалын e-commerce платформын архитектур
+# barilgaHUB — Барилгын материалын e-commerce платформын архитектур
 
 ## 1. Архитектурын үндсэн шийдэл
 
@@ -386,9 +386,9 @@ npm run dev:admin        # http://localhost:3300
 
 Seed өгөгдлийн туршилтын бүртгэл (нууц үг: `password123`):
 
-- `admin@100ail.mn` — админ
-- `buyer@100ail.mn`, `company@100ail.mn` — худалдан авагч
-- `montsement@100ail.mn` зэрэг нийлүүлэгчийн slug-тай хаягууд — нийлүүлэгч
+- `admin@barilgahub.mn` — админ
+- `buyer@barilgahub.mn`, `company@barilgahub.mn` — худалдан авагч
+- `montsement@barilgahub.mn` зэрэг нийлүүлэгчийн slug-тай хаягууд — нийлүүлэгч
 
 Seed нь агуулах бүрд координат, нийлүүлэгч бүрд банкны данс, нүүр хуудсанд
 3 баннер үүсгэдэг тул газрын зураг, татан авалт, сурталчилгааг шууд туршиж
@@ -471,19 +471,31 @@ storefront, `supplier.` болон `admin.` дэд домэйнүүдийг чи
 Cloudflare эсвэл reverse proxy дээр төгсгөнө. `PUBLIC_API_URL` болон
 `CORS_ORIGINS`-ыг тухайн домэйнүүдээр солино.
 
-### 12.9 Render + Vercel байршуулалт
+### 12.9 Railway + Vercel байршуулалт
 
-Docker-оос гадна үүлэн орчны бэлэн зам: **backend Render дээр, гурван веб
+Docker-оос гадна үүлэн орчны бэлэн зам: **backend Railway дээр, гурван веб
 Vercel дээр.**
 
-**Backend (Render).** `render.yaml` нь blueprint — Render дээр
-New → Blueprint → repo-г сонгоход web service (Docker, `backend/`) болон
-PostgreSQL хамт үүснэ. `preDeployCommand` нь схемийг тааруулж, seed болон
-каталогийн импортыг ажиллуулна (гурвуулаа idempotent). Redis, Meilisearch
-байхгүй — код нь нөөц зам руу (шууд гүйцэтгэл, PostgreSQL хайлт) шилжинэ.
+**Backend (Railway).** Тохиргоо нь `.railway/railway.ts` дотор кодоор
+бичигдсэн: Docker-оор баригдах `api` сервис, PostgreSQL, `/app/media`
+дээрх диск, Сингапурын бүс (`asia-southeast1`), орчны хувьсагчид.
+`npm run railway:plan` нь өөрчлөлтийг харуулж, `npm run railway:apply`
+хэрэгжүүлнэ. Redis, Meilisearch байхгүй — код нь нөөц зам руу (шууд
+гүйцэтгэл, PostgreSQL хайлт) шилжинэ.
 
-Гараар оруулах хувьсагчид: `CORS_ORIGINS`, `PUBLIC_API_URL`,
-`PUBLIC_WEB_URL` — Vercel-ийн домэйнууд гарсны дараа.
+Хуучин `railway.json`/`railway.toml` («Config as Code») нь 2026-12-01-нд
+уншигдахаа болих бөгөөд шинэ сервис түүнийг дэмжихгүй тул ашиглахгүй.
+
+Схемийн тохируулга, seed, каталогийн импорт нь `docker-entrypoint.sh`
+дотор хийгддэг (гурвуулаа idempotent). `prisma db push` нь зөвхөн
+`schema.prisma` өөрчлөгдсөн үед ажиллана — `prisma/sync-schema.ts` нь
+схемийн хэшийг `app_meta.schema_state`-д хадгалж тулгадаг. Хэш нь
+`public` биш тусдаа схемд сууна: `db push` нь датамоделд байхгүй
+хүснэгтийг устгадаг тул `public` дотор байрлуулбал өөрийгөө арчих байв.
+
+Гараар оруулах хувьсагчид (`preserve()` гэж тэмдэглэгдсэн):
+`JWT_SECRET`, `CORS_ORIGINS`, `PUBLIC_API_URL`, `PUBLIC_WEB_URL`,
+`S3_PUBLIC_URL` — Vercel-ийн домэйнууд гарсны дараа.
 
 **Frontend (Vercel).** Нэг repo-оос **гурван тусдаа project**, ялгаа нь
 зөвхөн Root Directory:
@@ -494,12 +506,12 @@ PostgreSQL хамт үүснэ. `preDeployCommand` нь схемийг таар�
 | supplier | `frontend/supplier` |
 | admin | `frontend/admin` |
 
-Project бүрд `NEXT_PUBLIC_API_URL=https://<render-app>.onrender.com/api`.
+Project бүрд `NEXT_PUBLIC_API_URL=https://<railway-app>.up.railway.app/api`.
 Энэ утга **build үед** шигтгэгддэг тул өөрчилсний дараа дахин deploy
 хийнэ. `output: "standalone"` нь зөвхөн Docker-т хэрэгтэй; Vercel үүнийг
 үл хэрэгсэнэ.
 
-**Зураг.** `media/` нь git-д ордоггүй тул Render дээр локал файл байхгүй —
+**Зураг.** `media/` нь git-д ордоггүй тул сервер дээр локал файл байхгүй —
 барааны зураг эх сайтын CDN хаягаар холбогдоно (импорт үүнийг автоматаар
 хийдэг). Урт хугацаанд өөрийн санд байрлуулах бол `media/barilga/*`-г
 S3/R2 руу хуулаад `S3_PUBLIC_URL`-ыг bucket-ийн нийтийн хаягаар тавина —

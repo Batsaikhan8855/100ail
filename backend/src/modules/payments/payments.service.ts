@@ -53,7 +53,7 @@ export class PaymentsService {
         const invoice = await this.qpay.createInvoice({
           orderCode: order.code,
           amount: order.total,
-          description: `100 Айл захиалга ${order.code}`,
+          description: `barilgaHUB захиалга ${order.code}`,
           callbackUrl: `${this.callbackBase}/payments/qpay/callback?payment=${payment.id}`,
         });
 

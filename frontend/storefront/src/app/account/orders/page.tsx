@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { AccountOrders } from "@/components/account-orders";
 
 export const metadata: Metadata = {
-  title: "Захиалгын түүх — 100 Айл",
+  title: "Захиалгын түүх — barilgaHUB",
   description: "Өөрийн захиалгууд, төлөв, төлбөрийн байдал.",
 };
 

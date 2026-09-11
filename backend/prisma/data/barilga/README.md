@@ -1,7 +1,7 @@
 # barilga.mn каталогийн импорт
 
 `https://www.barilga.mn/p/` дээрх нийтийн бүтээгдэхүүний каталогийг татаж
-100 Айл-ын мэдээллийн санд оруулах гурван алхамт урсгал.
+barilgaHUB-ын мэдээллийн санд оруулах гурван алхамт урсгал.
 
 ## 1. Өгөгдөл татах
 
@@ -53,8 +53,8 @@ python3 webp.py       # ~30 секунд
 
 Түүхий зураг (394MB, ихэнх нь PNG) нь production-д хэтэрхий том тул
 WebP болгож **frontend-ийн `public/` дор** байршуулна. Тэндээс Vercel-ийн
-CDN өгнө — Render-ийн үнэгүй instance (0.1 CPU, унтардаг) 5000 гаруй
-статик файл өгөхөд тохиромжгүй.
+CDN өгнө — API-ийн instance нь 5000 гаруй статик файл өгөхөд
+тохиромжгүй.
 
 Гаралт:
 
@@ -63,7 +63,7 @@ CDN өгнө — Render-ийн үнэгүй instance (0.1 CPU, унтардаг)
 | `frontend/storefront/public/media/barilga/<хэш>.webp` | зураг өөрөө (67MB) | ✓ |
 | `backend/prisma/data/barilga/images.json.gz` | импортын жагсаалт (104KB) | ✓ |
 
-**Жагсаалт яагаад хэрэгтэй вэ:** импорт нь Render дээр ажилладаг ба тэнд
+**Жагсаалт яагаад хэрэгтэй вэ:** импорт нь үүлэн орчинд ажилладаг ба тэнд
 зургийн файл байдаггүй (`.dockerignore` нь `backend/media`-г хасдаг). Тиймээс
 `import-barilga.ts` нь `fs.existsSync`-ийн оронд энэ жагсаалтаас аль зураг
 CDN дээр байгааг мэднэ.
@@ -88,14 +88,14 @@ CDN дээр байгааг мэднэ.
 
 ### Зураг өгөх хаяг
 
-Render дээр дараах хувьсагчийг тавина:
+Railway дээр дараах хувьсагчийг тавина:
 
 ```
-S3_PUBLIC_URL=https://100ail.vercel.app/media
+S3_PUBLIC_URL=https://barilgahub.vercel.app/media
 ```
 
 `StorageService.publicUrl` нь `barilga/<хэш>.webp` түлхүүрийг үүнтэй
-залгаж `https://100ail.vercel.app/media/barilga/<хэш>.webp` болгоно.
+залгаж `https://barilgahub.vercel.app/media/barilga/<хэш>.webp` болгоно.
 Файлын нэр нь агуулгын хэш тул `next.config.ts` дотор нэг жилийн
 `immutable` кэш тавьсан.
 

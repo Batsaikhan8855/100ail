@@ -21,7 +21,7 @@ describe("MessengerService", () => {
 
     const messenger = new MessengerService();
     await expect(
-      messenger.send({ ...message, email: "a@100ail.mn", phone: "99001122" }),
+      messenger.send({ ...message, email: "a@barilgahub.mn", phone: "99001122" }),
     ).resolves.toBe(false);
     expect(messenger.enabled).toBe(false);
     expect(fetchMock).not.toHaveBeenCalled();
@@ -35,14 +35,14 @@ describe("MessengerService", () => {
 
     const messenger = new MessengerService();
     await expect(
-      messenger.send({ ...message, email: "a@100ail.mn", phone: "99001122" }),
+      messenger.send({ ...message, email: "a@barilgahub.mn", phone: "99001122" }),
     ).resolves.toBe(true);
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
     const [mailUrl, mailInit] = fetchMock.mock.calls[0];
     expect(mailUrl).toBe("https://mail.test/send");
     expect((mailInit.headers as Record<string, string>).Authorization).toBe("Bearer token");
-    expect(JSON.parse(mailInit.body as string).to).toBe("a@100ail.mn");
+    expect(JSON.parse(mailInit.body as string).to).toBe("a@barilgahub.mn");
   });
 
   it("суваг унасан үед алдаа шидэлгүй false буцаана", async () => {
@@ -51,7 +51,7 @@ describe("MessengerService", () => {
     fetchMock.mockRejectedValue(new Error("ECONNREFUSED"));
 
     const messenger = new MessengerService();
-    await expect(messenger.send({ ...message, email: "a@100ail.mn" })).resolves.toBe(false);
+    await expect(messenger.send({ ...message, email: "a@barilgahub.mn" })).resolves.toBe(false);
   });
 
   it("хэрэглэгчийн хаяг байхгүй бол тухайн сувгийг алгасна", async () => {
@@ -60,7 +60,7 @@ describe("MessengerService", () => {
     fetchMock.mockResolvedValue({ ok: true });
 
     const messenger = new MessengerService();
-    await messenger.send({ ...message, email: "a@100ail.mn", phone: null });
+    await messenger.send({ ...message, email: "a@barilgahub.mn", phone: null });
     expect(fetchMock).not.toHaveBeenCalled();
   });
 });
