@@ -47,7 +47,7 @@ describe("QpayClient", () => {
       orderCode: "100A-1",
       amount: 1000,
       description: "тест",
-      callbackUrl: "https://api.100ail.mn/api/payments/qpay/callback",
+      callbackUrl: "https://api.barilgahub.mn/api/payments/qpay/callback",
     });
 
     expect(invoice).toEqual({

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { CheckoutView } from "@/components/checkout-view";
 
 export const metadata: Metadata = {
-  title: "Төлбөр — 100 Айл",
+  title: "Төлбөр — barilgaHUB",
   description:
     "Хүргэлтийн мэдээлэл, төлбөрийн хэлбэр сонгож захиалгаа баталгаажуулна.",
 };

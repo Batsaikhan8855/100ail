@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { AuthView } from "@/components/auth-view";
 
 export const metadata: Metadata = {
-  title: "Нэвтрэх — 100 Айл",
+  title: "Нэвтрэх — barilgaHUB",
   description: "Захиалгын түүх, хүргэлтээ хянахын тулд нэвтэрнэ үү.",
 };
 

@@ -4,7 +4,7 @@ import { mapColumns, OfferImportService, parseAmount } from "./offer-import.serv
 
 const user = {
   id: "u1",
-  email: "s@100ail.mn",
+  email: "s@barilgahub.mn",
   role: "SUPPLIER" as const,
   supplierId: "sup-1",
   organizationId: null,

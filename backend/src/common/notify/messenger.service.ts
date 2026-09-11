@@ -21,7 +21,7 @@ export class MessengerService {
   private readonly logger = new Logger(MessengerService.name);
   private readonly mailUrl = process.env.MAIL_WEBHOOK_URL ?? "";
   private readonly mailToken = process.env.MAIL_WEBHOOK_TOKEN ?? "";
-  private readonly mailFrom = process.env.MAIL_FROM ?? "100 Айл <no-reply@100ail.mn>";
+  private readonly mailFrom = process.env.MAIL_FROM ?? "barilgaHUB <no-reply@barilgahub.mn>";
   private readonly smsUrl = process.env.SMS_GATEWAY_URL ?? "";
   private readonly smsToken = process.env.SMS_GATEWAY_TOKEN ?? "";
 

@@ -72,7 +72,7 @@ export class OffersController {
   @Roles(UserRole.SUPPLIER, UserRole.ADMIN)
   @Get("import/template")
   async template(@CurrentUser() user: AuthUser) {
-    return { fileName: "100ail-import.csv", content: await this.imports.template(user) };
+    return { fileName: "barilgahub-import.csv", content: await this.imports.template(user) };
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

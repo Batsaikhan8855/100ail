@@ -20,13 +20,13 @@ describe("StorageService", () => {
   });
 
   it("нийтийн хаягийг S3_PUBLIC_URL-ээр үүсгэнэ", () => {
-    process.env.S3_PUBLIC_URL = "https://cdn.100ail.mn/";
+    process.env.S3_PUBLIC_URL = "https://cdn.barilgahub.mn/";
     const storage = new StorageService();
-    expect(storage.publicUrl("products/a.png")).toBe("https://cdn.100ail.mn/products/a.png");
+    expect(storage.publicUrl("products/a.png")).toBe("https://cdn.barilgahub.mn/products/a.png");
   });
 
   it("бүрэн хаягийг дахин угтваргүйгээр буцаана", () => {
-    process.env.S3_PUBLIC_URL = "https://cdn.100ail.mn";
+    process.env.S3_PUBLIC_URL = "https://cdn.barilgahub.mn";
     const storage = new StorageService();
     const url = "https://example.com/a.png";
     expect(storage.publicUrl(url)).toBe(url);

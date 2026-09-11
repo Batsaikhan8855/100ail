@@ -14,6 +14,7 @@ import { DeliveriesModule } from "./modules/deliveries/deliveries.module";
 import { BannersModule } from "./modules/banners/banners.module";
 import { DisputesModule } from "./modules/disputes/disputes.module";
 import { GeoModule } from "./modules/geo/geo.module";
+import { HealthModule } from "./modules/health/health.module";
 import { InventoryModule } from "./modules/inventory/inventory.module";
 import { NotificationsModule } from "./modules/notifications/notifications.module";
 import { OffersModule } from "./modules/offers/offers.module";
@@ -48,6 +49,7 @@ import { WarehousesModule } from "./modules/warehouses/warehouses.module";
     MeiliModule,
     NotificationsModule,
     StorageModule,
+    HealthModule,
 
     AuthModule,
     UsersModule,

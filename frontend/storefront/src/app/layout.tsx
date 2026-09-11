@@ -5,7 +5,7 @@ import { SessionProvider } from "@/components/session";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "100 Айл — Барилгын материалын маркетплейс",
+  title: "barilgaHUB — Барилгын материалын маркетплейс",
   description:
     "Олон нийлүүлэгчийн барилгын материалыг үнэ, үлдэгдэл, байршил, хүргэлтийн нөхцөлөөр харьцуулан худалдан авах платформ.",
 };

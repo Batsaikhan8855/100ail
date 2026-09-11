@@ -192,7 +192,7 @@ export class GeoService {
   private async fetchJson<T>(url: string): Promise<T | null> {
     try {
       const response = await fetch(url, {
-        headers: { "User-Agent": "100ail-marketplace/0.1 (support@100ail.mn)" },
+        headers: { "User-Agent": "barilgahub-marketplace/0.1 (support@barilgahub.mn)" },
         signal: AbortSignal.timeout(8000),
       });
       if (!response.ok) {
