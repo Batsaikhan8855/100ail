@@ -36,8 +36,7 @@ import {
 import { CargoBox } from "./cargo-box";
 import { ProductThumb } from "./product-art";
 import { SiteHeader } from "./site-header";
-import { VehicleArt } from "./vehicle-art";
-import { useDimensionsImage, VehicleDrawing } from "./vehicle-blueprint";
+import { dimensionsSrc, VehicleArt, VehicleDrawing } from "./vehicle-art";
 import { Panel, PanelHeader } from "./ui";
 
 export function CartView() {
@@ -530,7 +529,7 @@ function VehiclePicker({ group }: { group: SupplierGroup }) {
                     </span>
                   </h4>
                   <div className="p-3">
-                    <VehicleDrawing vehicle={shown} loadM3={group.volumeM3} />
+                    <VehicleDrawing vehicle={shown} />
                   </div>
                 </section>
 
@@ -807,15 +806,9 @@ function CargoStat({
   );
 }
 
-/**
- * Үйлдвэрийн хэмжээсийн зургийг бүтэн хэмжээгээр нээх холбоос.
- *
- * Зөвхөн бодит зураг байгаа үед гарна — вектор зураг нь дэлгэц дээрээ
- * бүтнээрээ харагддаг тул тусад нь нээх утгагүй.
- */
+/** Үйлдвэрийн хэмжээсийн зургийг бүтэн хэмжээгээр нээх холбоос */
 function DimensionsLink({ vehicleId, name }: { vehicleId: string; name: string }) {
-  const src = useDimensionsImage(vehicleId);
-  if (!src) return null;
+  const src = dimensionsSrc(vehicleId);
 
   return (
     <a
